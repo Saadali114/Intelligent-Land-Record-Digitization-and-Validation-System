@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<void> => {
   try {
+    if (mongoose.connection.readyState >= 1) {
+      return;
+    }
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/land_record_db';
     
     mongoose.connection.on('connected', () => {

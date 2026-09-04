@@ -93,16 +93,20 @@ const ensureSampleFiles = (uploadDir: string) => {
   }
 };
 
-export const seedDatabase = async () => {
+export const seedDatabase = async (dropExisting: boolean = true) => {
   try {
-    console.log('Connecting to database for seeding...');
-    await connectDB();
+    if (mongoose.connection.readyState < 1) {
+      console.log('Connecting to database for seeding...');
+      await connectDB();
+    }
 
-    console.log('Clearing existing collections and indexes...');
-    try {
-      await mongoose.connection.dropDatabase();
-    } catch (e) {
-      console.log('Database drop not needed or already empty');
+    if (dropExisting) {
+      console.log('Clearing existing collections and indexes...');
+      try {
+        await mongoose.connection.dropDatabase();
+      } catch (e) {
+        console.log('Database drop not needed or already empty');
+      }
     }
 
     const uploadDir = path.join(process.cwd(), 'uploads');
@@ -339,12 +343,20 @@ export const seedDatabase = async () => {
     console.log('  Verifier    : verifier1@landrecord.gov.in / Password123!');
     console.log('  Viewer      : viewer1@landrecord.gov.in   / Password123!');
     console.log('========================================================');
-
-    process.exit(0);
   } catch (error) {
     console.error('Database seeding failed:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedDatabase();
+// If run directly via CLI (npm run seed)
+const isDirectCliRun = process.argv[1] && (
+  process.argv[1].endsWith('seed.ts') || 
+  process.argv[1].endsWith('seed.js')
+);
+
+if (isDirectCliRun) {
+  seedDatabase(true)
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}
