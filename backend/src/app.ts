@@ -30,6 +30,16 @@ export const createApp = (): Express => {
   const uploadDir = path.join(process.cwd(), 'uploads');
   app.use('/uploads', express.static(uploadDir));
 
+  // Root welcome / health endpoint
+  app.get('/', (_req: Request, res: Response) => {
+    res.status(200).json({
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      service: 'Land Record API Service',
+      version: '1.0.0',
+    });
+  });
+
   // Health check endpoint
   app.get('/health', (_req: Request, res: Response) => {
     res.status(200).json({
@@ -39,8 +49,9 @@ export const createApp = (): Express => {
     });
   });
 
-  // Mount API endpoints
+  // Mount API endpoints - support both /api and root paths for deployed flexibility
   app.use('/api', routes);
+  app.use('/', routes);
 
   // 404 handler for unknown routes
   app.use('*', (req: Request, res: Response) => {

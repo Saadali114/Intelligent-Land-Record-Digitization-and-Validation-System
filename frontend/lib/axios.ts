@@ -1,6 +1,13 @@
 import axios, { AxiosError } from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const getBaseURL = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const trimmed = envUrl.replace(/\/+$/, '');
+  // If the URL already ends with /api, use it as is; otherwise append /api
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const baseURL = getBaseURL();
 
 export const apiClient = axios.create({
   baseURL,
