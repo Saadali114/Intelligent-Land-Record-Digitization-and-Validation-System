@@ -5,6 +5,7 @@ import {
   getDocumentById,
   deleteDocument,
   extractDocument,
+  verifyUserDocument,
   upload,
 } from '../controllers/document.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
@@ -33,6 +34,13 @@ router.post(
   '/:id/extract',
   authorize(['ADMIN', 'OFFICER', 'VERIFIER']),
   extractDocument
+);
+
+// Verifier / Officer / Admin verifies user uploaded document
+router.post(
+  '/:id/verify',
+  authorize(['ADMIN', 'OFFICER', 'VERIFIER']),
+  verifyUserDocument
 );
 
 // Delete: ADMIN only

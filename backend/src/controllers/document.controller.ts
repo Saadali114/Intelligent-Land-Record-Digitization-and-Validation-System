@@ -123,3 +123,36 @@ export const extractDocument = async (req: AuthenticatedRequest, res: Response):
     sendError(res, error.message || 'AI extraction failed', 400);
   }
 };
+
+export const verifyUserDocument = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      sendError(res, 'Authentication required to verify document', 401);
+      return;
+    }
+
+    const { action, remarks, correctedData } = req.body;
+    if (!action || !['APPROVED', 'REJECTED', 'NEEDS_REVIEW'].includes(action)) {
+      sendError(res, 'Invalid action. Must be APPROVED, REJECTED, or NEEDS_REVIEW', 400);
+      return;
+    }
+
+    if (!remarks || !remarks.trim()) {
+      sendError(res, 'Inspector remarks are mandatory', 400);
+      return;
+    }
+
+    const { verifyUserDocumentService } = await import('../services/document.service.js');
+    const result = await verifyUserDocumentService(
+      req.params.id,
+      { action, remarks: remarks.trim(), correctedData },
+      req.user._id.toString(),
+      req.ip
+    );
+
+    sendSuccess(res, `Document successfully marked as ${action.toLowerCase()}`, result, 200);
+  } catch (error: any) {
+    sendError(res, error.message || 'Document verification failed', 400);
+  }
+};
+

@@ -62,7 +62,16 @@ export interface OfficerApplication {
 }
 
 
-export type DocumentProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED' | 'NEEDS_REVIEW';
+export type DocumentProcessingStatus =
+  | 'UPLOADED'
+  | 'PROCESSING'
+  | 'PROCESSED'
+  | 'FAILED'
+  | 'NEEDS_REVIEW'
+  | 'VERIFIED'
+  | 'REJECTED'
+  | 'ACTION_REQUIRED'
+  | 'PENDING_OFFICER_REVIEW';
 
 export interface DocumentRecord {
   _id: string;

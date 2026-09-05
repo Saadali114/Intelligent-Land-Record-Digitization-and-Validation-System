@@ -46,4 +46,13 @@ export const documentsService = {
     );
     return response.data.data;
   },
+
+  verifyDocument: async (
+    id: string,
+    data: { action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW'; remarks: string; correctedData?: any }
+  ): Promise<DocumentRecord> => {
+    const response = await apiClient.post<ApiResponse<DocumentRecord>>(`/documents/${id}/verify`, data);
+    return response.data.data;
+  },
 };
+

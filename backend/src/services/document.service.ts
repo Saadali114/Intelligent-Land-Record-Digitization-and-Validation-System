@@ -180,3 +180,62 @@ export const deleteDocumentService = async (id: string, userId: string, ip?: str
 
   return { id };
 };
+
+export const verifyUserDocumentService = async (
+  documentId: string,
+  input: { action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW'; remarks: string; correctedData?: any },
+  verifierId: string,
+  ip?: string
+) => {
+  const doc = await DocumentModel.findById(documentId);
+  if (!doc) {
+    throw new Error('Document not found');
+  }
+
+  const targetStatus: DocumentProcessingStatus =
+    input.action === 'APPROVED'
+      ? 'VERIFIED'
+      : input.action === 'REJECTED'
+      ? 'REJECTED'
+      : 'NEEDS_REVIEW';
+
+  doc.processingStatus = targetStatus;
+  if (!doc.metadata) doc.metadata = {};
+  doc.metadata.verificationRemarks = input.remarks;
+  doc.metadata.verifiedBy = verifierId;
+  doc.metadata.verifiedAt = new Date();
+  await doc.save();
+
+  // Also update linked LandRecord if exists
+  const linkedRecord = await LandRecord.findOne({ sourceDocument: doc._id });
+  if (linkedRecord) {
+    linkedRecord.verificationStatus =
+      input.action === 'APPROVED' ? 'VERIFIED' : input.action === 'REJECTED' ? 'REJECTED' : 'NEEDS_REVIEW';
+    linkedRecord.verifiedBy = verifierId as any;
+    linkedRecord.remarks = input.remarks;
+    if (input.correctedData) {
+      Object.assign(linkedRecord, input.correctedData);
+    }
+    await linkedRecord.save();
+  }
+
+  await logAudit({
+    userId: verifierId as any,
+    action: input.action === 'APPROVED' ? 'RECORD_VERIFIED' : input.action === 'REJECTED' ? 'RECORD_REJECTED' : 'RECORD_CORRECTED',
+    resourceType: 'Document',
+    resourceId: doc._id.toString(),
+    description: `User document ${doc.originalName} (${doc.documentId}) verified with verdict: ${input.action}. Remarks: ${input.remarks}`,
+    ipAddress: ip,
+  });
+
+  const updatedDoc = await DocumentModel.findById(doc._id)
+    .populate('uploadedBy', 'name email role department district')
+    .lean();
+
+  return {
+    ...updatedDoc,
+    fileUrl: `/uploads/${doc.fileName}`,
+    landRecord: linkedRecord || null,
+  };
+};
+
