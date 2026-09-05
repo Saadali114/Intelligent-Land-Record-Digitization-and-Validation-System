@@ -4,6 +4,7 @@ import {
   getDocuments,
   getDocumentById,
   deleteDocument,
+  extractDocument,
   upload,
 } from '../controllers/document.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
@@ -25,6 +26,13 @@ router.post(
   authorize(['ADMIN', 'OFFICER']),
   upload.single('file'),
   uploadDocument
+);
+
+// Trigger AI OCR & Cadastral Entity Extraction: ADMIN, OFFICER, VERIFIER
+router.post(
+  '/:id/extract',
+  authorize(['ADMIN', 'OFFICER', 'VERIFIER']),
+  extractDocument
 );
 
 // Delete: ADMIN only

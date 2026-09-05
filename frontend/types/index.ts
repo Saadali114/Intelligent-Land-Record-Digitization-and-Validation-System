@@ -30,6 +30,8 @@ export interface DocumentRecord {
   processingStatus: DocumentProcessingStatus;
   uploadedAt: string;
   metadata?: Record<string, any>;
+  fileUrl?: string;
+  landRecord?: LandRecord;
   createdAt: string;
   updatedAt: string;
 }

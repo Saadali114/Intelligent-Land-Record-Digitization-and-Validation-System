@@ -7,6 +7,7 @@ import {
   getDocumentsService,
   getDocumentByIdService,
   deleteDocumentService,
+  extractDocumentService,
 } from '../services/document.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
@@ -107,5 +108,18 @@ export const deleteDocument = async (req: AuthenticatedRequest, res: Response): 
     sendSuccess(res, 'Document deleted successfully', result);
   } catch (error: any) {
     sendError(res, error.message || 'Failed to delete document', 400);
+  }
+};
+
+export const extractDocument = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      sendError(res, 'Authentication required to run AI extraction', 401);
+      return;
+    }
+    const result = await extractDocumentService(req.params.id, req.user._id.toString(), req.ip);
+    sendSuccess(res, 'AI extraction completed successfully', result, 200);
+  } catch (error: any) {
+    sendError(res, error.message || 'AI extraction failed', 400);
   }
 };

@@ -14,7 +14,9 @@ export type AuditAction =
   | 'RECORD_VERIFIED'
   | 'RECORD_REJECTED'
   | 'RECORD_CORRECTED'
-  | 'RECORD_DELETED';
+  | 'RECORD_DELETED'
+  | 'AI_EXTRACTION_COMPLETED'
+  | 'AI_EXTRACTION_FAILED';
 
 export interface IAuditLog extends MongooseDocument {
   userId?: mongoose.Types.ObjectId;

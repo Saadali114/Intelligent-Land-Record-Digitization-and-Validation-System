@@ -39,4 +39,11 @@ export const documentsService = {
   deleteDocument: async (id: string): Promise<void> => {
     await apiClient.delete(`/documents/${id}`);
   },
+
+  extractDocument: async (id: string): Promise<{ document: DocumentRecord; landRecord: any }> => {
+    const response = await apiClient.post<ApiResponse<{ document: DocumentRecord; landRecord: any }>>(
+      `/documents/${id}/extract`
+    );
+    return response.data.data;
+  },
 };
