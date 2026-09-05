@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   CheckCircle,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceItem {
   id: string;
@@ -25,6 +26,8 @@ interface ServiceItem {
 }
 
 export const ServicesSection: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const isMarathi = i18n.language === 'mr';
   const services: ServiceItem[] = [
     {
       id: 'satbara',
@@ -107,13 +110,13 @@ export const ServicesSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-800" />
-            Comprehensive Revenue Services
+            {t('navbar.services')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Official Land Related Services
+            {t('services.title')}
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            Direct online citizen access to certified land records, mutation registers, and cadastral certificates without visiting taluka revenue offices.
+            {t('services.subtitle')}
           </p>
         </div>
 
@@ -136,9 +139,14 @@ export const ServicesSection: React.FC = () => {
 
                 <div>
                   <h3 className="font-bold text-slate-900 text-base group-hover:text-blue-950 transition-colors">
-                    {s.title}
+                    {isMarathi ? s.titleMr : s.title}
                   </h3>
-                  <p className="text-xs font-semibold text-blue-900 mt-0.5">{s.titleMr}</p>
+                  {isMarathi && (
+                    <p className="text-xs text-slate-400 font-medium">{s.title}</p>
+                  )}
+                  {!isMarathi && (
+                    <p className="text-xs text-slate-400 font-medium">{s.titleMr}</p>
+                  )}
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">{s.description}</p>

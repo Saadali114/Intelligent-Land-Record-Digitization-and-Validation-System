@@ -16,48 +16,51 @@ import {
   FileCheck2,
 } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 export interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { user, isAdmin, isOfficer, isVerifier } = useAuth();
 
   const navItems = [
     {
-      label: 'Dashboard',
+      label: t('navbar.dashboard'),
       href: '/dashboard',
       icon: LayoutDashboard,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
     },
     {
-      label: 'Land Records',
+      label: t('navbar.landRecords'),
       href: '/land-records',
       icon: FileSpreadsheet,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
     },
     {
-      label: 'Document Repository',
+      label: t('navbar.documentRepository'),
       href: '/documents',
       icon: Files,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
     },
     {
-      label: 'Verification Queue',
+      label: t('navbar.verificationQueue'),
       href: '/verification',
       icon: CheckCheck,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
-      label: 'User Management',
+      label: t('navbar.userManagement'),
       href: '/users',
       icon: Users,
       roles: ['ADMIN'],
     },
     {
-      label: 'My Profile',
+      label: t('navbar.myProfile'),
       href: '/profile',
       icon: UserCheck,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],

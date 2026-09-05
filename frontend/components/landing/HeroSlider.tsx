@@ -18,6 +18,7 @@ import {
   MapPin,
   FileText,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SlideData {
   id: number;
@@ -36,22 +37,24 @@ interface SlideData {
 }
 
 export const HeroSlider: React.FC = () => {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const slides: SlideData[] = [
     {
       id: 0,
-      tag: 'Secure Land Records Repository',
+      tag: t('home.bannerBadge') || 'Secure Land Records Repository',
       tagIcon: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
-      title: 'Your Land Records Are',
-      highlight: 'Safe, Verified & Protected Here',
+      title: t('home.heroTitle') || 'Your Land Records Are',
+      highlight: t('common.portalFullName') || 'Safe, Verified & Protected Here',
       description:
+        t('home.heroSubtitle') ||
         'Powered by state-of-the-art AI Multilingual OCR, spatial cadastral parsing, and cryptographic audit security. Never lose a land title to physical degradation, forgery, or record manipulation.',
-      primaryBtnText: 'Search Land Records',
+      primaryBtnText: t('home.ctaExplore') || 'Search Land Records',
       primaryBtnLink: '/land-records',
-      secondaryBtnText: 'Verify Document Scan',
-      secondaryBtnLink: '/documents',
+      secondaryBtnText: t('home.ctaUpload') || 'Upload Land Record',
+      secondaryBtnLink: '/portal/upload',
       badge: '100% Authenticated Cadastral Database',
       theme: 'from-blue-950 via-slate-900 to-indigo-950',
     },

@@ -4,7 +4,8 @@ import { Badge } from '../ui/Badge';
 import { Pagination } from '../ui/Pagination';
 import { Skeleton } from '../ui/Skeleton';
 import { EmptyState } from '../ui/EmptyState';
-import { MapPin, Eye, Edit, Trash2 } from 'lucide-react';
+import { MapPin, Sparkles, Eye, Edit, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface LandRecordsTableProps {
   isLoading: boolean;
@@ -40,6 +41,8 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
   canEdit,
   canDelete,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="gov-card overflow-hidden">
       {isLoading && (
@@ -69,13 +72,13 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-semibold border-b border-slate-200 text-[10px]">
                 <tr>
-                  <th className="px-5 py-3.5">Owner / Land Parcel</th>
-                  <th className="px-4 py-3.5">Survey & Khasra</th>
-                  <th className="px-4 py-3.5">Khata No</th>
-                  <th className="px-4 py-3.5">Classification</th>
-                  <th className="px-4 py-3.5">Verification</th>
+                  <th className="px-5 py-3.5">{t('common.ownerName')} / Parcel</th>
+                  <th className="px-4 py-3.5">{t('common.surveyNumber')} &amp; Khasra</th>
+                  <th className="px-4 py-3.5">{t('common.khataNumber')}</th>
+                  <th className="px-4 py-3.5">{t('common.landType')}</th>
+                  <th className="px-4 py-3.5">{t('common.status')}</th>
                   <th className="px-4 py-3.5">AI Confidence</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

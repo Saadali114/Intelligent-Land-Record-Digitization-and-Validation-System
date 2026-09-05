@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface NoticeItem {
   id: string;
@@ -21,6 +22,7 @@ interface NoticeItem {
 }
 
 export const NewsNoticesSection: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('ALL');
 
   const notices: NoticeItem[] = [
@@ -82,13 +84,13 @@ export const NewsNoticesSection: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-xs font-bold text-rose-800 uppercase tracking-wider">
               <Bell className="w-3.5 h-3.5 text-rose-600" />
-              Official Gazette & Circulars
+              {t('news.badge') || 'Official Gazette & Circulars'}
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight mt-2">
-              News, Notices & Press Releases
+              {t('news.title') || 'News, Notices & Press Releases'}
             </h2>
             <p className="text-sm text-slate-600 mt-1">
-              Latest statutory orders, administrative guidelines, and land modernization updates.
+              {t('news.subtitle') || 'Latest statutory orders, administrative guidelines, and land modernization updates.'}
             </p>
           </div>
 

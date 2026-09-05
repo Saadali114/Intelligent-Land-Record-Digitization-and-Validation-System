@@ -6,6 +6,7 @@ import { Skeleton } from '../ui/Skeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { formatDate } from '../../lib/utils';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface UsersTableProps {
   isLoading: boolean;
@@ -35,6 +36,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   onToggleStatus,
   onConfirmDelete,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="gov-card overflow-hidden">
       {isLoading && (
@@ -54,7 +57,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
       {!isLoading && !isError && (!users || users.length === 0) && (
         <EmptyState
           title="No Users Found"
-          description="No accounts match your search and filter criteria."
+          description="No official accounts match your current filter criteria."
         />
       )}
 
@@ -64,13 +67,13 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-semibold border-b border-slate-200 text-[10px]">
                 <tr>
-                  <th className="px-5 py-3.5">User Details</th>
+                  <th className="px-5 py-3.5">User {t('common.details')}</th>
                   <th className="px-4 py-3.5">Role</th>
                   <th className="px-4 py-3.5">Department</th>
-                  <th className="px-4 py-3.5">District</th>
-                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-4 py-3.5">{t('common.district')}</th>
+                  <th className="px-4 py-3.5">{t('common.status')}</th>
                   <th className="px-4 py-3.5">Joined</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

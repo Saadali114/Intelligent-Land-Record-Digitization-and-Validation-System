@@ -12,7 +12,11 @@ import {
   FileText,
 } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 export const AboutUsSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section id="about" className="py-20 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">
@@ -20,14 +24,13 @@ export const AboutUsSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider">
             <Award className="w-3.5 h-3.5 text-blue-700" />
-            National Land Records Modernization Programme (DILRMP)
+            {t('about.badge') || 'National Land Records Modernization Programme (DILRMP)'}
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Preserving & Safeguarding India’s Cadastral Heritage
+            {t('about.title') || 'Preserving & Safeguarding India’s Cadastral Heritage'}
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            ILRDVS was created to modernize millions of fragile, hand-written land records into
-            structured, tamper-evident digital assets using neural computer vision and human inspector governance.
+            {t('about.description') || 'ILRDVS was created to modernize millions of fragile, hand-written land records into structured, tamper-evident digital assets using neural computer vision and human inspector governance.'}
           </p>
         </div>
 

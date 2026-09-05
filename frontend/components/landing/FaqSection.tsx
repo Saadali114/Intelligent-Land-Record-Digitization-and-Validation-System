@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FaqItem {
   question: string;
@@ -8,6 +9,7 @@ interface FaqItem {
 }
 
 export const FaqSection: React.FC = () => {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const faqs: FaqItem[] = [
@@ -66,13 +68,13 @@ export const FaqSection: React.FC = () => {
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold uppercase tracking-wider">
             <HelpCircle className="w-3.5 h-3.5 text-blue-800" />
-            Citizen Knowledge Base
+            {t('navbar.faq')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Frequently Asked Questions
+            {t('faq.title') || 'Frequently Asked Questions'}
           </h2>
           <p className="text-sm text-slate-600">
-            Answers to common questions regarding land records, digital 7/12 extracts, and mutation verification.
+            {t('faq.subtitle') || 'Answers to common questions regarding land records, digital 7/12 extracts, and mutation verification.'}
           </p>
         </div>
 

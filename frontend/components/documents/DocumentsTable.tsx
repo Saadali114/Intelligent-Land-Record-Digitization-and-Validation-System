@@ -15,6 +15,7 @@ import {
   Eye,
   Trash2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentsTableProps {
   isLoading: boolean;
@@ -52,6 +53,7 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onDeleteDoc,
   isAdmin,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="gov-card overflow-hidden">
       {isLoading && (
@@ -63,8 +65,8 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
       )}
 
       {isError && (
-        <div className="p-6 text-center text-rose-600 text-xs font-semibold">
-          {errorMessage || 'Failed to load documents'}
+        <div className="p-8 text-center text-xs text-rose-600">
+          Failed to load documents: {errorMessage || 'Server unreachable.'}
         </div>
       )}
 
@@ -85,11 +87,11 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   <th className="px-4 py-3.5">Document ID</th>
                   <th className="px-4 py-3.5">Type</th>
                   <th className="px-4 py-3.5">Language</th>
-                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-4 py-3.5">{t('common.status')}</th>
                   <th className="px-4 py-3.5">Digital Version</th>
                   <th className="px-4 py-3.5">Uploaded By</th>
                   <th className="px-4 py-3.5">Date</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
