@@ -64,6 +64,7 @@ def _preprocess_clahe_boost(image_bytes: bytes) -> Tuple[bytes, List[str]]:
     Applies aggressive CLAHE contrast stretching and sharpening to rescue faint stamp ink.
     """
     try:
+        # pyrefly: ignore [missing-import]
         import cv2
         import numpy as np
         nparr = np.frombuffer(image_bytes, np.uint8)
