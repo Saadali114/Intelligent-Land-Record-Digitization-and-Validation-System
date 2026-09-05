@@ -112,6 +112,64 @@ const SAMPLE_OWNERS = [
  * Intelligent parser that extracts cadastral entities from raw text
  */
 /**
+ * Dynamic Learned Corrections Memory
+ * Loaded on demand from ai-service/data/learned_corrections.json
+ */
+interface LearnedCorrectionsMemory {
+  tokenReplacements?: Record<string, string>;
+  verifiedVillages?: string[];
+  verifiedTehsils?: string[];
+  verifiedDistricts?: string[];
+  verifiedSurnames?: string[];
+}
+
+let cachedCorrections: LearnedCorrectionsMemory | null = null;
+let lastCorrectionsMtime = 0;
+
+function getLearnedCorrectionsFilePath(): string {
+  const candidate1 = path.resolve(process.cwd(), 'data/learned_corrections.json');
+  const candidate2 = path.resolve(process.cwd(), '../ai-service/data/learned_corrections.json');
+  const candidate3 = path.resolve(process.cwd(), 'ai-service/data/learned_corrections.json');
+  if (fs.existsSync(candidate2)) return candidate2;
+  if (fs.existsSync(candidate3)) return candidate3;
+  if (fs.existsSync(candidate1)) return candidate1;
+  return candidate2;
+}
+
+export function loadLearnedCorrections(): LearnedCorrectionsMemory {
+  try {
+    const filePath = getLearnedCorrectionsFilePath();
+    if (fs.existsSync(filePath)) {
+      const stat = fs.statSync(filePath);
+      if (!cachedCorrections || stat.mtimeMs > lastCorrectionsMtime) {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        cachedCorrections = JSON.parse(raw);
+        lastCorrectionsMtime = stat.mtimeMs;
+      }
+      return cachedCorrections || {};
+    }
+  } catch {
+    // Ignore read or parse errors gracefully
+  }
+  return {};
+}
+
+export function applyLearnedCorrectionsToText(rawText: string): string {
+  if (!rawText) return rawText;
+  const memory = loadLearnedCorrections();
+  let text = rawText;
+  if (memory.tokenReplacements) {
+    for (const [misread, correct] of Object.entries(memory.tokenReplacements)) {
+      if (!misread || !correct) continue;
+      const escaped = misread.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Replace whole-word or exact boundary matches case-insensitively
+      text = text.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), correct);
+    }
+  }
+  return text;
+}
+
+/**
  * Convert Devanagari digits (०-९) to standard ASCII digits (0-9)
  */
 export const normalizeDevanagariDigits = (input: string): string => {
@@ -127,8 +185,10 @@ export const normalizeDevanagariDigits = (input: string): string => {
  * Intelligent parser that extracts cadastral entities from raw OCR text
  */
 export const parseCadastralEntities = (rawText: string, originalName: string, language: string): ExtractedCadastralData => {
+  // Apply human-in-the-loop learned corrections & OCR substitutions
+  const textWithCorrections = applyLearnedCorrectionsToText(rawText || '');
   // Normalize Devanagari numerals to standard numbers for parsing
-  const text = normalizeDevanagariDigits(rawText || '');
+  const text = normalizeDevanagariDigits(textWithCorrections);
 
   let ownerName = '';
   let surveyNumber = '';
@@ -289,6 +349,20 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
         village = val;
         fieldConfidence.village = 0.97;
         break;
+      }
+    }
+  }
+
+  // Priority 3: Check dynamic learned villages from feedback memory
+  if (!village) {
+    const memory = loadLearnedCorrections();
+    if (memory.verifiedVillages) {
+      for (const v of memory.verifiedVillages) {
+        if (text.includes(v)) {
+          village = v;
+          fieldConfidence.village = 0.95;
+          break;
+        }
       }
     }
   }
@@ -739,6 +813,47 @@ async function checkDuplicatesWithAIService(
     return null;
   } catch {
     return null;
+  }
+}
+
+export interface FeedbackCorrectionPayload {
+  documentId?: string;
+  originalData?: Record<string, any>;
+  correctedData?: Record<string, any>;
+  originalOcrText?: string;
+  verifierRemarks?: string;
+}
+
+/**
+ * Dispatches human-in-the-loop verifier corrections to the Python AI microservice
+ * to update dynamic substitution rules and regional memory in learned_corrections.json.
+ */
+export async function reportCorrectionToAIService(payload: FeedbackCorrectionPayload): Promise<void> {
+  const pyUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  try {
+    const res = await fetch(`${pyUrl}/feedback/correction`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        document_id: payload.documentId || '',
+        original_data: payload.originalData || {},
+        corrected_data: payload.correctedData || {},
+        original_ocr_text: payload.originalOcrText || '',
+        verifier_remarks: payload.verifierRemarks || '',
+      }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      console.log(`[AI-Feedback] Dispatched correction to AI service: learned ${data.tokens_learned || 0} tokens, recorded feedback.`);
+      // Invalidate local cache so updates are immediately used by fallback engine
+      cachedCorrections = null;
+    } else {
+      console.warn(`[AI-Feedback] AI service returned HTTP ${res.status} for feedback correction`);
+    }
+  } catch (err: any) {
+    console.warn(`[AI-Feedback] Failed to report correction to AI microservice (${err.message})`);
   }
 }
 

@@ -228,6 +228,20 @@ export const verifyUserDocumentService = async (
     ipAddress: ip,
   });
 
+  // Asynchronously dispatch ground-truth feedback to AI microservice for continuous learning
+  try {
+    const { reportCorrectionToAIService } = await import('./ai-extraction.service.js');
+    reportCorrectionToAIService({
+      documentId: doc.documentId,
+      originalData: (doc.metadata?.aiExtraction?.entities as any) || (linkedRecord ? linkedRecord.toObject() : {}),
+      correctedData: input.correctedData || (linkedRecord ? linkedRecord.toObject() : {}),
+      originalOcrText: doc.metadata?.aiExtraction?.rawTextSnippet || doc.metadata?.extractedText || '',
+      verifierRemarks: input.remarks || '',
+    }).catch(err => console.warn('[AI-Feedback] Async reporting error:', err));
+  } catch (err: any) {
+    console.warn('[AI-Feedback] Failed to trigger feedback:', err);
+  }
+
   const updatedDoc = await DocumentModel.findById(doc._id)
     .populate('uploadedBy', 'name email role department district')
     .lean();

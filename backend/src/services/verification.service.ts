@@ -1,4 +1,5 @@
 import { LandRecord } from '../models/LandRecord.js';
+import { DocumentModel } from '../models/Document.js';
 import { VerificationRecord, VerificationAction } from '../models/VerificationRecord.js';
 import { VerifyRecordInput } from '../schemas/verification.schema.js';
 import { PaginationMeta } from '../utils/response.js';
@@ -123,6 +124,25 @@ export const verifyRecordService = async (
     description: `Record #${record.surveyNumber} ${input.action.toLowerCase()}: ${input.remarks}`,
     ipAddress: ip,
   });
+
+  // Asynchronously dispatch ground-truth feedback to AI microservice for continuous learning
+  try {
+    const { reportCorrectionToAIService } = await import('./ai-extraction.service.js');
+    let originalText = '';
+    if (record.sourceDocument) {
+      const sourceDoc = await DocumentModel.findById(record.sourceDocument).select('metadata documentId');
+      if (sourceDoc) originalText = sourceDoc.metadata?.aiExtraction?.rawTextSnippet || sourceDoc.metadata?.extractedText || '';
+    }
+    reportCorrectionToAIService({
+      documentId: record.sourceDocument ? record.sourceDocument.toString() : record._id.toString(),
+      originalData: previousData,
+      correctedData: input.correctedData || updatedData,
+      originalOcrText: originalText,
+      verifierRemarks: input.remarks || '',
+    }).catch(err => console.warn('[AI-Feedback] Async reporting error:', err));
+  } catch (err: any) {
+    console.warn('[AI-Feedback] Failed to trigger feedback:', err);
+  }
 
   return {
     record,

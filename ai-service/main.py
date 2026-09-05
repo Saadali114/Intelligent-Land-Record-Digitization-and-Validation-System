@@ -23,12 +23,16 @@ load_dotenv()
 
 from services.pipeline import run_full_pipeline
 from services.duplicate import check_duplicate
-from models import OCRRequest, OCRResponse, DuplicateCheckRequest, DuplicateCheckResponse
+from services.feedback_service import record_correction, get_feedback_memory
+from models import (
+    OCRRequest, OCRResponse, DuplicateCheckRequest, DuplicateCheckResponse,
+    FeedbackCorrectionRequest, FeedbackCorrectionResponse
+)
 
 app = FastAPI(
     title="ILRDVS AI Service",
-    description="Python AI microservice for OCR, NER, and validation of Indian land records",
-    version="1.0.0",
+    description="Python AI microservice for Adaptive OCR, Self-Correcting NER, and Validation",
+    version="2.5.0",
 )
 
 app.add_middleware(
@@ -41,7 +45,7 @@ app.add_middleware(
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "ILRDVS-AI-Service", "version": "1.0.0"}
+    return {"status": "ok", "service": "ILRDVS-AI-Service", "version": "2.5.0"}
 
 
 @app.post("/extract", response_model=OCRResponse)
@@ -52,7 +56,7 @@ async def extract_document(
 ):
     """
     Main endpoint — receives a raw image/PDF file from Express backend,
-    runs the full 5-stage AI pipeline, and returns structured cadastral data.
+    runs the self-diagnosing, multi-pass adaptive AI pipeline, and returns structured cadastral data.
     """
     try:
         contents = await file.read()
@@ -78,6 +82,45 @@ async def duplicate_check(req: DuplicateCheckRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Duplicate check failed: {str(e)}")
+
+
+@app.post("/feedback/correction", response_model=FeedbackCorrectionResponse)
+async def feedback_correction(req: FeedbackCorrectionRequest):
+    """
+    Continuous Learning Endpoint — receives ground-truth corrections submitted by human verifiers,
+    analyzes error discrepancies, and updates dynamic learned token substitutions & regional ontology.
+    """
+    try:
+        result = record_correction(
+            document_id=req.documentId,
+            original_data=req.originalData,
+            corrected_data=req.correctedData,
+            original_ocr_text=req.originalOcrText,
+            verifier_remarks=req.verifierRemarks,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Recording feedback failed: {str(e)}")
+
+
+@app.get("/feedback/stats")
+async def feedback_stats():
+    """
+    Returns statistics on learned error corrections, dynamic gazetteer expansions, and history.
+    """
+    try:
+        memory = get_feedback_memory()
+        return {
+            "status": "ok",
+            "totalCorrectionsRecorded": memory.get("totalCorrectionsRecorded", 0),
+            "learnedReplacementsCount": len(memory.get("tokenReplacements", {})),
+            "verifiedVillagesCount": len(memory.get("verifiedVillages", [])),
+            "verifiedTehsilsCount": len(memory.get("verifiedTehsils", [])),
+            "lastUpdated": memory.get("lastUpdated", ""),
+            "recentHistory": memory.get("correctionHistory", [])[:5]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch feedback stats: {str(e)}")
 
 
 if __name__ == "__main__":

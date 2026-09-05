@@ -50,3 +50,19 @@ class DuplicateCheckResponse(BaseModel):
     confidence: float
     matchedRecord: Optional[Dict[str, Any]] = None
     reason: str = ""
+
+
+class FeedbackCorrectionRequest(BaseModel):
+    documentId: str
+    originalData: Dict[str, Any] = {}
+    correctedData: Dict[str, Any] = {}
+    originalOcrText: Optional[str] = ""
+    verifierRemarks: Optional[str] = ""
+
+
+class FeedbackCorrectionResponse(BaseModel):
+    status: str
+    learnedReplacementsCount: int = 0
+    newVillagesAdded: int = 0
+    newTehsilsAdded: int = 0
+    totalCorrectionsRecorded: int = 0
