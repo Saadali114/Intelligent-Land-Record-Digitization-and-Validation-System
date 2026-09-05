@@ -17,6 +17,7 @@ import {
   Phone,
   Image,
   ExternalLink,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const SubNavbar: React.FC = () => {
@@ -252,7 +253,17 @@ export const SubNavbar: React.FC = () => {
             </button>
 
             {openDropdown === 'citizen' && (
-              <div className="absolute top-full left-0 w-60 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
+              <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
+                <Link
+                  href="/portal"
+                  className="flex items-center gap-2.5 px-4 py-2.5 bg-amber-50/80 border-b border-amber-100 hover:bg-amber-100/70 text-amber-950 font-bold"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                  <div>
+                    <div className="text-xs">Citizen Portal</div>
+                    <div className="text-[10px] text-amber-800 font-normal">Digitize &amp; Track Land Records</div>
+                  </div>
+                </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
@@ -327,14 +338,22 @@ export const SubNavbar: React.FC = () => {
           </div>
         </nav>
 
-        {/* Right CTA: Employee Login */}
-        <div className="hidden sm:flex items-center gap-3">
+        {/* Right CTA: Citizen Portal & Employee Login */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          <Link
+            href="/portal"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+          >
+            <ShieldCheck className="w-4 h-4 text-slate-950" />
+            <span>Citizen Portal</span>
+          </Link>
+
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all border border-blue-700"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
           >
             <LogIn className="w-4 h-4 text-amber-400" />
-            <span>Employee Login</span>
+            <span>Officer Login</span>
           </Link>
         </div>
 
@@ -408,7 +427,15 @@ export const SubNavbar: React.FC = () => {
           >
             Contact Us
           </Link>
-          <div className="pt-2">
+          <div className="pt-2 space-y-2">
+            <Link
+              href="/portal"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
+            >
+              <ShieldCheck className="w-4 h-4 text-slate-950" />
+              <span>Citizen Portal</span>
+            </Link>
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}

@@ -1,0 +1,352 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  FileText,
+  UploadCloud,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  ShieldCheck,
+  Building2,
+  MapPin,
+  ExternalLink,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
+import { PortalLayout } from '../../components/portal/PortalLayout';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { citizenService } from '../../services/citizen.service';
+import {
+  CitizenApplication,
+  CitizenLandRecord,
+  CitizenProfile,
+} from '../../types/citizen';
+
+export default function CitizenDashboardPage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<CitizenProfile | null>(null);
+  const [applications, setApplications] = useState<CitizenApplication[]>([]);
+  const [landRecords, setLandRecords] = useState<CitizenLandRecord[]>([]);
+
+  useEffect(() => {
+    // Check auth or load profile
+    const prof = citizenService.getProfile();
+    setProfile(prof);
+    const apps = citizenService.getApplications();
+    setApplications(apps);
+    const records = citizenService.getLandRecords();
+    setLandRecords(records);
+  }, []);
+
+  const totalCount = applications.length;
+  const underReviewCount = applications.filter(
+    (a) => a.status === 'UNDER_REVIEW' || a.status === 'PROCESSING'
+  ).length;
+  const verifiedCount = applications.filter((a) => a.status === 'VERIFIED').length;
+  const actionRequiredCount = applications.filter(
+    (a) => a.status === 'ACTION_REQUIRED'
+  ).length;
+
+  const discrepancyApp = applications.find((a) => a.status === 'ACTION_REQUIRED');
+
+  return (
+    <PortalLayout>
+      {/* Welcome & Profile Header Banner */}
+      <div className="bg-gradient-to-r from-blue-900 via-blue-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
+        {/* Subtle decorative background pattern */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-400 via-transparent to-transparent pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/80 border border-blue-700/60 text-xs font-semibold text-blue-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Aadhaar Identity Verified Citizen</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Namaste, {profile?.name || 'Rahul Patil'}
+            </h1>
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs sm:text-sm text-slate-300">
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                {profile?.village || 'Khadakwasla'}, Taluka {profile?.taluka || 'Haveli'}, {profile?.district || 'Pune'}
+              </span>
+              <span className="hidden sm:inline text-slate-600">&bull;</span>
+              <span className="text-slate-300">
+                Mobile: <strong className="text-white font-mono">{profile?.mobile || '+91 98220 12345'}</strong>
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <Link href="/portal/upload">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold border border-amber-300 shadow-md gap-2"
+              >
+                <UploadCloud className="w-5 h-5 text-slate-950" />
+                <span>+ Upload Land Document</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Discrepancy Action Alert (if any application requires citizen attention) */}
+      {discrepancyApp && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50/90 p-4 sm:p-5 shadow-xs animate-in fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-amber-100 text-amber-800 flex-shrink-0 mt-0.5">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-amber-950">
+                    Action Required on Application {discrepancyApp.id}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-200 text-amber-900">
+                    Discrepancy Noticed
+                  </span>
+                </div>
+                <p className="text-xs text-amber-900/90 mt-1 max-w-3xl">
+                  A boundary/area variance ({discrepancyApp.surveyNumber}, {discrepancyApp.village}) was flagged during cadastral cross-verification. Please submit a clarification or supporting tax receipt to resume processing.
+                </p>
+              </div>
+            </div>
+            <Link href={`/portal/applications/${discrepancyApp.id}`}>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold whitespace-nowrap shadow-xs"
+              >
+                Review &amp; Clarify →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* KPI Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Submissions */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Total Applications
+            </span>
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-800">
+              <FileText className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 mt-2">{totalCount}</div>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Across 7/12, Mutation &amp; Deeds
+          </p>
+        </div>
+
+        {/* Under Review */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              In Processing
+            </span>
+            <div className="p-2 rounded-lg bg-sky-50 text-sky-800">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-sky-900 mt-2">{underReviewCount}</div>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Cadastral AI &amp; Talathi review
+          </p>
+        </div>
+
+        {/* Verified / Digitized */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Verified &amp; Digitized
+            </span>
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-emerald-700 mt-2">{verifiedCount}</div>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Certified digitally signed records
+          </p>
+        </div>
+
+        {/* Action Required */}
+        <div
+          className={`rounded-xl border p-5 shadow-xs transition-colors ${
+            actionRequiredCount > 0
+              ? 'bg-amber-50/50 border-amber-200'
+              : 'bg-white border-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Action Required
+            </span>
+            <div
+              className={`p-2 rounded-lg ${
+                actionRequiredCount > 0
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <div
+            className={`text-2xl font-bold mt-2 ${
+              actionRequiredCount > 0 ? 'text-amber-800' : 'text-slate-900'
+            }`}
+          >
+            {actionRequiredCount}
+          </div>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Requires citizen response
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content Split: Recent Applications (Left) + My Land Parcels & Quick Help (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 Cols: Recent Applications */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">
+                Recent Land Record Applications
+              </h2>
+              <p className="text-xs text-slate-500">
+                Track status of your uploaded records and AI verification pipeline
+              </p>
+            </div>
+            <Link
+              href="/portal/applications"
+              className="text-xs font-semibold text-blue-900 hover:text-blue-700 flex items-center gap-1"
+            >
+              View All ({totalCount}) <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="divide-y divide-slate-100 overflow-x-auto">
+            {applications.slice(0, 4).map((app) => (
+              <div
+                key={app.id}
+                className="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-slate-900">
+                      {app.id}
+                    </span>
+                    <Badge status={app.status}>
+                      {app.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="text-xs font-semibold text-slate-800">
+                    {app.documentType} &bull; Survey No: <span className="font-mono">{app.surveyNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                    <span>Village: {app.village}</span>
+                    <span>&bull;</span>
+                    <span>Submitted: {app.submittedDate}</span>
+                    <span>&bull;</span>
+                    <span className="text-emerald-700 font-medium">
+                      OCR Confidence: {Math.round(app.ocrConfidence * 100)}%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:self-center">
+                  <Link href={`/portal/applications/${app.id}`}>
+                    <Button variant="outline" size="sm" className="text-xs gap-1">
+                      <span>Track Progress</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right 1 Col: Land Parcels & Citizen Guide */}
+        <div className="space-y-6">
+          {/* Registered Parcels Card */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-blue-900" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  My Verified Land Parcels
+                </h3>
+              </div>
+              <Link
+                href="/portal/land-records"
+                className="text-xs text-blue-900 font-semibold hover:underline"
+              >
+                View
+              </Link>
+            </div>
+
+            <div className="mt-3 space-y-3">
+              {landRecords.slice(0, 2).map((record) => (
+                <div
+                  key={record.id}
+                  className="p-3 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900">
+                      Survey {record.surveyNumber}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                      {record.status || record.recordStatus || 'VERIFIED'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">
+                    {record.village}, Taluka {record.taluka}
+                  </p>
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
+                    <span>Area: {record.area}</span>
+                    <span className="font-mono text-[10px] text-slate-400">
+                      ULPIN: {record.ulpin ? record.ulpin.slice(0, 10) + '...' : record.id}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Digitization Transparency Box */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl border border-blue-200 p-5 text-xs text-slate-700 space-y-2.5">
+            <div className="flex items-center gap-2 font-bold text-blue-950">
+              <Sparkles className="w-4 h-4 text-blue-800" />
+              <span>How ILRDVS AI Works for You</span>
+            </div>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              When you upload a Marathi/English land document, our vision model automatically transcribes survey numbers, khata details, and owner names. You review every extracted field before official Talathi verification.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/portal/upload"
+                className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-700"
+              >
+                Upload your first document now →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PortalLayout>
+  );
+}

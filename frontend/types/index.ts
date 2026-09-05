@@ -1,4 +1,5 @@
-export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER';
+export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER' | 'CITIZEN';
+export * from './citizen';
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 export interface User {
