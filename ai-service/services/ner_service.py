@@ -254,36 +254,57 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
     # Normalize Devanagari abbreviation dot and extra spacing
     clean_text = text.replace('\u0970', '.')
 
-    surnames = r'(?:पाटील|पाटी|शिंदे|देशमुख|कुलकर्णी|जाधव|मोरे|पवार|गायकवाड|चव्हाण|कदम|भोसले|जोशी|साळुंखे|खरात|माने|वाघ|जगताप|Patil|Deshmukh|Shinde|Jadhav)'
+    def is_valid_name(cand: str) -> bool:
+        if not cand or len(cand) < 3:
+            return False
+        blacklist = [
+            "क्षेत्र", "आकार", "पोटखराब", "जुडी", "रुपये", "पैसे", "नमुना", "गाव",
+            "तालुका", "जिल्हा", "शासन", "महाराष्ट्र", "महसूल", "अधिकार", "अभिलेख",
+            "भोगवटादार", "खातेदार", "पिकांची", "हंगाम", "शेरा", "शेती", "जिरायत",
+            "government", "revenue", "department", "satbara", "signature",
+        ]
+        lower = cand.lower()
+        return not any(w in lower for w in blacklist)
 
-    # Pattern 1: Full 3-4 word Devanagari name with optional honorific (श्री. गणेश लक्ष्मण शिंदे)
+    # Pattern 1: Explicit occupant / khatedar label
     m = re.search(
-        rf'(?:(?:श्री|सौ|श्रीमती)\.?\s+)?([A-Za-z\u0900-\u097F]{{2,20}}\s+[A-Za-z\u0900-\u097F]{{2,20}}\s+{surnames})',
-        clean_text
-    )
-    if m:
-        full_name = m.group(0).strip()
-        return full_name, 0.96
-
-    # Pattern 2: Explicit occupant / khatedar label
-    m = re.search(
-        r'(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भूभिधारकांचे\s*नाव|भूधारकाचे\s*नाव|भोगवटादार|owner\s*name)'
-        r'[\s\:\-\=\n]+([\w\u0900-\u097F\s]{4,50})',
+        r'(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भूभिधारकांचे\s*नाव|भूधारकाचे\s*नाव|कब्जेदार|भोगवटादार|owner\s*name)'
+        r'[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})',
         clean_text, re.IGNORECASE
     )
     if m:
         val = m.group(1).strip()
-        if "क्षेत्र" not in val and "आकार" not in val and len(val) > 3:
-            first_line = val.split('\n')[0].strip()
-            return first_line[:50], 0.92
+        val = re.sub(r'^[१२३४५६७८९\d]+[\)\.\-]\s*', '', val)
+        val = re.sub(r'\([0-9\u0900-\u097F\s\.\-]+\)', '', val).strip()
+        if is_valid_name(val):
+            return val, 0.95
 
-    # Pattern 3: 2-word Devanagari name with surname
+    # Pattern 2: Full Devanagari name with honorific (श्री / श्रीमती / सौ / कै / स्व)
     m = re.search(
-        rf'([A-Za-z\u0900-\u097F]{{3,20}}\s+{surnames})',
+        r'(?:(?:श्री|सौ|श्रीमती|कै|स्व)\.?\s+)([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
         clean_text
     )
     if m:
-        return m.group(1).strip(), 0.88
+        full_name = m.group(0).strip()
+        if is_valid_name(full_name):
+            return full_name, 0.92
+
+    # Pattern 3: Numbered table entry (1) नाम or १) नाम)
+    m = re.search(
+        r'(?:^|\n)\s*[१२३४५६७८९\d]+[\)\.\-]\s*(?:(?:श्री|श्रीमती|सौ)\.?\s+)?([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
+        clean_text
+    )
+    if m:
+        val = m.group(1).strip()
+        if is_valid_name(val):
+            return val, 0.88
+
+    # Pattern 4: Capitalized English name (2-3 words)
+    m = re.search(r'\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b', clean_text)
+    if m:
+        cand = m.group(1).strip()
+        if is_valid_name(cand):
+            return cand, 0.85
 
     return None, 0.0
 
@@ -599,53 +620,45 @@ def extract_cadastral_entities(
     ] if v and "N/A" not in str(v) and "Estimated" not in str(v))
     ocr_quality_good = extracted_fields >= 4
 
-    # Hash-based deterministic fallback for missing fields (flagged as estimates)
-    name_hash = sum(ord(c) for c in original_name)
-    district_keys = list(MAHARASHTRA_JURISDICTIONS.keys())
-
+    # Real data handling for missing fields — NO fake placeholder people or fake survey numbers!
     if not district:
-        district = district_keys[name_hash % len(district_keys)]
-        anomalies.append("District not detected — estimated from file metadata")
-        field_confidence["district"] = 0.35
-
-    dist_obj = MAHARASHTRA_JURISDICTIONS.get(district, MAHARASHTRA_JURISDICTIONS["Pune"])
+        district = "Maharashtra"
+        anomalies.append("District not detected in document scan — verifier confirmation required")
+        field_confidence["district"] = 0.30
 
     if not tehsil:
-        tehsil = dist_obj["tehsils"][name_hash % len(dist_obj["tehsils"])]
-        anomalies.append("Tehsil not detected in scan — estimated from jurisdiction dictionary")
-        field_confidence["tehsil"] = 0.30
+        tehsil = "Not Detected"
+        anomalies.append("Tehsil not detected in scan — manual verification required")
+        field_confidence["tehsil"] = 0.25
 
     if not village:
-        village = dist_obj["villages"][(name_hash + 1) % len(dist_obj["villages"])]
-        anomalies.append("Village not detected in scan — estimated from jurisdiction dictionary")
-        field_confidence["village"] = 0.30
+        village = "Not Detected"
+        anomalies.append("Village not detected in scan — manual verification required")
+        field_confidence["village"] = 0.25
 
     if not owner_name:
-        owner_name = SAMPLE_OWNERS[name_hash % len(SAMPLE_OWNERS)]
-        anomalies.append("Owner name not extracted — placeholder used, manual entry required")
-        field_confidence["ownerName"] = 0.15
+        owner_name = "Not Detected (Manual Review Required)"
+        anomalies.append("Owner name not extracted — manual entry or inspection required")
+        field_confidence["ownerName"] = 0.20
 
     if not survey_number:
-        survey_number = f"{(name_hash % 280) + 12}/{(name_hash % 4) + 1}"
-        anomalies.append("Survey number not found — estimated value, manual verification required")
+        survey_number = "Not Detected"
+        anomalies.append("Survey number not found — manual verification required")
         field_confidence["surveyNumber"] = 0.20
 
     # Khasra: no fallback needed for 7/12 forms
     if not khasra_number and not is_712_form:
-        # Only estimate for non-7/12 forms
-        khasra_number = str((name_hash % 190) + 5)
-        field_confidence["khasraNumber"] = 0.25
+        khasra_number = "N/A"
+        field_confidence["khasraNumber"] = 0.30
 
     if not khata_number:
-        khata_number = str((name_hash % 850) + 101)
-        anomalies.append("Khata number not detected — estimated value")
+        khata_number = "Not Detected"
         field_confidence["khataNumber"] = 0.25
 
     if not plot_area:
-        area_val = round(((name_hash % 35) + 10) / 10, 2)
-        plot_area = f"{area_val} Hectares (Estimated — OCR could not extract area)"
-        anomalies.append("Plot area not extracted — value is estimated, manual entry required")
-        field_confidence["plotArea"] = 0.15
+        plot_area = "Not Detected"
+        anomalies.append("Plot area not extracted — manual entry required")
+        field_confidence["plotArea"] = 0.20
 
     if not mutation_number:
         mutation_number = f"MTR-{2024 + (name_hash % 3)}-{(name_hash % 900) + 100}"

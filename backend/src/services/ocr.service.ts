@@ -5,67 +5,70 @@ import path from 'path';
  * OCR Service — extracts text from uploaded documents.
  *
  * Supports:
- *   - Images (JPEG, PNG, WEBP, TIFF):  Tesseract.js OCR with Marathi + Hindi + English
- *   - PDFs:                             pdf-parse text extraction (embedded text)
+ *   - Images (JPEG, PNG, WEBP, TIFF): Tesseract.js OCR with Marathi + Hindi + English
+ *   - PDFs: pdf-parse text extraction (embedded text)
  *
- * Images are preprocessed with `sharp` for optimal OCR on scanned Indian land records:
- *   - Aggressive upscaling (up to 3x) for low-resolution mobile photos
- *   - Grayscale conversion + contrast normalization for aged/yellowed paper
- *   - Adaptive threshold binarization for uneven illumination
- *   - Sharpening to enhance Devanagari text strokes
+ * Preprocessing with `sharp`:
+ *   - Non-destructive contrast stretch (normalise)
+ *   - Gentle stroke sharpening for Devanagari script
+ *   - Preserves grayscale depth and anti-aliasing (NO destructive hard thresholding)
+ *   - Aspect-ratio preserving high-resolution upscaling (minimum 2000px width)
  */
 
 const IMAGE_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/tiff'];
 
-// ---------------------------------------------------------------------------
-// Image preprocessing via sharp — optimized for Indian land record scans
-// ---------------------------------------------------------------------------
-async function preprocessImage(filePath: string): Promise<Buffer> {
+/**
+ * Preprocess image buffer with Sharp for optimal OCR readability
+ */
+export async function preprocessImageBuffer(inputBuffer: Buffer): Promise<Buffer> {
   try {
-    // Dynamically import sharp so the module doesn't crash if not installed
     const sharp = (await import('sharp')).default;
-    const meta = await sharp(filePath).metadata();
+    const meta = await sharp(inputBuffer).metadata();
     const currentWidth = meta.width || 800;
     const currentHeight = meta.height || 600;
 
-    let pipeline = sharp(filePath);
+    let pipeline = sharp(inputBuffer).rotate(); // auto-orient based on EXIF
 
-    // Step 1: Aggressive upscaling — mobile photos of documents are often 600–1200px wide
-    // Tesseract needs at least 300 DPI equivalent; ~1800–2400px wide is ideal.
-    if (currentWidth < 2000) {
-      const scaleFactor = Math.min(3.0, Math.max(1.8, 2000 / currentWidth));
-      const newWidth = Math.round(currentWidth * scaleFactor);
-      const newHeight = Math.round(currentHeight * scaleFactor);
+    // Step 1: High-resolution upscaling while strictly preserving aspect ratio
+    // Tesseract achieves optimal Devanagari character recognition at 2000-2400px width
+    if (currentWidth < 1800) {
+      const scale = Math.min(3.0, 2200 / currentWidth);
+      const targetWidth = Math.round(currentWidth * scale);
       pipeline = pipeline.resize({
-        width: newWidth,
-        height: newHeight,
-        fit: 'fill',
+        width: targetWidth,
+        fit: 'inside',
+        withoutEnlargement: false,
         kernel: 'lanczos3',
       });
     }
 
-    // Step 2: Grayscale + aggressive contrast stretch for aged/yellowed paper
+    // Step 2: Grayscale + dynamic contrast stretching + gentle sharpening
+    // Note: We deliberately avoid hard binary thresholding (.threshold(145))
+    // because hard thresholding obliterates light strokes, matras, and anti-aliased font edges.
     const processed = await pipeline
       .grayscale()
-      .normalise({ lower: 5, upper: 95 })  // wider stretch for aged documents
-      .sharpen({ sigma: 2.0, m1: 1.5, m2: 3.0 })  // stronger sharpening for thin Devanagari strokes
-      .threshold(145)   // binarize: converts to pure black/white, removes scan noise and paper texture
-      .png({ compressionLevel: 1 })  // PNG for lossless Tesseract input (JPEG artifacts harm OCR)
+      .normalise({ lower: 2, upper: 98 })
+      .gamma(1.05)
+      .sharpen({ sigma: 1.0, m1: 0.5, m2: 2.0 })
+      .png({ compressionLevel: 1 })
       .toBuffer();
+
     return processed;
   } catch (err) {
-    console.warn('[OCR] sharp preprocessing failed, falling back to raw buffer:', err);
-    return fs.readFileSync(filePath);
+    console.warn('[OCR] Sharp preprocessing error, using raw buffer:', err);
+    return inputBuffer;
   }
 }
 
-// ---------------------------------------------------------------------------
-// Tesseract OCR for images
-// ---------------------------------------------------------------------------
-async function runTesseractOCR(imageBuffer: Buffer, language: string): Promise<string> {
+/**
+ * Run Tesseract.js OCR on preprocessed image buffer
+ */
+export async function runTesseractOCR(
+  imageBuffer: Buffer,
+  language: string = 'Marathi'
+): Promise<{ text: string; confidence: number }> {
   const { createWorker } = await import('tesseract.js');
 
-  // Map document language to Tesseract language codes
   const langMap: Record<string, string> = {
     Marathi: 'mar+hin+eng',
     Hindi: 'hin+eng',
@@ -82,41 +85,48 @@ async function runTesseractOCR(imageBuffer: Buffer, language: string): Promise<s
 
   const tesseractLang = langMap[language] || 'mar+hin+eng';
 
-  console.log(`[OCR] Starting Tesseract OCR — lang: ${tesseractLang}`);
+  console.log(`[OCR] Initializing Tesseract with language(s): ${tesseractLang}`);
 
-  const worker = await createWorker(tesseractLang, 1, {
-    // Silence verbose Tesseract logs in production
-    logger: (m: any) => {
-      if (m.status === 'recognizing text') {
-        process.stdout.write(`\r[OCR] Progress: ${(m.progress * 100).toFixed(0)}%   `);
-      }
-    },
-  });
-
+  let worker: any = null;
   try {
-    // PSM 6 = "Assume a single uniform block of text" — best for structured government forms
-    // OEM 1 = LSTM neural network — most accurate for Devanagari (default in Tesseract 4+)
+    try {
+      worker = await createWorker(tesseractLang, 1);
+    } catch (langErr) {
+      console.warn(`[OCR] Failed to load ${tesseractLang}, falling back to eng+hin:`, langErr);
+      worker = await createWorker('hin+eng', 1);
+    }
+
+    // PSM 3 = Fully automatic page segmentation (properly parses complex tables,
+    // columns, and multi-line headers in 7/12 land records)
     await worker.setParameters({
-      tessedit_pageseg_mode: '6' as any,  // PSM_SINGLE_BLOCK
+      tessedit_pageseg_mode: '3' as any,
       preserve_interword_spaces: '1',
     });
+
     const { data } = await worker.recognize(imageBuffer);
-    console.log(`\n[OCR] Completed — confidence: ${data.confidence.toFixed(1)}%`);
-    return data.text || '';
+    const confidence = (data.confidence || 80) / 100;
+    console.log(`[OCR] Recognition completed — Confidence: ${(confidence * 100).toFixed(1)}%, Length: ${data.text.length} chars`);
+    return {
+      text: data.text || '',
+      confidence,
+    };
+  } catch (err) {
+    console.error('[OCR] Tesseract recognition failed:', err);
+    return { text: '', confidence: 0 };
   } finally {
-    await worker.terminate();
+    if (worker) {
+      await worker.terminate().catch(() => {});
+    }
   }
 }
 
-
-// ---------------------------------------------------------------------------
-// PDF text extraction
-// ---------------------------------------------------------------------------
-async function extractPdfText(filePath: string): Promise<string> {
+/**
+ * PDF text extraction using pdf-parse
+ */
+async function extractPdfText(buffer: Buffer): Promise<string> {
   try {
     const pdfModule: any = await import('pdf-parse');
     const pdfParse = pdfModule.default || pdfModule;
-    const buffer = fs.readFileSync(filePath);
     const result = await pdfParse(buffer);
     return result.text || '';
   } catch (err) {
@@ -125,52 +135,71 @@ async function extractPdfText(filePath: string): Promise<string> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
 export interface OcrResult {
   text: string;
-  /** Milliseconds taken */
+  confidence: number;
   durationMs: number;
-  /** 'tesseract' | 'pdf-parse' | 'fallback' */
   engine: string;
 }
 
 /**
- * Extracts raw text from an uploaded document file.
- * Uses Tesseract.js for images and pdf-parse for PDFs.
- * Returns an empty string (never throws) so the caller can always fall back
- * to the heuristic extraction pipeline.
+ * Extract text directly from Buffer (memory storage uploads)
+ */
+export async function extractTextFromBuffer(
+  buffer: Buffer,
+  mimeType: string,
+  language: string = 'Marathi'
+): Promise<OcrResult> {
+  const t0 = Date.now();
+
+  try {
+    if (mimeType === 'application/pdf') {
+      const text = await extractPdfText(buffer);
+      return {
+        text,
+        confidence: 0.95,
+        durationMs: Date.now() - t0,
+        engine: 'pdf-parse',
+      };
+    }
+
+    if (IMAGE_MIMETYPES.includes(mimeType) || mimeType.startsWith('image/')) {
+      const preprocessed = await preprocessImageBuffer(buffer);
+      const { text, confidence } = await runTesseractOCR(preprocessed, language);
+      return {
+        text,
+        confidence,
+        durationMs: Date.now() - t0,
+        engine: 'tesseract.js-sharp',
+      };
+    }
+
+    // Default raw text
+    const text = buffer.toString('utf8');
+    return {
+      text,
+      confidence: 0.8,
+      durationMs: Date.now() - t0,
+      engine: 'raw-utf8',
+    };
+  } catch (err) {
+    console.error('[OCR] Extraction failed:', err);
+    return { text: '', confidence: 0, durationMs: Date.now() - t0, engine: 'fallback' };
+  }
+}
+
+/**
+ * Extract text from file on disk
  */
 export async function extractTextFromFile(
   filePath: string,
   mimeType: string,
   language: string = 'Marathi'
 ): Promise<OcrResult> {
-  const t0 = Date.now();
-
   if (!fs.existsSync(filePath)) {
-    return { text: '', durationMs: 0, engine: 'fallback' };
+    return { text: '', confidence: 0, durationMs: 0, engine: 'fallback' };
   }
 
-  try {
-    if (mimeType === 'application/pdf') {
-      const text = await extractPdfText(filePath);
-      return { text, durationMs: Date.now() - t0, engine: 'pdf-parse' };
-    }
-
-    if (IMAGE_MIMETYPES.includes(mimeType)) {
-      const imageBuffer = await preprocessImage(filePath);
-      const text = await runTesseractOCR(imageBuffer, language);
-      return { text, durationMs: Date.now() - t0, engine: 'tesseract.js' };
-    }
-
-    // Unknown file type — try to read as UTF-8 text
-    const raw = fs.readFileSync(filePath).toString('utf8', 0, 65536);
-    return { text: raw, durationMs: Date.now() - t0, engine: 'raw-utf8' };
-  } catch (err) {
-    console.error('[OCR] Text extraction failed:', err);
-    return { text: '', durationMs: Date.now() - t0, engine: 'fallback' };
-  }
+  const buffer = fs.readFileSync(filePath);
+  return extractTextFromBuffer(buffer, mimeType, language);
 }

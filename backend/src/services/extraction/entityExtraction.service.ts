@@ -101,39 +101,99 @@ export class EntityExtractionService {
   }
 
   private static extractOwnerName(text: string): ExtractedFieldResult {
-    // Regex matches for Marathi, Hindi, English owner names
-    const patterns = [
-      /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नाव|भूधारकाचे\s*नाव|जमीन\s*मालक|नाव|owner(?:\s*name)?)\s*[:\-]?\s*([^\n\r,;:–0-9]{3,50})/i,
-      /(?:श्री|श्रीमती|सौ\.)\s+([^\n\r,;:–0-9]{4,40})/i,
-      /(?:Shankar Ganpat Patil|Meena Rajendra Kulkarni|Rahul Shankar Patil|[A-Z][a-z]+\s+[A-Z][a-z]+\s+[A-Z][a-z]+)/i,
-    ];
+    const isInvalid = (str: string): boolean => {
+      if (!str || str.length < 3) return true;
+      const blacklist = [
+        'क्षेत्र', 'आकार', 'पोटखराब', 'जुडी', 'रुपये', 'पैसे', 'नमुना', 'गाव',
+        'तालुका', 'जिल्हा', 'शासन', 'महाराष्ट्र', 'महसूल', 'अधिकार', 'अभिलेख',
+        'भोगवटादार', 'खातेदार', 'पिकांची', 'हंगाम', 'शेरा', 'शेती', 'जिरायत',
+        'government', 'revenue', 'department', 'satbara', 'signature',
+      ];
+      const lower = str.toLowerCase();
+      return blacklist.some((w) => lower.includes(w));
+    };
 
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match && match[1]) {
-        const raw = match[1].trim();
-        const norm = NormalizationService.normalizeName(raw);
-        if (norm.length >= 3 && !norm.includes('तालुका') && !norm.includes('जिल्हा')) {
-          return {
-            label: 'Owner Name (खातेदाराचे नाव)',
-            value: raw,
-            normalizedValue: norm,
-            confidence: 0.95,
-            status: 'HIGH',
-            rawTextMatch: match[0],
-          };
-        }
-      } else if (match && match[0]) {
-        const raw = match[0].trim();
-        const norm = NormalizationService.normalizeName(raw);
+    const cleanCandidate = (raw: string): string => {
+      return raw
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '')
+        .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '')
+        .replace(/\r?\n.*/s, '')
+        .trim();
+    };
+
+    // Pattern 1: Explicitly labeled owner / khatedar field
+    const labeledMatch = text.match(
+      /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूधारकाचे\s*नाव|जमीन\s*मालक|owner(?:\s*name)?)\s*[:\-=\n]?\s*([^\n\r,;:–|]{3,60})/i
+    );
+    if (labeledMatch && labeledMatch[1]) {
+      const cleaned = cleanCandidate(labeledMatch[1]);
+      if (!isInvalid(cleaned)) {
+        const norm = NormalizationService.normalizeName(cleaned);
         return {
           label: 'Owner Name (खातेदाराचे नाव)',
-          value: raw,
+          value: cleaned,
+          normalizedValue: norm,
+          confidence: 0.95,
+          status: 'HIGH',
+          rawTextMatch: labeledMatch[0],
+        };
+      }
+    }
+
+    // Pattern 2: Devanagari honorific with full name
+    const honorificMatch = text.match(
+      /(?:(?:श्री|श्रीमती|सौ|कै|स्व)\.?\s+)([A-Za-z\u0900-\u097F\s]{4,45})/
+    );
+    if (honorificMatch && honorificMatch[0]) {
+      const cleaned = cleanCandidate(honorificMatch[0]);
+      if (!isInvalid(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        const norm = NormalizationService.normalizeName(cleaned);
+        return {
+          label: 'Owner Name (खातेदाराचे नाव)',
+          value: cleaned,
           normalizedValue: norm,
           confidence: 0.92,
           status: 'HIGH',
-          rawTextMatch: match[0],
+          rawTextMatch: honorificMatch[0],
         };
+      }
+    }
+
+    // Pattern 3: Numbered table row (e.g. 1) शंकर गणपत पाटील or १) रमेश पवार)
+    const numberedMatch = text.match(
+      /(?:^|\n)\s*[१२३४५६७८९\d]+[\)\.\-]\s*(?:(?:श्री|श्रीमती|सौ)\.?\s+)?([A-Za-z\u0900-\u097F\s]{4,45})/
+    );
+    if (numberedMatch && numberedMatch[1]) {
+      const cleaned = cleanCandidate(numberedMatch[1]);
+      if (!isInvalid(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        const norm = NormalizationService.normalizeName(cleaned);
+        return {
+          label: 'Owner Name (खातेदाराचे नाव)',
+          value: cleaned,
+          normalizedValue: norm,
+          confidence: 0.88,
+          status: 'HIGH',
+          rawTextMatch: numberedMatch[0],
+        };
+      }
+    }
+
+    // Pattern 4: Capitalized English full name (2-3 words)
+    const engMatches = text.match(/\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b/g);
+    if (engMatches) {
+      for (const cand of engMatches) {
+        if (!isInvalid(cand)) {
+          const norm = NormalizationService.normalizeName(cand);
+          return {
+            label: 'Owner Name (खातेदाराचे नाव)',
+            value: cand.trim(),
+            normalizedValue: norm,
+            confidence: 0.85,
+            status: 'HIGH',
+            rawTextMatch: cand,
+          };
+        }
       }
     }
 
@@ -142,30 +202,33 @@ export class EntityExtractionService {
       label: 'Owner Name (खातेदाराचे नाव)',
       value: 'Not Detected',
       normalizedValue: '',
-      confidence: 0.4,
+      confidence: 0.2,
       status: 'LOW',
     };
   }
 
   private static extractSurveyNumber(text: string): ExtractedFieldResult {
     const patterns = [
-      /(?:गट\s*क्र(?:\.|मांक)?|सर्व्हे\s*क्र(?:\.|मांक)?|Survey\s*No\.?|Gat\s*No\.?)\s*[:\-]?\s*([0-9]+(?:\/[0-9]+[a-zA-Z]*)?)/i,
-      /([0-9]{1,4}\/[0-9]{1,3}[A-Za-z]?)/,
+      /(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gat\s*(?:no\.?|number))[\s\:\-\=\n]*([0-9]+(?:\/[0-9]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i,
+      /\b([0-9]{1,4}\/[0-9]{1,3}(?:\/[0-9\u0900-\u097FA-Za-z]+)?)\b/,
     ];
 
     for (const pattern of patterns) {
       const match = text.match(pattern);
       if (match && (match[1] || match[0])) {
         const raw = (match[1] || match[0]).trim();
-        const norm = NormalizationService.normalizeSurveyNumber(raw);
-        return {
-          label: 'Survey / Gat Number (गट / सर्व्हे क्र.)',
-          value: raw,
-          normalizedValue: norm,
-          confidence: 0.98,
-          status: 'HIGH',
-          rawTextMatch: match[0],
-        };
+        // Discard if matching the form type 7/12
+        if (raw !== '7/12' && raw !== '7' && raw !== '12') {
+          const norm = NormalizationService.normalizeSurveyNumber(raw);
+          return {
+            label: 'Survey / Gat Number (गट / सर्व्हे क्र.)',
+            value: raw,
+            normalizedValue: norm,
+            confidence: 0.98,
+            status: 'HIGH',
+            rawTextMatch: match[0],
+          };
+        }
       }
     }
 
@@ -173,7 +236,7 @@ export class EntityExtractionService {
       label: 'Survey / Gat Number (गट / सर्व्हे क्र.)',
       value: 'Not Detected',
       normalizedValue: '',
-      confidence: 0.35,
+      confidence: 0.2,
       status: 'LOW',
     };
   }
@@ -183,31 +246,62 @@ export class EntityExtractionService {
     taluka: ExtractedFieldResult;
     district: ExtractedFieldResult;
   } {
+    const cleanLocationValue = (raw: string): string => {
+      let v = raw.trim();
+      v = v.split(/(?:तालुका|तहसील|जिल्हा|गाव|District|Taluka|Village|Tehsil|\||\/)/i)[0].trim();
+      return v;
+    };
+
     // Village
-    let villageVal = 'Pune';
-    let villageConf = 0.85;
-    const vMatch = text.match(/(?:गाव|Village)\s*[:\-]?\s*([^\n\r,;:–0-9]{2,30})/i);
+    let villageVal = 'Not Detected';
+    let villageConf = 0.2;
+    const vMatch = text.match(/(?:गाव|Village)\s*[:\-=\n]+\s*([^\n\r,;:–0-9]{2,30})/i);
     if (vMatch && vMatch[1]) {
-      villageVal = vMatch[1].trim();
-      villageConf = 0.96;
+      const cleaned = cleanLocationValue(vMatch[1]);
+      if (cleaned.length >= 2 && !cleaned.includes('नमुना') && !cleaned.includes('शासन')) {
+        villageVal = cleaned;
+        villageConf = 0.96;
+      }
     }
 
     // Taluka / Tehsil
-    let talukaVal = 'Haveli';
-    let talukaConf = 0.85;
-    const tMatch = text.match(/(?:तालुका|तहसील|Taluka|Tehsil)\s*[:\-]?\s*([^\n\r,;:–0-9]{2,30})/i);
+    let talukaVal = 'Not Detected';
+    let talukaConf = 0.2;
+    const tMatch = text.match(/(?:तालुका|तहसील|Taluka|Tehsil|ता\.)\s*[:\-=\n]+\s*([^\n\r,;:–0-9]{2,30})/i);
     if (tMatch && tMatch[1]) {
-      talukaVal = tMatch[1].trim();
-      talukaConf = 0.96;
+      const cleaned = cleanLocationValue(tMatch[1]);
+      if (cleaned.length >= 2 && !cleaned.includes('शासन') && !cleaned.includes('नमुना')) {
+        talukaVal = cleaned;
+        talukaConf = 0.96;
+      }
     }
 
     // District
-    let districtVal = 'Pune';
-    let districtConf = 0.88;
-    const dMatch = text.match(/(?:जिल्हा|District)\s*[:\-]?\s*([^\n\r,;:–0-9]{2,30})/i);
+    let districtVal = 'Not Detected';
+    let districtConf = 0.2;
+    const dMatch = text.match(/(?:जिल्हा|District|जि\.)\s*[:\-=\n]+\s*([^\n\r,;:–0-9]{2,30})/i);
     if (dMatch && dMatch[1]) {
-      districtVal = dMatch[1].trim();
-      districtConf = 0.97;
+      const cleaned = cleanLocationValue(dMatch[1]);
+      if (cleaned.length >= 2 && !cleaned.includes('पद्धती') && !cleaned.includes('शासन')) {
+        districtVal = cleaned;
+        districtConf = 0.97;
+      }
+    }
+
+    if (districtVal === 'Not Detected') {
+      const knownDistricts = [
+        'पुणे', 'रायगड', 'नाशिक', 'नागपूर', 'सातारा', 'ठाणे', 'कोल्हापूर',
+        'सोलापूर', 'सांगली', 'अहमदनगर', 'जळगाव', 'अमरावती', 'नांदेड', 'लातूर',
+        'बीड', 'रत्नागिरी', 'सिंधुदुर्ग', 'छत्रपती संभाजीनगर', 'औरंगाबाद',
+        'Pune', 'Raigad', 'Nashik', 'Nagpur', 'Satara', 'Thane', 'Kolhapur'
+      ];
+      for (const d of knownDistricts) {
+        if (text.includes(d)) {
+          districtVal = d;
+          districtConf = 0.88;
+          break;
+        }
+      }
     }
 
     return {
@@ -216,28 +310,28 @@ export class EntityExtractionService {
         value: villageVal,
         normalizedValue: villageVal.toLowerCase(),
         confidence: villageConf,
-        status: villageConf > 0.9 ? 'HIGH' : 'MEDIUM',
+        status: villageConf > 0.8 ? 'HIGH' : 'LOW',
       },
       taluka: {
         label: 'Taluka (तालुका)',
         value: talukaVal,
         normalizedValue: talukaVal.toLowerCase(),
         confidence: talukaConf,
-        status: talukaConf > 0.9 ? 'HIGH' : 'MEDIUM',
+        status: talukaConf > 0.8 ? 'HIGH' : 'LOW',
       },
       district: {
         label: 'District (जिल्हा)',
         value: districtVal,
         normalizedValue: districtVal.toLowerCase(),
         confidence: districtConf,
-        status: districtConf > 0.9 ? 'HIGH' : 'MEDIUM',
+        status: districtConf > 0.8 ? 'HIGH' : 'LOW',
       },
     };
   }
 
   private static extractPlotArea(text: string): ExtractedFieldResult {
     const patterns = [
-      /(?:एकूण\s*क्षेत्र|क्षेत्र|Total\s*Area|Area)\s*[:\-]?\s*([0-9.]+\s*(?:हेक्टर|हे|आर|एकर|गुंठे|Hectares?|Acres?|Guntha)?)/i,
+      /(?:एकूण\s*क्षेत्र|क्षेत्र|Total\s*Area|Area)\s*[:\-=\n]?\s*([0-9.]+\s*(?:हेक्टर|हे|आर|एकर|गुंठे|Hectares?|Acres?|Guntha)?)/i,
       /([0-9]+\.[0-9]{2}\s*(?:हेक्टर|Hectares?))/i,
     ];
 
@@ -259,10 +353,10 @@ export class EntityExtractionService {
 
     return {
       label: 'Land Area (जमीन क्षेत्र)',
-      value: '1.25 Hectares',
-      normalizedValue: '1.25',
-      confidence: 0.8,
-      status: 'MEDIUM',
+      value: 'Not Detected',
+      normalizedValue: '',
+      confidence: 0.2,
+      status: 'LOW',
     };
   }
 

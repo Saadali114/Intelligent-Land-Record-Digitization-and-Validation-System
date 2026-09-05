@@ -118,20 +118,23 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   };
 
   // 1. Survey / Sub-division Number (भूमापन क्रमांक व उपविभाग / गट क्र.)
-  // Matches: भूमापन क्रमांक व उपविभाग : 101/2/ब, 101/2/व, 101/2/A, गट क्र. 101/2
-  const surveyMatch = text.match(/(?:भूमापन\s*क्रमांक\s*व\s*उपविभाग|भूमापन\s*क्रमांक|सर्वे\s*क्र\.?|गट\s*क्र\.?|survey\s*(?:no\.?|number)|gut\s*no\.?)\s*[:\-]?\s*([0-9]+(?:\/[0-9]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
-  if (surveyMatch) {
+  // Matches: भूमापन क्रमांक व उपविभाग : 101/2/ब, 101/2/व, 101/2/A, गट क्र. 101/2, सर्व्हे क्र.
+  const surveyMatch = text.match(/(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gut\s*(?:no\.?|number))[\s\:\-\=\n]*([0-9]+(?:\/[0-9]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
+  if (surveyMatch && surveyMatch[1]) {
     let sNum = surveyMatch[1].trim();
-    // Common OCR correction: 'व' in Marathi sub-division is almost always 'ब' (sub-division B)
-    if (sNum.endsWith('/व')) {
-      sNum = sNum.replace(/\/व$/, '/ब');
+    if (sNum !== '7/12' && sNum !== '7' && sNum !== '12') {
+      if (sNum.endsWith('/व')) {
+        sNum = sNum.replace(/\/व$/, '/ब');
+      }
+      surveyNumber = sNum;
+      fieldConfidence.surveyNumber = 0.98;
     }
-    surveyNumber = sNum;
-    fieldConfidence.surveyNumber = 0.98;
-  } else {
-    // Check fallback pattern: e.g. '101/2/व' or '101/2/ब' anywhere near header
+  }
+
+  if (!surveyNumber) {
+    // Check fallback pattern: e.g. '101/2/व' or '101/2/ब' anywhere in text, excluding form title 7/12
     const generalSurveyMatch = text.match(/\b([0-9]{1,4}\/[0-9]{1,3}(?:\/[0-9\u0900-\u097FA-Za-z]+)?)\b/);
-    if (generalSurveyMatch) {
+    if (generalSurveyMatch && generalSurveyMatch[1] && generalSurveyMatch[1] !== '7/12') {
       let sNum = generalSurveyMatch[1].trim();
       if (sNum.endsWith('/व')) sNum = sNum.replace(/\/व$/, '/ब');
       surveyNumber = sNum;
@@ -316,70 +319,155 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // 10. Owner Name (भोगवटादाराचे नाव / खातेदाराचे नाव)
-  const ownerMatch = text.match(/(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भोगवटादार|owner\s*name)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{4,40})/i);
-  if (ownerMatch && !ownerMatch[1].includes('क्षेत्र') && !ownerMatch[1].includes('आकार')) {
-    ownerName = ownerMatch[1].trim();
-    fieldConfidence.ownerName = 0.94;
+  // 10. Owner Name (भोगवटादाराचे नाव / खातेदाराचे नाव / कब्जेदार)
+  // Clean text by stripping zero-width spaces and normalizing punctuation
+  const cleanOwnerCandidate = (raw: string): string => {
+    return raw
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '') // strip mutation numbers in parens like (1532) or (१६३२)
+      .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '') // strip leading list numbers like 1) or १)
+      .replace(/\r?\n.*/s, '') // keep first line if multiline
+      .trim();
+  };
+
+  const isInvalidOwner = (cand: string): boolean => {
+    if (!cand || cand.length < 3) return true;
+    const blacklist = [
+      'क्षेत्र', 'आकार', 'पोटखराब', 'जुडी', 'रुपये', 'पैसे', 'नमुना', 'गाव',
+      'तालुका', 'जिल्हा', 'शासन', 'महाराष्ट्र', 'महसूल', 'अधिकार', 'अभिलेख',
+      'भोगवटादार', 'खातेदार', 'पिकांची', 'हंगाम', 'शेरा', 'शेती', 'जिरायत',
+      'government', 'revenue', 'department', 'satbara', 'signature',
+    ];
+    const lower = cand.toLowerCase();
+    return blacklist.some((w) => lower.includes(w));
+  };
+
+  // Pattern A: Labeled owner field (e.g. खातेदाराचे नाव : श्री. रमेश पाटील or under table column)
+  const labeledOwnerMatch = text.match(
+    /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूधारकाचे\s*नाव|जमीन\s*मालक|owner\s*name)[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})/i
+  );
+  if (labeledOwnerMatch && labeledOwnerMatch[1]) {
+    const cleaned = cleanOwnerCandidate(labeledOwnerMatch[1]);
+    if (!isInvalidOwner(cleaned)) {
+      ownerName = cleaned;
+      fieldConfidence.ownerName = 0.94;
+    }
   }
 
-  // Determine how many fields were extracted from real OCR text vs. being unknown
+  // Pattern B: Devanagari honorific with full name (श्री / श्रीमती / सौ / कै / स्व)
+  if (!ownerName) {
+    const honorificMatch = text.match(
+      /(?:(?:श्री|श्रीमती|सौ|कै|स्व)\.?\s+)([A-Za-z\u0900-\u097F\s]{4,45})/
+    );
+    if (honorificMatch && honorificMatch[0]) {
+      const cleaned = cleanOwnerCandidate(honorificMatch[0]);
+      if (!isInvalidOwner(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        ownerName = cleaned;
+        fieldConfidence.ownerName = 0.91;
+      }
+    }
+  }
+
+  // Pattern C: Numbered entry in 7/12 table (e.g. 1) शंकर गणपत पाटील or १) रमेश पवार)
+  if (!ownerName) {
+    const numberedMatch = text.match(
+      /(?:^|\n)\s*[१२३४५६७८९\d]+[\)\.\-]\s*(?:(?:श्री|श्रीमती|सौ)\.?\s+)?([A-Za-z\u0900-\u097F\s]{4,45})/
+    );
+    if (numberedMatch && numberedMatch[1]) {
+      const cleaned = cleanOwnerCandidate(numberedMatch[1]);
+      if (!isInvalidOwner(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        ownerName = cleaned;
+        fieldConfidence.ownerName = 0.88;
+      }
+    }
+  }
+
+  // Pattern D: 2-3 word English full name
+  if (!ownerName) {
+    const engMatches = text.match(/\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b/g);
+    if (engMatches) {
+      for (const cand of engMatches) {
+        if (!isInvalidOwner(cand)) {
+          ownerName = cand.trim();
+          fieldConfidence.ownerName = 0.85;
+          break;
+        }
+      }
+    }
+  }
+
+  // Determine how many fields were extracted from real OCR text vs. missing
   const ocrExtractedFields = [
     !!surveyNumber, !!khasraNumber, !!khataNumber, !!plotArea,
     !!village, !!tehsil, !!district, !!ownerName,
   ].filter(Boolean).length;
-  const ocrQualityGood = ocrExtractedFields >= 3; // at least 3 fields found in real text
+  const ocrQualityGood = ocrExtractedFields >= 3;
 
-  // Heuristic fallback for any remaining empty fields — flagged clearly
-  // These are ESTIMATES used for record creation, not verified data.
-  const hash = Array.from(originalName).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const districtKeys = Object.keys(MAHARASHTRA_JURISDICTIONS);
-  const selectedDistrictKey = district || districtKeys[hash % districtKeys.length];
+  // Real data handling for missing fields — NO fake placeholder people or fake survey numbers!
   if (!district) {
-    district = selectedDistrictKey;
-    anomalies.push('District not found in document — estimated from file metadata');
-    fieldConfidence.district = 0.40;
+    // Check if any Maharashtra district name is present anywhere in raw text
+    const allDistricts = [
+      'पुणे', 'रायगड', 'नाशिक', 'नागपूर', 'सातारा', 'ठाणे', 'कोल्हापूर',
+      'सोलापूर', 'सांगली', 'अहमदनगर', 'जळगाव', 'अमरावती', 'नांदेड', 'लातूर',
+      'बीड', 'रत्नागिरी', 'सिंधुदुर्ग', 'छत्रपती संभाजीनगर', 'औरंगाबाद',
+      'Pune', 'Raigad', 'Nashik', 'Nagpur', 'Satara', 'Thane', 'Kolhapur'
+    ];
+    for (const d of allDistricts) {
+      if (text.includes(d)) {
+        district = d;
+        fieldConfidence.district = 0.85;
+        break;
+      }
+    }
+    if (!district) {
+      district = 'Maharashtra';
+      anomalies.push('District not detected in document scan — verifier confirmation required');
+      fieldConfidence.district = 0.30;
+    }
   }
 
-  const districtObj = MAHARASHTRA_JURISDICTIONS[district] || MAHARASHTRA_JURISDICTIONS['Raigad'] || MAHARASHTRA_JURISDICTIONS['Pune'];
-  if (!tehsil && districtObj) {
-    tehsil = districtObj.tehsils[hash % districtObj.tehsils.length];
-    anomalies.push('Tehsil not detected in scan — estimated from jurisdiction dictionary');
-    fieldConfidence.tehsil = 0.35;
+  if (!tehsil) {
+    tehsil = 'Not Detected';
+    anomalies.push('Tehsil not detected in document scan — manual verification required');
+    fieldConfidence.tehsil = 0.25;
   }
-  if (!village && districtObj) {
-    village = districtObj.villages[(hash + 1) % districtObj.villages.length];
-    anomalies.push('Village not detected in scan — estimated from jurisdiction dictionary');
-    fieldConfidence.village = 0.35;
+
+  if (!village) {
+    village = 'Not Detected';
+    anomalies.push('Village not detected in document scan — manual verification required');
+    fieldConfidence.village = 0.25;
   }
+
   if (!ownerName) {
-    ownerName = SAMPLE_OWNERS[hash % SAMPLE_OWNERS.length];
-    anomalies.push('Owner name not extracted from scan — placeholder used, manual entry required');
+    ownerName = 'Not Detected (Manual Review Required)';
+    anomalies.push('Owner name could not be automatically detected from scan — manual entry or inspection required');
     fieldConfidence.ownerName = 0.20;
   }
+
   if (!surveyNumber) {
-    surveyNumber = `${(hash % 280) + 12}/${(hash % 4) + 1}`;
-    anomalies.push('Survey number not found in document — estimated value, manual verification required');
-    fieldConfidence.surveyNumber = 0.25;
+    surveyNumber = 'Not Detected';
+    anomalies.push('Survey / Gat number could not be found in document — manual entry required');
+    fieldConfidence.surveyNumber = 0.20;
   }
+
   if (!khasraNumber) {
-    khasraNumber = `${(hash % 190) + 5}`;
-    fieldConfidence.khasraNumber = 0.30;
+    khasraNumber = 'N/A';
+    fieldConfidence.khasraNumber = 0.50;
   }
+
   if (!khataNumber) {
-    khataNumber = `${(hash % 850) + 101}`;
-    anomalies.push('Khata number not detected — estimated value, manual verification required');
-    fieldConfidence.khataNumber = 0.30;
+    khataNumber = 'Not Detected';
+    fieldConfidence.khataNumber = 0.25;
   }
+
   if (!plotArea) {
-    const areaVal = (((hash % 35) + 10) / 10).toFixed(2);
-    plotArea = `${areaVal} Hectares (Estimated — OCR could not extract area)`;
-    anomalies.push('Plot area not extracted from scan — value is estimated, manual entry required');
+    plotArea = 'Not Detected';
+    anomalies.push('Plot area could not be extracted from scan — manual verification required');
     fieldConfidence.plotArea = 0.20;
   }
 
   if (!mutationNumber) {
-    mutationNumber = `MTR-${2024 + (hash % 3)}-${(hash % 900) + 100}`;
+    mutationNumber = '';
   }
   registrationNumber = `REG-MH-${(district || 'MH').substring(0, 3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
 

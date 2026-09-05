@@ -13,6 +13,7 @@ import { LandRecordMatchingService } from './landRecordMatching.service.js';
 import { DocumentConsistencyService } from './documentConsistency.service.js';
 import { DocumentAnomalyService } from './documentAnomaly.service.js';
 import { VerificationRiskService } from './verificationRisk.service.js';
+import { extractTextFromBuffer } from '../ocr.service.js';
 
 export interface ProcessDocumentInput {
   fileBuffer: Buffer;
@@ -57,12 +58,32 @@ export class VerificationOrchestrator {
       mimeType
     );
 
-    // Step 2: OCR Text Acquisition (PDF stream or image OCR)
+    // Step 2: OCR Text Acquisition (PDF text layer or real Tesseract OCR on images/scans)
     let extractedRawText = preprocessed.extractedPdfText || '';
     let avgConfidence = 0.95;
 
+    // If PDF has no text layer, or if an image was uploaded, run real OCR!
     if (!extractedRawText || extractedRawText.trim().length < 20) {
-      // Use fallback text for demo / sample file or Tesseract OCR
+      const ocrBuffer = preprocessed.preprocessedImageBuffer || fileBuffer;
+      console.log(`[Verification] Running real Tesseract OCR on ${originalName} (${mimeType})...`);
+      try {
+        const ocrResult = await extractTextFromBuffer(ocrBuffer, mimeType, 'Marathi');
+        if (ocrResult.text && ocrResult.text.trim().length > 0) {
+          extractedRawText = ocrResult.text;
+          avgConfidence = ocrResult.confidence;
+          console.log(
+            `[Verification] OCR succeeded for ${originalName} — chars: ${extractedRawText.length}, conf: ${(avgConfidence * 100).toFixed(1)}%`
+          );
+        }
+      } catch (ocrErr) {
+        console.warn(`[Verification] OCR extraction warning for ${originalName}:`, ocrErr);
+      }
+    }
+
+    // Only fall back to casePreset demo text if explicitly requested by a demo caller
+    // (e.g. CASE_1_GREEN, CASE_2_YELLOW, CASE_3_RED) and no real OCR text could be extracted
+    if ((!extractedRawText || extractedRawText.trim().length < 15) && casePreset) {
+      console.log(`[Verification] Using casePreset demo text for preset ${casePreset}`);
       extractedRawText = this.generateRepresentativeOcrText(originalName, declaredDocType);
       avgConfidence = 0.96;
     }
