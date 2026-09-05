@@ -17,11 +17,24 @@ import {
   VerificationActionModal,
   VerificationAuditHistory,
 } from '../../components/verification';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, ShieldCheck, Layers, FileCheck } from 'lucide-react';
+import { OfficerVerificationWorkspace } from '../../components/officer-verification/OfficerVerificationWorkspace';
+import { DemoBanner } from '../../components/citizen-verification/DemoBanner';
+import { DemoCaseSelector } from '../../components/citizen-verification/DemoCaseSelector';
+import {
+  verificationWorkflowService,
+  VerificationWorkflowData,
+} from '../../services/verificationWorkflowService';
 
 export default function VerificationPage() {
   const { t } = useTranslation();
   const { isAdmin, isVerifier } = useAuth();
+  const [activeTab, setActiveTab] = useState<'workflow' | 'queue'>('workflow');
+  const [activePreset, setActivePreset] = useState<'CASE_1_GREEN' | 'CASE_2_YELLOW' | 'CASE_3_RED'>('CASE_1_GREEN');
+  const [workflowData, setWorkflowData] = useState<VerificationWorkflowData>(
+    verificationWorkflowService.getPreset('CASE_1_GREEN')
+  );
+
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [scanZoom, setScanZoom] = useState(1);
@@ -88,8 +101,11 @@ export default function VerificationPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        {/* Prototype Environment Notice */}
+        <DemoBanner />
+
+        {/* Page Header with Mode Selector */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <CheckCheck className="w-6 h-6 text-blue-900" />
@@ -99,47 +115,90 @@ export default function VerificationPage() {
               {t('officerVerification.subtitle', { defaultValue: 'Cross-validate OCR extracted records against archival physical scans.' })}
             </p>
           </div>
-        </div>
 
-        {/* Main Workstation Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Review Queue Sidebar */}
-          <VerificationQueueList
-            records={records}
-            isLoading={queueLoading}
-            selectedRecordId={selectedRecordId}
-            onSelectRecord={setSelectedRecordId}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-          />
-
-          {/* Active Record Review Panel */}
-          <div className="lg:col-span-8 flex flex-col space-y-4">
-            {activeRecord ? (
-              <>
-                <VerificationScanViewer
-                  sourceDocument={activeRecord.sourceDocument}
-                  scanZoom={scanZoom}
-                  onZoomChange={setScanZoom}
-                  showScanPreview={showScanPreview}
-                  onToggleScanPreview={() => setShowScanPreview(!showScanPreview)}
-                />
-
-                <VerificationDetailsPanel
-                  record={activeRecord}
-                  onOpenAction={handleOpenAction}
-                  canVerify={isAdmin || isVerifier}
-                />
-
-                <VerificationAuditHistory history={history} />
-              </>
-            ) : (
-              <div className="gov-card p-12 text-center text-slate-400 text-xs">
-                {t('officerVerification.noRecords', { defaultValue: 'No active record selected for verification.' })}
-              </div>
-            )}
+          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setActiveTab('workflow')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                activeTab === 'workflow'
+                  ? 'bg-blue-900 text-white shadow'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>4-Pillar Workflow Dossiers</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('queue')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                activeTab === 'queue'
+                  ? 'bg-blue-900 text-white shadow'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Queue View</span>
+            </button>
           </div>
         </div>
+
+        {activeTab === 'workflow' ? (
+          <div className="space-y-6">
+            <DemoCaseSelector
+              selectedPreset={activePreset}
+              onSelectPreset={(p) => {
+                setActivePreset(p);
+                setWorkflowData(verificationWorkflowService.getPreset(p));
+              }}
+            />
+            <OfficerVerificationWorkspace
+              key={workflowData.id}
+              initialWorkflow={workflowData}
+            />
+          </div>
+        ) : (
+          /* Main Workstation Layout */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Review Queue Sidebar */}
+            <VerificationQueueList
+              records={records}
+              isLoading={queueLoading}
+              selectedRecordId={selectedRecordId}
+              onSelectRecord={setSelectedRecordId}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+            />
+
+            {/* Active Record Review Panel */}
+            <div className="lg:col-span-8 flex flex-col space-y-4">
+              {activeRecord ? (
+                <>
+                  <VerificationScanViewer
+                    sourceDocument={activeRecord.sourceDocument}
+                    scanZoom={scanZoom}
+                    onZoomChange={setScanZoom}
+                    showScanPreview={showScanPreview}
+                    onToggleScanPreview={() => setShowScanPreview(!showScanPreview)}
+                  />
+
+                  <VerificationDetailsPanel
+                    record={activeRecord}
+                    onOpenAction={handleOpenAction}
+                    canVerify={isAdmin || isVerifier}
+                  />
+
+                  <VerificationAuditHistory history={history} />
+                </>
+              ) : (
+                <div className="gov-card p-12 text-center text-slate-400 text-xs">
+                  {t('officerVerification.noRecords', { defaultValue: 'No active record selected for verification.' })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Verification Action Dialog */}

@@ -41,8 +41,13 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       name: t('dashboard.uploadCta').replace('+', '').trim(),
       href: '/portal/upload',
       icon: UploadCloud,
+    },
+    {
+      name: 'Verify Land Record',
+      href: '/portal/verify',
+      icon: ShieldCheck,
       highlight: true,
-      badge: 'New',
+      badge: '4-Pillar',
     },
     {
       name: t('applications.title'),
