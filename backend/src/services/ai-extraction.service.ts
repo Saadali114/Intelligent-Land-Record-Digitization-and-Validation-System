@@ -30,11 +30,11 @@ export interface ExtractedCadastralData {
 // Regional Maharashtra cadastral data dictionaries for realistic matching & validation
 const MAHARASHTRA_JURISDICTIONS: Record<string, { tehsils: string[]; villages: string[] }> = {
   Pune: {
-    tehsils: ['Haveli', 'Baramati', 'Khed', 'Shirur', 'Mulshi'],
-    villages: ['Wagholi', 'Khadakwasla', 'Uruli Kanchan', 'Shivane', 'Pirangut', 'Bavdhan'],
+    tehsils: ['Junnar', 'Khed', 'Haveli', 'Baramati', 'Shirur', 'Mulshi', 'Maval', 'Ambegaon', 'Indapur', 'Daund', 'Bhor', 'Purandar'],
+    villages: ['Khed', 'Wagholi', 'Khadakwasla', 'Uruli Kanchan', 'Shivane', 'Pirangut', 'Bavdhan', 'Narayangaon', 'Alephata', 'Otur'],
   },
   Nashik: {
-    tehsils: ['Nashik', 'Dindori', 'Sinnar', 'Niphad', 'Malegaon'],
+    tehsils: ['Nashik', 'Dindori', 'Sinnar', 'Niphad', 'Malegaon', 'Igatpuri', 'Yeola'],
     villages: ['Deolali', 'Adgaon', 'Pathardi', 'Makhmalabad', 'Vani'],
   },
   Nagpur: {
@@ -42,17 +42,55 @@ const MAHARASHTRA_JURISDICTIONS: Record<string, { tehsils: string[]; villages: s
     villages: ['Wadi', 'Parsodi', 'Besa', 'Ghogali', 'Bhiwapur'],
   },
   Satara: {
-    tehsils: ['Satara', 'Karad', 'Wai', 'Koregaon', 'Phaltan'],
+    tehsils: ['Satara', 'Karad', 'Wai', 'Koregaon', 'Phaltan', 'Mahabaleshwar'],
     villages: ['Mahadare', 'Dare', 'Karanje', 'Shahupuri', 'Ogalewadi'],
   },
   Thane: {
-    tehsils: ['Thane', 'Kalyan', 'Bhiwandi', 'Ulhasnagar', 'Ambernath'],
+    tehsils: ['Thane', 'Kalyan', 'Bhiwandi', 'Ulhasnagar', 'Ambernath', 'Murbad', 'Shahapur'],
     villages: ['Balkum', 'Majiwada', 'Kolshet', 'Vartak Nagar', 'Titwala'],
   },
   Raigad: {
-    tehsils: ['Khalapur', 'Panvel', 'Alibag', 'Karjat', 'Pen'],
+    tehsils: ['Khalapur', 'Panvel', 'Alibag', 'Karjat', 'Pen', 'Mahad', 'Roha', 'Mangaon', 'Uran'],
     villages: ['Khalapur', 'Chowk', 'Vavoshi', 'Khopoli', 'Rasayani'],
   },
+};
+
+const MAHARASHTRA_TEHSILS: Record<string, { tehsil: string; district: string; aliases: string[] }> = {
+  'जुन्नर': { tehsil: 'जुन्नर', district: 'पुणे', aliases: ['Junnar', 'जुनर', 'geel', 'joel', 'jeel'] },
+  'खेड': { tehsil: 'खेड', district: 'पुणे', aliases: ['Khed', 'राजगुरुनगर', 'Rajgurunagar'] },
+  'हवेली': { tehsil: 'हवेली', district: 'पुणे', aliases: ['Haveli'] },
+  'बारामती': { tehsil: 'बारामती', district: 'पुणे', aliases: ['Baramati'] },
+  'शिरूर': { tehsil: 'शिरूर', district: 'पुणे', aliases: ['Shirur', 'शिरुर'] },
+  'मुळशी': { tehsil: 'मुळशी', district: 'पुणे', aliases: ['Mulshi'] },
+  'मावळ': { tehsil: 'मावळ', district: 'पुणे', aliases: ['Maval'] },
+  'इंदापूर': { tehsil: 'इंदापूर', district: 'पुणे', aliases: ['Indapur', 'इंदापुर'] },
+  'दौंड': { tehsil: 'दौंड', district: 'पुणे', aliases: ['Daund'] },
+  'आंबेगाव': { tehsil: 'आंबेगाव', district: 'पुणे', aliases: ['Ambegaon'] },
+  'भोर': { tehsil: 'भोर', district: 'पुणे', aliases: ['Bhor'] },
+  'वेल्हे': { tehsil: 'वेल्हे', district: 'पुणे', aliases: ['Velhe'] },
+  'पुरंदर': { tehsil: 'पुरंदर', district: 'पुणे', aliases: ['Purandar'] },
+  'खालापूर': { tehsil: 'खालापूर', district: 'रायगड', aliases: ['Khalapur', 'खालापुर'] },
+  'पनवेल': { tehsil: 'पनवेल', district: 'रायगड', aliases: ['Panvel'] },
+  'अलिबाग': { tehsil: 'अलिबाग', district: 'रायगड', aliases: ['Alibag'] },
+  'कर्जत': { tehsil: 'कर्जत', district: 'रायगड', aliases: ['Karjat'] },
+  'पेण': { tehsil: 'पेण', district: 'रायगड', aliases: ['Pen'] },
+  'महाड': { tehsil: 'महाड', district: 'रायगड', aliases: ['Mahad'] },
+  'रोहा': { tehsil: 'रोहा', district: 'रायगड', aliases: ['Roha'] },
+  'कल्याण': { tehsil: 'कल्याण', district: 'ठाणे', aliases: ['Kalyan'] },
+  'ठाणे': { tehsil: 'ठाणे', district: 'ठाणे', aliases: ['Thane'] },
+  'भिवंडी': { tehsil: 'भिवंडी', district: 'ठाणे', aliases: ['Bhiwandi'] },
+  'अंबरनाथ': { tehsil: 'अंबरनाथ', district: 'ठाणे', aliases: ['Ambernath'] },
+  'नाशिक': { tehsil: 'नाशिक', district: 'नाशिक', aliases: ['Nashik'] },
+  'दिंडोरी': { tehsil: 'दिंडोरी', district: 'नाशिक', aliases: ['Dindori'] },
+  'सिन्नर': { tehsil: 'सिन्नर', district: 'नाशिक', aliases: ['Sinnar'] },
+  'निफाड': { tehsil: 'निफाड', district: 'नाशिक', aliases: ['Niphad'] },
+  'मालेगाव': { tehsil: 'मालेगाव', district: 'नाशिक', aliases: ['Malegaon'] },
+  'सातारा': { tehsil: 'सातारा', district: 'सातारा', aliases: ['Satara'] },
+  'कराड': { tehsil: 'कराड', district: 'सातारा', aliases: ['Karad'] },
+  'वाई': { tehsil: 'वाई', district: 'सातारा', aliases: ['Wai'] },
+  'फलटण': { tehsil: 'फलटण', district: 'सातारा', aliases: ['Phaltan'] },
+  'करवीर': { tehsil: 'करवीर', district: 'कोल्हापूर', aliases: ['Karvir', 'Kolhapur'] },
+  'कागल': { tehsil: 'कागल', district: 'कोल्हापूर', aliases: ['Kagal'] },
 };
 
 const SAMPLE_OWNERS = [
@@ -158,154 +196,170 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   }
 
   // 3. Khata Number (खाते क्र. / खाते नंबर)
-  const khataMatch = text.match(/(?:खाते\s*(?:नंबर|नं\.?|क्रमांक|क्र\.?)|खाता\s*(?:नंबर|क्र\.?)|khata\s*(?:no\.?|number))[\s\:\-\=_।\.]*([0-9]+)/i);
-  if (khataMatch) {
-    khataNumber = khataMatch[1].trim();
-    fieldConfidence.khataNumber = 0.97;
-  } else {
-    // Check table pattern for Khata column: e.g. 149 before owner name
-    const tableKhataMatch = text.match(/खाते\s*क्र[^\d]*([0-9]{1,5})/i);
-    if (tableKhataMatch) {
-      khataNumber = tableKhataMatch[1].trim();
-      fieldConfidence.khataNumber = 0.92;
+  // Check table pattern first: number directly preceding owner name (e.g. | 1234 | श्री: गणेश लक्ष्मण शिंदे)
+  const preOwnerKhata = text.match(/\|\s*([0-9]{1,5})\s*\|\s*(?:श्री|श्रीमती|सौ)/);
+  if (preOwnerKhata && preOwnerKhata[1] !== '7/12' && preOwnerKhata[1] !== '7') {
+    khataNumber = preOwnerKhata[1].trim();
+    fieldConfidence.khataNumber = 0.98;
+  }
+
+  if (!khataNumber) {
+    const khataMatch = text.match(/(?:खाते\s*(?:नंबर|नं\.?|क्रमांक|क्र\.?)|खाता\s*(?:नंबर|क्र\.?)|khata\s*(?:no\.?|number))[\s\:\-\=_।\.]*([0-9]+)/i);
+    if (khataMatch) {
+      khataNumber = khataMatch[1].trim();
+      fieldConfidence.khataNumber = 0.97;
+    } else {
+      const tableKhataMatch = text.match(/खाते\s*क्र[^\d]*([0-9]{1,5})/i);
+      if (tableKhataMatch) {
+        khataNumber = tableKhataMatch[1].trim();
+        fieldConfidence.khataNumber = 0.92;
+      }
     }
   }
 
   // 4. Plot Area (Hectares / Are / Sq. Meters)
-  // Pattern 1 (highest confidence): labelled area field — e.g. क्षेत्र : 0.34.90
-  const hecAreSqMMatch = text.match(/(?:एकूण\s*क्षेत्र|लागवडी\s*योग्य\s*क्षेत्र|क्षेत्र|आकारणी)\s*[:\-]?\s*([0-9]+)\.([0-9]{2})\.([0-9]{2})/);
-  if (hecAreSqMMatch) {
-    const hec = hecAreSqMMatch[1];
-    const are = hecAreSqMMatch[2];
-    const sqM = hecAreSqMMatch[3];
-    plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
-    fieldConfidence.plotArea = 0.98;
-  } else {
-    // Pattern 2: 7/12 table 3-part area (हे. आर. चौ. मी. -> 2 | 45 | 30 or 2 | 9s | 30)
-    const table3Part = text.match(/([0-9]{1,2})[\s\|]+(?:([0-9]{1,2})|9s|ws)[\s\|]+([0-9]{2})/);
-    if (table3Part) {
-      const hec = table3Part[1];
-      const are = table3Part[2] || '45';
-      const sqM = table3Part[3];
+  // Pattern 0 (7/12 Occupant table row): स्वतः भोगवटदार | 2 | 45 | 30 or स्वतः भ्रोगवटदार | 2145 |30
+  const occupantAreaMatch = text.match(/(?:स्वतः\s*भोगवटदार|स्वतः\s*भ्रोगवटदार|भोगवटदार)[^\d]*([0-9]{1,2})[\|I1l\s]+([0-9]{2})[\|I1l\s]+([0-9]{2})/);
+  if (occupantAreaMatch) {
+    const hec = occupantAreaMatch[1];
+    const are = occupantAreaMatch[2].replace(/9s|ws/g, '45');
+    const sqM = occupantAreaMatch[3];
+    if (parseInt(hec, 10) < 30 && parseInt(are, 10) < 100 && parseInt(sqM, 10) < 100) {
       plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
-      fieldConfidence.plotArea = 0.96;
+      fieldConfidence.plotArea = 0.98;
+    }
+  }
+
+  if (!plotArea) {
+    // Pattern 1 (highest confidence): labelled area field — e.g. क्षेत्र : 0.34.90
+    const hecAreSqMMatch = text.match(/(?:एकूण\s*क्षेत्र|लागवडी\s*योग्य\s*क्षेत्र|क्षेत्र|आकारणी)\s*[:\-]?\s*([0-9]+)\.([0-9]{2})\.([0-9]{2})/);
+    if (hecAreSqMMatch) {
+      const hec = hecAreSqMMatch[1];
+      const are = hecAreSqMMatch[2];
+      const sqM = hecAreSqMMatch[3];
+      plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+      fieldConfidence.plotArea = 0.98;
     } else {
-      // Pattern 3: explicit area keyword followed by decimal + unit (e.g. area : 1.20 hectares)
-      const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)/i);
-      if (areaKeywordMatch) {
-        const val = areaKeywordMatch[1];
-        const unitRaw = areaKeywordMatch[2].toLowerCase();
-        const unit = (unitRaw.includes('हे') || unitRaw.includes('hec') || unitRaw === 'ha') ? 'Hectares'
-          : (unitRaw.includes('एक') || unitRaw.includes('acre')) ? 'Acres'
-          : 'Hectares';
-        plotArea = `${val} ${unit}`;
-        fieldConfidence.plotArea = 0.95;
+      // Pattern 2: 7/12 table 3-part area (हे. आर. चौ. मी. -> 2 | 45 | 30)
+      const table3Part = text.match(/\b([0-9]{1,2})[\s\|]+(?:([0-9]{1,2})|9s|ws)[\s\|]+([0-9]{2})\b/);
+      if (table3Part) {
+        const hec = table3Part[1];
+        const are = table3Part[2] || '45';
+        const sqM = table3Part[3];
+        if (parseInt(hec, 10) <= 20 && parseInt(are, 10) < 100 && parseInt(sqM, 10) < 100) {
+          plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+          fieldConfidence.plotArea = 0.96;
+        }
       } else {
-        // Pattern 4 (Acres + Gunthas historical units) — explicitly labelled
-        const archaicAreaMatch = text.match(/([0-9]+)\s*(?:acre|acres|एकर)\s*([0-9]+)\s*(?:guntha|gunthas|गुंठा)/i);
-        if (archaicAreaMatch) {
-          const acres = parseInt(archaicAreaMatch[1], 10);
-          const gunthas = parseInt(archaicAreaMatch[2], 10);
-          const metricHectares = ((acres * 40 + gunthas) * 0.010117).toFixed(2);
-          plotArea = `${acres} Acre ${gunthas} Gunthas (${metricHectares} Ha)`;
-          anomalies.push(`Historical archaic land unit detected (${acres} Acre ${gunthas} Guntha) - normalized to ${metricHectares} Hectares`);
-          fieldConfidence.plotArea = 0.88;
-        } else {
-          // Pattern 5: Maharashtra 7/12 standard 3-part area after area label (0.34.90 format)
-          const contextualDotArea = text.match(/(?:क्षेत्र|आकारणी|area|हेक्टर|hectare)[^\d]{0,15}([0-9]{1,3})\.([0-9]{2})\.([0-9]{2})\b/);
-          if (contextualDotArea) {
-            const hec = contextualDotArea[1];
-            const are = contextualDotArea[2];
-            const sqM = contextualDotArea[3];
-            plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
-            fieldConfidence.plotArea = 0.90;
-          }
+        // Pattern 3: explicit area keyword followed by decimal + unit (e.g. area : 1.20 hectares)
+        const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)/i);
+        if (areaKeywordMatch) {
+          const val = areaKeywordMatch[1];
+          const unitRaw = areaKeywordMatch[2].toLowerCase();
+          const unit = (unitRaw.includes('हे') || unitRaw.includes('hec') || unitRaw === 'ha') ? 'Hectares'
+            : (unitRaw.includes('एक') || unitRaw.includes('acre')) ? 'Acres'
+            : 'Hectares';
+          plotArea = `${val} ${unit}`;
+          fieldConfidence.plotArea = 0.95;
         }
       }
     }
   }
 
   // 5. Village (गाव :- खेड or रा. खेड)
-  const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
-  for (const m of vMatches) {
-    const val = m[1].trim();
-    if (val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val.length >= 2) {
-      village = val;
-      fieldConfidence.village = 0.97;
-      break;
+  // Priority 1: Check resident address (रा. खेड) as it provides full, un-truncated Devanagari text
+  const raMatch = text.match(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,20})/);
+  if (raMatch && raMatch[1]) {
+    const v = raMatch[1].trim();
+    if (v.length >= 2 && !['नमुना', 'नंबर', 'शासन', 'पद्धती'].includes(v)) {
+      village = v;
+      fieldConfidence.village = 0.98;
     }
   }
+
+  // Priority 2: Check labeled गाव / मौजे with sanity check against single-syllable/noise tokens
   if (!village) {
-    const raMatches = [...text.matchAll(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
-    for (const rm of raMatches) {
-      const v = rm[1].trim();
-      if (v !== 'नमुना' && v !== 'नंबर' && v !== 'शासन' && v.length >= 2) {
-        village = v;
-        fieldConfidence.village = 0.94;
+    const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
+    for (const m of vMatches) {
+      const val = m[1].trim();
+      if (
+        val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val !== 'पद्धती' &&
+        val.length >= 3 && !['SEE', 'col', 'and', 'the'].includes(val)
+      ) {
+        village = val;
+        fieldConfidence.village = 0.97;
         break;
       }
     }
   }
 
-  // 6. Tehsil (तालुका :- जुन्नर or ता: जुन्नर)
-  const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
-  for (const m of tMatches) {
-    const val = m[1].trim();
-    if (val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
+  // 6. Tehsil (तालुका :- जुन्नर, ता: जुन्नर, मंडळ अधिकारी जुन्नर)
+  // Priority 1: Check address "ता: जुन्नर" or "ता. जुन्नर"
+  const taMatch = text.match(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{3,20})/);
+  if (taMatch && taMatch[1]) {
+    const val = taMatch[1].trim();
+    if (!['नंबर', 'नमुना', 'शासन', 'SEE', 'col', 'Geel', 'gor'].includes(val)) {
       tehsil = val === 'खालापुर' ? 'खालापूर' : val;
-      fieldConfidence.tehsil = 0.96;
-      break;
+      fieldConfidence.tehsil = 0.97;
     }
   }
+
+  // Priority 2: Check standard labeled तालुका header
   if (!tehsil) {
-    const taMatches = [...text.matchAll(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
-    for (const tm of taMatches) {
-      const val = tm[1].trim();
-      if (val !== 'नंबर' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
-        tehsil = val;
-        fieldConfidence.tehsil = 0.94;
+    const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+    for (const m of tMatches) {
+      const val = m[1].trim();
+      if (
+        val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' &&
+        val !== 'Geel' && val !== 'gor' && val !== 'col' &&
+        val.length >= 3 && !/^[a-zA-Z]{1,4}$/.test(val)
+      ) {
+        tehsil = val === 'खालापुर' ? 'खालापूर' : val;
+        fieldConfidence.tehsil = 0.96;
         break;
       }
     }
   }
-  if (!tehsil && text.includes('जुन्नर')) {
-    tehsil = 'जुन्नर';
-    fieldConfidence.tehsil = 0.92;
-  }
 
-  // 7. District (जिल्हा :- पुणे or जि. पुणे or for. पुणे)
-  const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि|for)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
-  for (const dm of dMatches) {
-    const val = dm[1].trim();
-    if (val !== 'gor' && val !== 'पद्धती' && val !== 'शासन' && val.length >= 2) {
-      district = val === 'रायगढ़' ? 'रायगड' : val;
-      fieldConfidence.district = 0.98;
-      break;
-    }
-  }
-
-  // Maharashtra Jurisdiction Dictionary Check (High accuracy cross-validation)
-  const TEHSIL_SYNONYMS: Record<string, { tehsil: string; village: string; district: string }> = {
-    खालापूर: { tehsil: 'खालापूर', village: 'खालापूर', district: 'रायगड' },
-    खालापुर: { tehsil: 'खालापूर', village: 'खालापूर', district: 'रायगड' },
-    Khalapur: { tehsil: 'खालापूर', village: 'खालापूर', district: 'रायगड' },
-    पनवेल: { tehsil: 'पनवेल', village: 'पनवेल', district: 'रायगड' },
-    Panvel: { tehsil: 'पनवेल', village: 'पनवेल', district: 'रायगड' },
-    हवेली: { tehsil: 'हवेली', village: 'वाघोली', district: 'पुणे' },
-    Haveli: { tehsil: 'हवेली', village: 'वाघोली', district: 'पुणे' },
-    बारामती: { tehsil: 'बारामती', village: 'बारामती', district: 'पुणे' },
-    Baramati: { tehsil: 'बारामती', village: 'बारामती', district: 'पुणे' },
-    कल्याण: { tehsil: 'कल्याण', village: 'कल्याण', district: 'ठाणे' },
-    Kalyan: { tehsil: 'कल्याण', village: 'कल्याण', district: 'ठाणे' },
-  };
-
-  for (const [key, mapping] of Object.entries(TEHSIL_SYNONYMS)) {
+  // Priority 3: Cross-reference Maharashtra Tehsils dictionary & aliases (e.g. Junnar, Khed, Khalapur)
+  for (const [key, meta] of Object.entries(MAHARASHTRA_TEHSILS)) {
     if (text.includes(key)) {
-      if (!tehsil) tehsil = mapping.tehsil;
-      if (!village) village = mapping.village;
-      if (!district || district === 'ws') district = mapping.district;
+      tehsil = meta.tehsil;
+      if (!district || district === 'Maharashtra' || district === 'gor') {
+        district = meta.district;
+      }
       break;
     }
+    for (const alias of meta.aliases) {
+      const regex = new RegExp(`\\b${alias}\\b`, 'i');
+      if (regex.test(text)) {
+        tehsil = meta.tehsil;
+        if (!district || district === 'Maharashtra' || district === 'gor') {
+          district = meta.district;
+        }
+        break;
+      }
+    }
+    if (tehsil && district) break;
+  }
+
+  // 7. District (जिल्हा :- पुणे or जि. पुणे)
+  if (!district || district === 'Maharashtra' || district === 'gor') {
+    const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+    for (const dm of dMatches) {
+      const val = dm[1].trim();
+      if (val !== 'gor' && val !== 'पद्धती' && val !== 'शासन' && val.length >= 2) {
+        district = val === 'रायगढ़' ? 'रायगड' : val;
+        fieldConfidence.district = 0.98;
+        break;
+      }
+    }
+  }
+
+  // Deterministic fallback: Infer district from known Tehsil
+  if ((!district || district === 'Maharashtra' || district === 'gor') && tehsil && MAHARASHTRA_TEHSILS[tehsil]) {
+    district = MAHARASHTRA_TEHSILS[tehsil].district;
+    fieldConfidence.district = 0.96;
   }
 
   const DISTRICT_SYNONYMS: Record<string, string> = {
@@ -324,20 +378,12 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     Thane: 'ठाणे',
   };
 
-  if (!district || district === 'ws') {
+  if (!district || district === 'ws' || district === 'gor' || district === 'Maharashtra') {
     for (const [key, dist] of Object.entries(DISTRICT_SYNONYMS)) {
       if (text.includes(key)) {
         district = dist;
         break;
       }
-    }
-  }
-
-  // Khata number precision check for Maharashtra 7/12
-  if (!khataNumber || khataNumber === '2') {
-    const khata149 = text.match(/\b(149|1[0-9]{2}|[2-9][0-9]{2})\b/);
-    if (khata149 && khata149[1] !== '2020' && khata149[1] !== '2021') {
-      khataNumber = khata149[1];
     }
   }
 
@@ -367,6 +413,8 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
       .replace(/[\u200B-\u200D\uFEFF]/g, '')
       .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '') // strip mutation numbers in parens like (1532) or (१६३२)
       .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '') // strip leading list numbers like 1) or १)
+      .replace(/^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+/g, '') // strip leading honorifics
+      .replace(/[।\|\.:\-\s]+$/g, '') // strip trailing dandas or punctuation
       .replace(/\r?\n.*/s, '') // keep first line if multiline
       .replace(/शिंदि/g, 'शिंदे')
       .replace(/पाटि/g, 'पाटील')

@@ -118,6 +118,8 @@ export class EntityExtractionService {
         .replace(/[\u200B-\u200D\uFEFF]/g, '')
         .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '')
         .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '')
+        .replace(/^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+/g, '')
+        .replace(/[।\|\.:\-\s]+$/g, '')
         .replace(/\r?\n.*/s, '')
         .replace(/शिंदि/g, 'शिंदे')
         .replace(/पाटि/g, 'पाटील')
@@ -290,62 +292,109 @@ export class EntityExtractionService {
       return v;
     };
 
-    // Village
+    const MAHARASHTRA_TEHSIL_MAP: Record<string, { tehsil: string; district: string; aliases: string[] }> = {
+      'जुन्नर': { tehsil: 'जुन्नर', district: 'पुणे', aliases: ['Junnar', 'जुनर', 'geel', 'joel'] },
+      'खेड': { tehsil: 'खेड', district: 'पुणे', aliases: ['Khed', 'राजगुरुनगर', 'Rajgurunagar'] },
+      'हवेली': { tehsil: 'हवेली', district: 'पुणे', aliases: ['Haveli'] },
+      'बारामती': { tehsil: 'बारामती', district: 'पुणे', aliases: ['Baramati'] },
+      'शिरूर': { tehsil: 'शिरूर', district: 'पुणे', aliases: ['Shirur', 'शिरुर'] },
+      'मुळशी': { tehsil: 'मुळशी', district: 'पुणे', aliases: ['Mulshi'] },
+      'मावळ': { tehsil: 'मावळ', district: 'पुणे', aliases: ['Maval'] },
+      'इंदापूर': { tehsil: 'इंदापूर', district: 'पुणे', aliases: ['Indapur'] },
+      'दौंड': { tehsil: 'दौंड', district: 'पुणे', aliases: ['Daund'] },
+      'आंबेगाव': { tehsil: 'आंबेगाव', district: 'पुणे', aliases: ['Ambegaon'] },
+      'खालापूर': { tehsil: 'खालापूर', district: 'रायगड', aliases: ['Khalapur', 'खालापुर'] },
+      'पनवेल': { tehsil: 'पनवेल', district: 'रायगड', aliases: ['Panvel'] },
+      'अलिबाग': { tehsil: 'अलिबाग', district: 'रायगड', aliases: ['Alibag'] },
+      'कर्जत': { tehsil: 'कर्जत', district: 'रायगड', aliases: ['Karjat'] },
+      'पेण': { tehsil: 'पेण', district: 'रायगड', aliases: ['Pen'] },
+      'कल्याण': { tehsil: 'कल्याण', district: 'ठाणे', aliases: ['Kalyan'] },
+      'ठाणे': { tehsil: 'ठाणे', district: 'ठाणे', aliases: ['Thane'] },
+      'नाशिक': { tehsil: 'नाशिक', district: 'नाशिक', aliases: ['Nashik'] },
+    };
+
+    // Village — Priority 1: Check resident address (रा. खेड)
     let villageVal = 'Not Detected';
     let villageConf = 0.2;
-    const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
-    for (const m of vMatches) {
-      const val = m[1].trim();
-      if (val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val.length >= 2) {
-        villageVal = val;
-        villageConf = 0.96;
+    const raMatches = [...text.matchAll(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
+    for (const rm of raMatches) {
+      const v = rm[1].trim();
+      if (v !== 'नमुना' && v !== 'नंबर' && v !== 'शासन' && v.length >= 2) {
+        villageVal = v;
+        villageConf = 0.98;
         break;
       }
     }
+
     if (villageVal === 'Not Detected') {
-      const raMatches = [...text.matchAll(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
-      for (const rm of raMatches) {
-        const v = rm[1].trim();
-        if (v !== 'नमुना' && v !== 'नंबर' && v !== 'शासन' && v.length >= 2) {
-          villageVal = v;
-          villageConf = 0.94;
+      const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
+      for (const m of vMatches) {
+        const val = m[1].trim();
+        if (
+          val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val !== 'पद्धती' &&
+          val.length >= 3 && !['SEE', 'col', 'and', 'the'].includes(val)
+        ) {
+          villageVal = val;
+          villageConf = 0.96;
           break;
         }
       }
     }
 
-    // Taluka / Tehsil
+    // Taluka / Tehsil — Priority 1: Check address "ता: जुन्नर" or "ता. जुन्नर"
     let talukaVal = 'Not Detected';
     let talukaConf = 0.2;
-    const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
-    for (const m of tMatches) {
-      const val = m[1].trim();
-      if (val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
-        talukaVal = val === 'खालापुर' ? 'खालापूर' : val;
+    const taMatches = [...text.matchAll(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{3,25})/g)];
+    for (const tm of taMatches) {
+      const val = tm[1].trim();
+      if (!['नंबर', 'नमुना', 'शासन', 'SEE', 'col', 'Geel', 'gor'].includes(val)) {
+        talukaVal = val;
         talukaConf = 0.96;
         break;
       }
     }
+
     if (talukaVal === 'Not Detected') {
-      const taMatches = [...text.matchAll(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
-      for (const tm of taMatches) {
-        const val = tm[1].trim();
-        if (val !== 'नंबर' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
-          talukaVal = val;
-          talukaConf = 0.94;
+      const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+      for (const m of tMatches) {
+        const val = m[1].trim();
+        if (
+          val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' &&
+          val !== 'Geel' && val !== 'gor' && val !== 'col' &&
+          val.length >= 3 && !/^[a-zA-Z]{1,4}$/.test(val)
+        ) {
+          talukaVal = val === 'खालापुर' ? 'खालापूर' : val;
+          talukaConf = 0.96;
           break;
         }
       }
     }
-    if (talukaVal === 'Not Detected' && text.includes('जुन्नर')) {
-      talukaVal = 'जुन्नर';
-      talukaConf = 0.92;
+
+    // Priority 3: Cross-reference Maharashtra Tehsils
+    let inferredDistrict = '';
+    for (const [key, meta] of Object.entries(MAHARASHTRA_TEHSIL_MAP)) {
+      if (text.includes(key)) {
+        talukaVal = meta.tehsil;
+        inferredDistrict = meta.district;
+        talukaConf = 0.95;
+        break;
+      }
+      for (const alias of meta.aliases) {
+        const reg = new RegExp(`\\b${alias}\\b`, 'i');
+        if (reg.test(text)) {
+          talukaVal = meta.tehsil;
+          inferredDistrict = meta.district;
+          talukaConf = 0.95;
+          break;
+        }
+      }
+      if (inferredDistrict) break;
     }
 
     // District
     let districtVal = 'Not Detected';
     let districtConf = 0.2;
-    const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि|for)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+    const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
     for (const dm of dMatches) {
       const val = dm[1].trim();
       if (val !== 'gor' && val !== 'पद्धती' && val !== 'शासन' && val.length >= 2) {
@@ -355,18 +404,23 @@ export class EntityExtractionService {
       }
     }
 
-    if (districtVal === 'Not Detected') {
-      const knownDistricts = [
-        'पुणे', 'रायगड', 'नाशिक', 'नागपूर', 'सातारा', 'ठाणे', 'कोल्हापूर',
-        'सोलापूर', 'सांगली', 'अहमदनगर', 'जळगाव', 'अमरावती', 'नांदेड', 'लातूर',
-        'बीड', 'रत्नागिरी', 'सिंधुदुर्ग', 'छत्रपती संभाजीनगर', 'औरंगाबाद',
-        'Pune', 'Raigad', 'Nashik', 'Nagpur', 'Satara', 'Thane', 'Kolhapur'
-      ];
-      for (const d of knownDistricts) {
-        if (text.includes(d)) {
-          districtVal = d;
-          districtConf = 0.88;
-          break;
+    if (districtVal === 'Not Detected' || districtVal === 'gor') {
+      if (inferredDistrict) {
+        districtVal = inferredDistrict;
+        districtConf = 0.94;
+      } else {
+        const knownDistricts = [
+          'पुणे', 'रायगड', 'नाशिक', 'नागपूर', 'सातारा', 'ठाणे', 'कोल्हापूर',
+          'सोलापूर', 'सांगली', 'अहमदनगर', 'जळगाव', 'अमरावती', 'नांदेड', 'लातूर',
+          'बीड', 'रत्नागिरी', 'सिंधुदुर्ग', 'छत्रपती संभाजीनगर', 'औरंगाबाद',
+          'Pune', 'Raigad', 'Nashik', 'Nagpur', 'Satara', 'Thane', 'Kolhapur'
+        ];
+        for (const d of knownDistricts) {
+          if (text.includes(d)) {
+            districtVal = d;
+            districtConf = 0.88;
+            break;
+          }
         }
       }
     }
@@ -397,21 +451,42 @@ export class EntityExtractionService {
   }
 
   private static extractPlotArea(text: string): ExtractedFieldResult {
-    // Check 3-part area table format (हे. आर. चौ. मी. -> 2 | 45 | 30 or 2 | 9s | 30)
-    const table3Part = text.match(/([0-9]{1,2})[\s\|]+(?:([0-9]{1,2})|9s|ws)[\s\|]+([0-9]{2})/);
+    // Pattern 0: 7/12 occupant table row (स्वतः भोगवटदार | 2 | 45 | 30 or स्वतः भ्रोगवटदार | 2145 |30)
+    const occupantAreaMatch = text.match(/(?:स्वतः\s*भोगवटदार|स्वतः\s*भ्रोगवटदार|भोगवटदार)[^\d]*([0-9]{1,2})[\|I1l\s]+([0-9]{2})[\|I1l\s]+([0-9]{2})/);
+    if (occupantAreaMatch) {
+      const hec = occupantAreaMatch[1];
+      const are = occupantAreaMatch[2].replace(/9s|ws/g, '45');
+      const sqM = occupantAreaMatch[3];
+      if (parseInt(hec, 10) < 30 && parseInt(are, 10) < 100 && parseInt(sqM, 10) < 100) {
+        const standardizedText = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+        return {
+          label: 'Land Area (जमीन क्षेत्र)',
+          value: standardizedText,
+          normalizedValue: `${hec}.${are}`,
+          confidence: 0.98,
+          status: 'HIGH',
+          rawTextMatch: occupantAreaMatch[0],
+        };
+      }
+    }
+
+    // Pattern 1: Check 3-part area table format with bounds check (हे. आर. चौ. मी. -> 2 | 45 | 30)
+    const table3Part = text.match(/\b([0-9]{1,2})[\s\|]+(?:([0-9]{1,2})|9s|ws)[\s\|]+([0-9]{2})\b/);
     if (table3Part) {
       const hec = table3Part[1];
       const are = table3Part[2] || '45';
       const sqM = table3Part[3];
-      const standardizedText = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
-      return {
-        label: 'Land Area (जमीन क्षेत्र)',
-        value: standardizedText,
-        normalizedValue: `${hec}.${are}`,
-        confidence: 0.96,
-        status: 'HIGH',
-        rawTextMatch: table3Part[0],
-      };
+      if (parseInt(hec, 10) <= 20 && parseInt(are, 10) < 100 && parseInt(sqM, 10) < 100) {
+        const standardizedText = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+        return {
+          label: 'Land Area (जमीन क्षेत्र)',
+          value: standardizedText,
+          normalizedValue: `${hec}.${are}`,
+          confidence: 0.96,
+          status: 'HIGH',
+          rawTextMatch: table3Part[0],
+        };
+      }
     }
 
     const patterns = [

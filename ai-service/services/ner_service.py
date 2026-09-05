@@ -46,6 +46,10 @@ MAHARASHTRA_JURISDICTIONS = {
 }
 
 TEHSIL_SYNONYMS = {
+    "जुन्नर": {"tehsil": "जुन्नर", "village": "खेड", "district": "पुणे"},
+    "Junnar": {"tehsil": "जुन्नर", "village": "खेड", "district": "पुणे"},
+    "खेड": {"tehsil": "खेड", "village": "खेड", "district": "पुणे"},
+    "Khed": {"tehsil": "खेड", "village": "खेड", "district": "पुणे"},
     "खालापूर": {"tehsil": "खालापूर", "village": "खालापूर", "district": "रायगड"},
     "खालापुर": {"tehsil": "खालापूर", "village": "खालापूर", "district": "रायगड"},
     "Khalapur": {"tehsil": "खालापूर", "village": "खालापूर", "district": "रायगड"},
@@ -158,6 +162,13 @@ def extract_khasra_number(text: str) -> Tuple[Optional[str], float]:
 
 
 def extract_plot_area(text: str) -> Tuple[Optional[str], float]:
+    # Pattern 0: Tabular 7/12 occupant row (स्वतः भोगवटदार | 2 | 45 | 30 or स्वतः भ्रोगवटदार | 2145 |30)
+    m0 = re.search(r'(?:स्वतः\s*भोगवटदार|स्वतः\s*भ्रोगवटदार|भोगवटदार)[^\d]*([0-9]{1,2})[\|I1l\s]+([0-9]{2})[\|I1l\s]+([0-9]{2})', text)
+    if m0:
+        hec, are, sqm = m0.group(1), m0.group(2).replace('9s', '45').replace('ws', '45'), m0.group(3)
+        if int(hec) < 30 and int(are) < 100 and int(sqm) < 100:
+            return f"{hec}.{are}{sqm} Hectares ({are}.{sqm} Are)", 0.98
+
     # Pattern 1: Tabular 7/12 area under occupant / bhogwatdar section
     # Matches: भोगवटदार\n2\n45 30 -> 2 Hectares, 45 Are, 30 Sq.m
     m = re.search(r'(?:भोगवटदार|भोगवटादार)[\s\n]+([0-9]{1,2})[\s\n]+([0-9]{1,2})[\s]+([0-9]{1,2})', text)
@@ -207,24 +218,39 @@ def extract_plot_area(text: str) -> Tuple[Optional[str], float]:
 
 
 def extract_village(text: str) -> Tuple[Optional[str], float]:
+    # Priority 1: Check resident address (रा. खेड)
+    m_ra = re.search(r'रा[\.\s:\-]+([\w\u0900-\u097F]{2,20})', text)
+    if m_ra and len(m_ra.group(1)) > 1:
+        val = m_ra.group(1).strip()
+        if val not in ("नमुना", "नंबर", "शासन", "पद्धती"):
+            return val, 0.98
+
+    # Priority 2: Check labeled गाव / मौजे
     m = re.search(r'(?:गाव|गाग|village)\s*[:\-\=\n]+\s*([\w\u0900-\u097F]{2,20})', text, re.IGNORECASE)
-    if m and len(m.group(1)) > 1:
+    if m and len(m.group(1)) > 2:
         val = m.group(1).strip()
-        if val not in ("नमुना", "नंबर", "शासन"):
+        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "SEE", "col"):
             return val, 0.96
     return None, 0.0
 
 
 def extract_tehsil(text: str) -> Tuple[Optional[str], float]:
+    # Priority 1: Check address "ता: जुन्नर" or "ता. जुन्नर"
+    m_ta = re.search(r'ता[\s:\.\-]+([\w\u0900-\u097F]{3,20})', text)
+    if m_ta:
+        val = m_ta.group(1).strip()
+        if val not in ("नंबर", "नमुना", "शासन", "SEE", "col", "Geel", "gor"):
+            return ("खालापूर" if val == "खालापुर" else val), 0.97
+
+    # Priority 2: Check standard labeled तालुका header
     m = re.search(
-        r'(?:तालुका|तालमा|तालुक|tehsil|taluka|ता\.)\s*[:\-\=\n]+\s*([\w\u0900-\u097F]{2,20})',
+        r'(?:तालुका|तालमा|तालुक|tehsil|taluka)\s*[:\-\=\n]+\s*([\w\u0900-\u097F]{2,20})',
         text, re.IGNORECASE
     )
-    if m and len(m.group(1)) > 1:
+    if m and len(m.group(1)) > 2:
         val = m.group(1).strip()
-        if val == "खालापुर":
-            val = "खालापूर"
-        return val, 0.95
+        if val not in ("नंबर", "SEE", "नमुना", "शासन", "Geel", "gor", "col") and not re.match(r'^[a-zA-Z]{1,4}$', val):
+            return ("खालापूर" if val == "खालापुर" else val), 0.95
     return None, 0.0
 
 
@@ -275,17 +301,21 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
     if m:
         val = m.group(1).strip()
         val = re.sub(r'^[१२३४५६७८९\d]+[\)\.\-]\s*', '', val)
-        val = re.sub(r'\([0-9\u0900-\u097F\s\.\-]+\)', '', val).strip()
+        val = re.sub(r'\([0-9\u0900-\u097F\s\.\-]+\)', '', val)
+        val = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', val)
+        val = re.sub(r'[।\|\.:\-\s]+$', '', val).strip()
         if is_valid_name(val):
             return val, 0.95
 
     # Pattern 2: Full Devanagari name with honorific (श्री / श्रीमती / सौ / कै / स्व)
     m = re.search(
-        r'(?:(?:श्री|सौ|श्रीमती|कै|स्व)\.?\s+)([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
+        r'(?:(?:श्री|सौ|श्रीमती|कै|स्व)[\s:\.\-=_]+)([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
         clean_text
     )
     if m:
-        full_name = m.group(0).strip()
+        full_name = m.group(1).strip()
+        full_name = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', full_name)
+        full_name = re.sub(r'[।\|\.:\-\s]+$', '', full_name).strip()
         if is_valid_name(full_name):
             return full_name, 0.92
 
