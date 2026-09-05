@@ -21,6 +21,7 @@ import {
   Image,
   ExternalLink,
   ShieldCheck,
+  UserPlus,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
@@ -343,23 +344,31 @@ export const SubNavbar: React.FC = () => {
           </div>
         </nav>
 
-        {/* Right CTA: Language Switcher, Citizen Portal & Employee Login */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        {/* Right CTA: Language Switcher, Register, Citizen Portal & Employee Login */}
+        <div className="hidden sm:flex items-center gap-2">
           <LanguageSwitcher variant="header" />
 
           <Link
-            href="/portal"
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+            href="/register"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
           >
-            <ShieldCheck className="w-4 h-4 text-slate-950" />
+            <UserPlus className="w-3.5 h-3.5 text-blue-900" />
+            <span>{t('registration.registerNow', { defaultValue: 'Register' })}</span>
+          </Link>
+
+          <Link
+            href="/portal"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-950" />
             <span>{t('navbar.citizenPortal')}</span>
           </Link>
 
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
           >
-            <LogIn className="w-4 h-4 text-amber-400" />
+            <LogIn className="w-3.5 h-3.5 text-amber-400" />
             <span>{t('navbar.employeeLogin')}</span>
           </Link>
         </div>
@@ -367,6 +376,12 @@ export const SubNavbar: React.FC = () => {
         {/* Mobile Hamburger Button */}
         <div className="flex xl:hidden items-center gap-2">
           <LanguageSwitcher variant="header" />
+          <Link
+            href="/register"
+            className="px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-bold text-xs"
+          >
+            Register
+          </Link>
           <Link
             href="/portal"
             className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
@@ -387,6 +402,13 @@ export const SubNavbar: React.FC = () => {
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
         <div className="xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2 text-xs font-semibold text-slate-700">
+          <Link
+            href="/register"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg bg-blue-50 text-blue-900 font-bold border border-blue-200"
+          >
+            + {t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}
+          </Link>
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}

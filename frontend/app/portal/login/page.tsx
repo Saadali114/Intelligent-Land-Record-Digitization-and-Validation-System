@@ -198,6 +198,13 @@ export default function CitizenLoginPage() {
               >
                 {t('auth.sendEmailOtp', { defaultValue: 'Send Verification Code' })} <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
+
+              <div className="pt-2 text-center text-xs text-slate-600 border-t border-slate-100">
+                <span>{t('registration.dontHaveAccount', { defaultValue: "Don't have an account?" })} </span>
+                <Link href="/register/citizen" className="font-bold text-blue-900 hover:underline">
+                  {t('registration.citizenRegisterTab', { defaultValue: 'Citizen Registration' })} &rarr;
+                </Link>
+              </div>
             </form>
           ) : (
             <div className="space-y-5">

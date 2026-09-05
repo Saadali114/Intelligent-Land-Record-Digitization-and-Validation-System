@@ -1,8 +1,14 @@
 import mongoose, { Schema, Document as MongooseDocument } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER';
+export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER' | 'CITIZEN';
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+export type AccountStatus =
+  | 'PENDING_VERIFICATION'
+  | 'PENDING_APPROVAL'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'DISABLED';
 
 export interface IUser extends MongooseDocument {
   name: string;
@@ -12,6 +18,8 @@ export interface IUser extends MongooseDocument {
   department: string;
   district: string;
   status: UserStatus;
+  accountStatus?: AccountStatus;
+  preferredLanguage?: string;
   emailVerified?: boolean;
   emailVerifiedAt?: Date;
   mobile?: string;
@@ -75,19 +83,19 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
-      default: 'VIEWER',
+      enum: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER', 'CITIZEN'],
+      default: 'CITIZEN',
       index: true,
     },
     department: {
       type: String,
-      required: [true, 'Department is required'],
+      default: 'Citizen Services',
       trim: true,
       index: true,
     },
     district: {
       type: String,
-      required: [true, 'District is required'],
+      default: 'Maharashtra',
       trim: true,
       index: true,
     },
@@ -96,6 +104,22 @@ const UserSchema = new Schema<IUser>(
       enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],
       default: 'ACTIVE',
       index: true,
+    },
+    accountStatus: {
+      type: String,
+      enum: [
+        'PENDING_VERIFICATION',
+        'PENDING_APPROVAL',
+        'ACTIVE',
+        'SUSPENDED',
+        'DISABLED',
+      ],
+      default: 'ACTIVE',
+      index: true,
+    },
+    preferredLanguage: {
+      type: String,
+      default: 'en',
     },
     lastLogin: {
       type: Date,
@@ -114,8 +138,10 @@ const UserSchema = new Schema<IUser>(
 
 // Compound indexes for fast admin querying & filtering
 UserSchema.index({ role: 1, status: 1 });
+UserSchema.index({ role: 1, accountStatus: 1 });
 UserSchema.index({ district: 1, department: 1 });
 UserSchema.index({ createdAt: -1 });
+
 
 // Password hashing middleware
 UserSchema.pre<IUser>('save', async function (next) {

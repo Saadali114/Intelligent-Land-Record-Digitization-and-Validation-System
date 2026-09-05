@@ -1,6 +1,12 @@
 export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER' | 'CITIZEN';
 export * from './citizen';
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+export type AccountStatus =
+  | 'PENDING_VERIFICATION'
+  | 'PENDING_APPROVAL'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'DISABLED';
 
 export interface User {
   _id: string;
@@ -10,10 +16,48 @@ export interface User {
   department: string;
   district: string;
   status: UserStatus;
+  accountStatus?: AccountStatus;
+  preferredLanguage?: string;
+  emailVerified?: boolean;
   lastLogin?: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export type OfficerApplicationStatus =
+  | 'PENDING_EMAIL_VERIFICATION'
+  | 'PENDING_APPROVAL'
+  | 'UNDER_REVIEW'
+  | 'ACTION_REQUIRED'
+  | 'APPROVED'
+  | 'REJECTED';
+
+export interface OfficerApplication {
+  _id: string;
+  userId: User | string;
+  requestedRole: 'OFFICER';
+  name: string;
+  email: string;
+  employeeId: string;
+  department: string;
+  designation: string;
+  office: string;
+  district: string;
+  taluka?: string;
+  phone?: string;
+  preferredLanguage: string;
+  emailVerified: boolean;
+  status: OfficerApplicationStatus;
+  rejectionReason?: string;
+  clarificationMessage?: string;
+  approvedBy?: User | { name: string; email: string };
+  approvedAt?: string;
+  rejectedBy?: User | { name: string; email: string };
+  rejectedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 export type DocumentProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED' | 'NEEDS_REVIEW';
 

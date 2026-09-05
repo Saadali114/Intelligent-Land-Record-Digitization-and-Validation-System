@@ -146,6 +146,14 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Register / Account Request Box */}
+        <div className="mt-4 p-3.5 bg-white rounded-xl border border-slate-200 text-center text-xs text-slate-600 shadow-xs flex items-center justify-between">
+          <span>{t('registration.dontHaveAccount', { defaultValue: "Don't have an account?" })}</span>
+          <Link href="/register" className="font-bold text-blue-900 hover:text-blue-800 underline flex items-center gap-1">
+            <span>{t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}</span> &rarr;
+          </Link>
+        </div>
+
         <div className="flex items-center justify-between mt-4 px-2 text-xs">
           <Link href="/" className="font-semibold text-blue-900 hover:underline">
             &larr; {t('common.backToHome')}

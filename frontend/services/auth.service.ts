@@ -119,4 +119,107 @@ export const authService = {
       message: response.data.message,
     };
   },
+
+  // Dedicated Citizen & Officer Registration APIs
+  registerCitizen: async (data: any): Promise<{ email: string; expiresIn: number; resendAvailableIn: number; message: string }> => {
+    const response = await apiClient.post<
+      ApiResponse<{ email: string; expiresIn: number; resendAvailableIn: number }>
+    >('/auth/register/citizen', data);
+    return {
+      email: response.data.data.email,
+      expiresIn: response.data.data.expiresIn,
+      resendAvailableIn: response.data.data.resendAvailableIn,
+      message: response.data.message,
+    };
+  },
+
+  registerOfficer: async (data: any): Promise<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number; message: string }> => {
+    const response = await apiClient.post<
+      ApiResponse<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number }>
+    >('/auth/register/officer', data);
+    return {
+      email: response.data.data.email,
+      employeeId: response.data.data.employeeId,
+      expiresIn: response.data.data.expiresIn,
+      resendAvailableIn: response.data.data.resendAvailableIn,
+      message: response.data.message,
+    };
+  },
+
+  verifyRegistrationOtp: async (data: {
+    email: string;
+    otp: string;
+    registrationType: 'CITIZEN' | 'OFFICER';
+  }): Promise<{ user: User; token: string; role: string; accountStatus: string; message: string }> => {
+    const response = await apiClient.post<
+      ApiResponse<{ user: User; token: string; role: string; accountStatus: string }>
+    >('/auth/verify-registration-otp', data);
+    return {
+      user: response.data.data.user,
+      token: response.data.data.token,
+      role: response.data.data.role,
+      accountStatus: response.data.data.accountStatus,
+      message: response.data.message,
+    };
+  },
+
+  getOfficerSelfStatus: async (): Promise<any> => {
+    const response = await apiClient.get<ApiResponse<any>>('/auth/officer/status');
+    return response.data.data;
+  },
+
+  // Admin Officer Applications APIs
+  listOfficerApplications: async (params?: {
+    status?: string;
+    district?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ applications: any[]; pagination: { total: number; page: number; limit: number; pages: number } }> => {
+    const response = await apiClient.get<
+      ApiResponse<{ applications: any[]; pagination: { total: number; page: number; limit: number; pages: number } }>
+    >('/admin/officer-applications', { params });
+    return response.data.data;
+  },
+
+  getOfficerApplicationById: async (id: string): Promise<any> => {
+    const response = await apiClient.get<ApiResponse<any>>(`/admin/officer-applications/${id}`);
+    return response.data.data;
+  },
+
+  approveOfficerApplication: async (id: string): Promise<{ success: boolean; message: string; application: any }> => {
+    const response = await apiClient.post<ApiResponse<{ application: any }>>(
+      `/admin/officer-applications/${id}/approve`
+    );
+    return {
+      success: true,
+      message: response.data.message,
+      application: response.data.data.application,
+    };
+  },
+
+  rejectOfficerApplication: async (id: string, reason: string): Promise<{ success: boolean; message: string; application: any }> => {
+    const response = await apiClient.post<ApiResponse<{ application: any }>>(
+      `/admin/officer-applications/${id}/reject`,
+      { reason }
+    );
+    return {
+      success: true,
+      message: response.data.message,
+      application: response.data.data.application,
+    };
+  },
+
+  requestOfficerClarification: async (id: string, message: string): Promise<{ success: boolean; message: string; application: any }> => {
+    const response = await apiClient.post<ApiResponse<{ application: any }>>(
+      `/admin/officer-applications/${id}/request-clarification`,
+      { message }
+    );
+    return {
+      success: true,
+      message: response.data.message,
+      application: response.data.data.application,
+    };
+  },
 };
+

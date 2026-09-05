@@ -61,7 +61,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
-    router.push('/dashboard');
+
+    if (loggedInUser.accountStatus === 'PENDING_APPROVAL') {
+      router.push('/officer/application-status');
+    } else if (loggedInUser.role === 'CITIZEN') {
+      router.push('/portal');
+    } else if (loggedInUser.role === 'OFFICER' || loggedInUser.role === 'VERIFIER') {
+      router.push('/verification');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   const register = async (data: RegisterFormData) => {
@@ -71,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(registeredUser);
     router.push('/dashboard');
   };
+
 
   const logout = async () => {
     try {
