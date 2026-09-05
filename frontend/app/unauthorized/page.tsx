@@ -2,11 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function UnauthorizedPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   return (
@@ -16,19 +18,18 @@ export default function UnauthorizedPage() {
       </div>
 
       <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-        403 &mdash; Access Restricted
+        {t('errorPages.forbiddenTitle', { defaultValue: '403 — Access Restricted' })}
       </h1>
 
       <p className="mt-2 text-xs text-slate-600 max-w-md">
-        Your current role ({user?.role || 'Guest'}) does not have sufficient permissions to access this
-        department resource. Contact your system administrator to request elevated role privileges.
+        {t('errorPages.forbiddenDesc', { defaultValue: 'Your current role does not have sufficient permissions to access this department resource. Contact your system administrator for elevated privileges.' })}
       </p>
 
       <div className="mt-6 flex items-center gap-3">
         <Link href="/dashboard">
           <Button variant="primary" size="sm">
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Return to Dashboard
+            {t('errorPages.returnDashboard', { defaultValue: 'Return to Dashboard' })}
           </Button>
         </Link>
       </div>

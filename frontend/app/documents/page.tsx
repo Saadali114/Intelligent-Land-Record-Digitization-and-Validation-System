@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import {
   useDocumentsQuery,
@@ -23,6 +24,7 @@ import {
 import { Files, UploadCloud } from 'lucide-react';
 
 export default function DocumentsPage() {
+  const { t } = useTranslation();
   const { isAdmin, isOfficer } = useAuth();
   const queryClient = useQueryClient();
 
@@ -103,17 +105,17 @@ export default function DocumentsPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <Files className="w-6 h-6 text-blue-900" />
-              Document Registry & Ingestion
+              {t('officerDocuments.title', { defaultValue: 'Document Registry & Ingestion' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Archival repository for scanned land records, 7/12 extracts, and mutation registers.
+              {t('officerDocuments.subtitle', { defaultValue: 'Archival repository for scanned land records, 7/12 extracts, and mutation registers.' })}
             </p>
           </div>
 
           {(isAdmin || isOfficer) && (
             <Button onClick={() => setIsUploadModalOpen(true)} className="sm:self-start">
               <UploadCloud className="w-4 h-4 mr-1.5" />
-              Upload Document
+              {t('officerDocuments.uploadButton', { defaultValue: 'Upload Document' })}
             </Button>
           )}
         </div>

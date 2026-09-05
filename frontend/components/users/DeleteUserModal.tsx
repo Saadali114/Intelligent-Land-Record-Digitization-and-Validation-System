@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
@@ -15,23 +16,24 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
   onConfirmDelete,
   isDeleting,
 }) => {
+  const { t } = useTranslation();
   if (!deleteTargetId) return null;
 
   return (
     <Modal
       isOpen={Boolean(deleteTargetId)}
       onClose={onClose}
-      title="Confirm Account Deletion"
-      description="Are you sure you want to permanently revoke and delete this account?"
+      title={t('officerUsers.deleteTitle', { defaultValue: 'Confirm Account Deletion' })}
+      description={t('officerUsers.deleteDesc', { defaultValue: 'Are you sure you want to permanently revoke and delete this account?' })}
       maxWidth="sm"
     >
       <div className="space-y-4">
         <p className="text-xs text-slate-600">
-          This action cannot be undone. All audit records associated with this account will remain logged for compliance.
+          {t('officerUsers.deleteWarning', { defaultValue: 'This action cannot be undone. All audit records associated with this account will remain logged for compliance.' })}
         </p>
         <div className="flex items-center justify-end gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button
             variant="danger"
@@ -39,7 +41,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
             isLoading={isDeleting}
             onClick={onConfirmDelete}
           >
-            Confirm Deletion
+            {t('officerUsers.confirmDeleteButton', { defaultValue: 'Confirm Deletion' })}
           </Button>
         </div>
       </div>

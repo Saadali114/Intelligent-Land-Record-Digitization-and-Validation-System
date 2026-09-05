@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import {
   useUsersQuery,
@@ -19,6 +20,7 @@ import {
 import { Users, UserPlus } from 'lucide-react';
 
 export default function UsersPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -74,15 +76,15 @@ export default function UsersPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <Users className="w-6 h-6 text-blue-900" />
-              User & Role Governance
+              {t('officerUsers.title', { defaultValue: 'User & Role Governance' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Admin-level provisioning, RBAC permission assignment, and account status controls.
+              {t('officerUsers.subtitle', { defaultValue: 'Admin-level provisioning, RBAC permission assignment, and account status controls.' })}
             </p>
           </div>
           <Button onClick={() => setIsCreateModalOpen(true)} className="sm:self-start">
             <UserPlus className="w-4 h-4 mr-1.5" />
-            Create Official Account
+            {t('officerUsers.addUser', { defaultValue: 'Create Official Account' })}
           </Button>
         </div>
 

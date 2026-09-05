@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -22,6 +23,7 @@ export const Badge: React.FC<BadgeProps> = ({
   children,
   ...props
 }) => {
+  const { t } = useTranslation();
   let resolvedVariant = variant || 'default';
 
   // Auto-resolve variant based on standard status words if status is provided
@@ -73,7 +75,13 @@ export const Badge: React.FC<BadgeProps> = ({
           resolvedVariant === 'default' && 'bg-blue-500'
         )}
       />
-      {children || status}
+      {children
+        ? typeof children === 'string'
+          ? t(`status.${children.toLowerCase()}`, { defaultValue: children })
+          : children
+        : status
+        ? t(`status.${status.toLowerCase()}`, { defaultValue: status.replace(/_/g, ' ') })
+        : null}
     </span>
   );
 };

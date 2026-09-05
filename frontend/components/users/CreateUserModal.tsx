@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -20,6 +21,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
   onCreateUser,
   isCreating,
 }) => {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -44,12 +46,12 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Provision New Official Account"
-      description="Create an authorized administrative or field officer account."
+      title={t('officerUsers.provisionTitle', { defaultValue: 'Provision New Official Account' })}
+      description={t('officerUsers.provisionDesc', { defaultValue: 'Create an authorized administrative or field officer account.' })}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
-          label="Full Name"
+          label={t('profile.fullName', { defaultValue: 'Full Name' })}
           placeholder="e.g. Ramesh Patil"
           error={errors.name?.message}
           {...register('name')}
@@ -85,11 +87,11 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
           />
 
           <Select
-            label="Account Status"
+            label={t('officerProfile.accountStatus', { defaultValue: 'Account Status' })}
             options={[
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'INACTIVE', label: 'Inactive' },
-              { value: 'SUSPENDED', label: 'Suspended' },
+              { value: 'ACTIVE', label: t('status.active', { defaultValue: 'Active' }) },
+              { value: 'INACTIVE', label: t('status.inactive', { defaultValue: 'Inactive' }) },
+              { value: 'SUSPENDED', label: t('status.suspended', { defaultValue: 'Suspended' }) },
             ]}
             error={errors.status?.message}
             {...register('status')}
@@ -98,14 +100,14 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Department / Wing"
+            label={t('officerProfile.department', { defaultValue: 'Department / Wing' })}
             placeholder="e.g. Settlement Office"
             error={errors.department?.message}
             {...register('department')}
           />
 
           <Input
-            label="Jurisdiction District"
+            label={t('officerProfile.jurisdictionDistrict', { defaultValue: 'Jurisdiction District' })}
             placeholder="e.g. Pune"
             error={errors.district?.message}
             {...register('district')}
@@ -114,10 +116,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button type="submit" isLoading={isCreating}>
-            Create Account
+            {t('officerUsers.addUser', { defaultValue: 'Create Account' })}
           </Button>
         </div>
       </form>

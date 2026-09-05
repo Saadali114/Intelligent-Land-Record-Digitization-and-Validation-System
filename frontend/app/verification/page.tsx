@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import {
   useVerificationRecordsQuery,
@@ -19,6 +20,7 @@ import {
 import { CheckCheck } from 'lucide-react';
 
 export default function VerificationPage() {
+  const { t } = useTranslation();
   const { isAdmin, isVerifier } = useAuth();
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
@@ -91,10 +93,10 @@ export default function VerificationPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <CheckCheck className="w-6 h-6 text-blue-900" />
-              Cadastral Verification Workstation
+              {t('officerVerification.title', { defaultValue: 'Cadastral Verification Workstation' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Cross-validate OCR extracted records against archival physical scans.
+              {t('officerVerification.subtitle', { defaultValue: 'Cross-validate OCR extracted records against archival physical scans.' })}
             </p>
           </div>
         </div>
@@ -133,7 +135,7 @@ export default function VerificationPage() {
               </>
             ) : (
               <div className="gov-card p-12 text-center text-slate-400 text-xs">
-                No active record selected for verification.
+                {t('officerVerification.noRecords', { defaultValue: 'No active record selected for verification.' })}
               </div>
             )}
           </div>

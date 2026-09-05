@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { VerificationAction } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -24,6 +25,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
   correctedData,
   onCorrectedDataChange,
 }) => {
+  const { t } = useTranslation();
   if (!action) return null;
 
   const handleFieldChange = (key: string, value: string) => {
@@ -37,17 +39,17 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
     <Modal
       isOpen={Boolean(action)}
       onClose={onClose}
-      title={`Confirm Action: ${action}`}
+      title={`${t('officerVerification.confirmActionTitle', { defaultValue: 'Confirm Action' })}: ${t('status.' + action.toLowerCase(), { defaultValue: action })}`}
       description="Official verification requires mandatory inspection remarks."
     >
       <div className="space-y-4 text-xs">
         {action === 'CORRECTED' && (
           <div className="space-y-2">
-            <span className="font-bold text-slate-700 block">Edit Extracted Cadastral Values:</span>
+            <span className="font-bold text-slate-700 block">{t('officerVerification.correctionAction', { defaultValue: 'Edit Extracted Cadastral Values' })}:</span>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Owner Name
+                  {t('officerLandRecords.primaryOwner', { defaultValue: 'Owner Name' })}
                 </label>
                 <input
                   type="text"
@@ -58,7 +60,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Survey Number
+                  {t('officerLandRecords.surveyDivision', { defaultValue: 'Survey Number' })}
                 </label>
                 <input
                   type="text"
@@ -69,7 +71,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Khasra Number
+                  {t('officerLandRecords.khasra', { defaultValue: 'Khasra Number' })}
                 </label>
                 <input
                   type="text"
@@ -80,7 +82,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Khata Number
+                  {t('officerLandRecords.khata', { defaultValue: 'Khata Number' })}
                 </label>
                 <input
                   type="text"
@@ -91,7 +93,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Plot Area
+                  {t('officerLandRecords.plotArea', { defaultValue: 'Plot Area' })}
                 </label>
                 <input
                   type="text"
@@ -102,7 +104,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Village
+                  {t('officerLandRecords.village', { defaultValue: 'Village' })}
                 </label>
                 <input
                   type="text"
@@ -113,7 +115,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  Tehsil
+                  {t('officerLandRecords.tehsil', { defaultValue: 'Tehsil' })}
                 </label>
                 <input
                   type="text"
@@ -124,7 +126,7 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
               </div>
               <div>
                 <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
-                  District
+                  {t('officerLandRecords.district', { defaultValue: 'District' })}
                 </label>
                 <input
                   type="text"
@@ -139,23 +141,23 @@ export const VerificationActionModal: React.FC<VerificationActionModalProps> = (
 
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">
-            Mandatory Inspector Remarks <span className="text-rose-600">*</span>
+            {t('officerVerification.inspectionRemarksLabel', { defaultValue: 'Mandatory Inspector Remarks' })} <span className="text-rose-600">*</span>
           </label>
           <textarea
             rows={3}
             value={remarks}
             onChange={(e) => onRemarksChange(e.target.value)}
-            placeholder="Document verified against original physical revenue registry copy..."
+            placeholder={t('officerVerification.inspectionRemarksPlaceholder', { defaultValue: 'Document verified against original physical revenue registry copy...' })}
             className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-blue-900 focus:outline-none"
           />
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
           <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button size="sm" onClick={onExecute} isLoading={isSubmitting}>
-            Submit Verification
+            {t('officerVerification.executeAndSign', { defaultValue: 'Submit Verification' })}
           </Button>
         </div>
       </div>

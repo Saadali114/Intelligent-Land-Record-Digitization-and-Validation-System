@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import {
   useLandRecordsQuery,
@@ -23,6 +24,7 @@ import {
 import { FileSpreadsheet, Plus } from 'lucide-react';
 
 export default function LandRecordsPage() {
+  const { t } = useTranslation();
   const { isAdmin, isOfficer, isVerifier } = useAuth();
 
   // Filter & Pagination State
@@ -103,17 +105,17 @@ export default function LandRecordsPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <FileSpreadsheet className="w-6 h-6 text-blue-900" />
-              Cadastral Land Records
+              {t('officerLandRecords.title', { defaultValue: 'Cadastral Land Records' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Search, filter, and manage verified digital land records and ownership titles.
+              {t('officerLandRecords.subtitle', { defaultValue: 'Search, filter, and manage verified digital land records and ownership titles.' })}
             </p>
           </div>
 
           {(isAdmin || isOfficer) && (
             <Button onClick={() => setIsCreateModalOpen(true)} className="sm:self-start">
               <Plus className="w-4 h-4 mr-1.5" />
-              Add Record
+              {t('officerLandRecords.addRecord', { defaultValue: 'Add Record' })}
             </Button>
           )}
         </div>

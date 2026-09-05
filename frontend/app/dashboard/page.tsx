@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { useDashboardStatsQuery } from '../../hooks/useDashboard';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
@@ -39,6 +40,7 @@ import {
 const CHART_COLORS = ['#1e3a8a', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0284c7'];
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { data: stats, isLoading, isError, error } = useDashboardStatsQuery();
 
   return (
@@ -48,16 +50,16 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-5">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Operations & Validation Dashboard
+              {t('officerDashboard.title', { defaultValue: 'Operations & Validation Dashboard' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Real-time synchronization across district land registries, document ingestion, and verification queues.
+              {t('officerDashboard.subtitle', { defaultValue: 'Real-time synchronization across district land registries, document ingestion, and verification queues.' })}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Database Feed
+              {t('officerDashboard.liveFeed', { defaultValue: 'Live Database Feed' })}
             </span>
           </div>
         </div>
@@ -95,7 +97,7 @@ export default function DashboardPage() {
               {/* Total Users */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Total Users</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.totalUsers', { defaultValue: 'Total Users' })}</span>
                   <Users className="w-4 h-4 text-blue-900" />
                 </div>
                 <div className="mt-2">
@@ -107,7 +109,7 @@ export default function DashboardPage() {
               {/* Total Documents */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Documents</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.registeredDocuments', { defaultValue: 'Documents' })}</span>
                   <Files className="w-4 h-4 text-slate-700" />
                 </div>
                 <div className="mt-2">
@@ -119,7 +121,7 @@ export default function DashboardPage() {
               {/* Total Land Records */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Land Records</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.activeLandRecords', { defaultValue: 'Land Records' })}</span>
                   <FileSpreadsheet className="w-4 h-4 text-indigo-700" />
                 </div>
                 <div className="mt-2">
@@ -131,7 +133,7 @@ export default function DashboardPage() {
               {/* Pending Verification */}
               <div className="gov-card p-4 flex flex-col justify-between bg-amber-50/40 border-amber-200">
                 <div className="flex items-center justify-between text-amber-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Pending</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.pendingVerification', { defaultValue: 'Pending' })}</span>
                   <Clock className="w-4 h-4 text-amber-600" />
                 </div>
                 <div className="mt-2">
@@ -143,7 +145,7 @@ export default function DashboardPage() {
               {/* Verified Records */}
               <div className="gov-card p-4 flex flex-col justify-between bg-emerald-50/40 border-emerald-200">
                 <div className="flex items-center justify-between text-emerald-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Verified</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.verified', { defaultValue: 'Verified' })}</span>
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="mt-2">
@@ -155,7 +157,7 @@ export default function DashboardPage() {
               {/* Rejected Records */}
               <div className="gov-card p-4 flex flex-col justify-between bg-rose-50/40 border-rose-200">
                 <div className="flex items-center justify-between text-rose-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Rejected</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.rejected', { defaultValue: 'Rejected' })}</span>
                   <XCircle className="w-4 h-4 text-rose-600" />
                 </div>
                 <div className="mt-2">
@@ -167,7 +169,7 @@ export default function DashboardPage() {
               {/* Documents Processing */}
               <div className="gov-card p-4 flex flex-col justify-between bg-sky-50/40 border-sky-200">
                 <div className="flex items-center justify-between text-sky-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Processing</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.processing', { defaultValue: 'Processing' })}</span>
                   <Cpu className="w-4 h-4 text-sky-600 animate-pulse" />
                 </div>
                 <div className="mt-2">
@@ -184,10 +186,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Files className="w-4 h-4 text-blue-900" />
-                    Document Processing Status
+                    {t('officerDashboard.ingestionStatusTitle', { defaultValue: 'Document Ingestion & Processing Status' })}
                   </CardTitle>
                   <CardDescription>
-                    Breakdown of uploaded archival records across pipeline states
+                    {t('officerDashboard.ingestionStatusDesc', { defaultValue: 'Breakdown of uploaded archival records across pipeline states' })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-72">
@@ -202,7 +204,7 @@ export default function DashboardPage() {
                         innerRadius={60}
                         outerRadius={90}
                         paddingAngle={4}
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        label={({ name, percent }) => `${t('status.' + String(name).toLowerCase(), { defaultValue: String(name) })} (${(percent * 100).toFixed(0)}%)`}
                       >
                         {stats.charts.documentStatus.map((entry, index) => (
                           <Cell
@@ -222,10 +224,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Verification Status Distribution
+                    {t('officerVerification.title', { defaultValue: 'Verification Status Distribution' })}
                   </CardTitle>
                   <CardDescription>
-                    Current audit state of digitized land records
+                    {t('officerDashboard.velocityDesc', { defaultValue: 'Current audit state of digitized land records' })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-72">
@@ -246,10 +248,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Building className="w-4 h-4 text-indigo-700" />
-                    District-wise Land Records
+                    {t('officerDashboard.districtRecordsTitle', { defaultValue: 'District-wise Land Records' })}
                   </CardTitle>
                   <CardDescription>
-                    Spatial distribution of records registered in the system
+                    {t('officerDashboard.districtRecordsDesc', { defaultValue: 'Spatial distribution of records registered in the system' })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-72">
@@ -274,10 +276,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-slate-700" />
-                    Authorized Personnel by Role
+                    {t('officerUsers.title', { defaultValue: 'Authorized Personnel by Role' })}
                   </CardTitle>
                   <CardDescription>
-                    Role-based access distribution across system accounts
+                    {t('officerUsers.subtitle', { defaultValue: 'Role-based access distribution across system accounts' })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="h-72">
@@ -301,10 +303,10 @@ export default function DashboardPage() {
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-blue-900" />
-                      Recent Governance Audit Trail
+                      {t('officerDashboard.auditLogsTitle', { defaultValue: 'Recent Governance Audit Trail' })}
                     </CardTitle>
                     <CardDescription>
-                      Cryptographically tracked administrative and verification actions
+                      {t('officerDashboard.auditLogsDesc', { defaultValue: 'Cryptographically tracked administrative and verification actions' })}
                     </CardDescription>
                   </div>
                 </div>

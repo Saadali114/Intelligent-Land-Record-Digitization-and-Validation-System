@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { UploadCloud } from 'lucide-react';
@@ -16,6 +17,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
   onUpload,
   isUploading,
 }) => {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('Marathi');
   const [fileType, setFileType] = useState('7/12 Extract');
@@ -40,17 +42,17 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Ingest Land Document"
-      description="Upload historical scan or PDF into the registry pipeline."
+      title={t('officerDocuments.uploadModalTitle', { defaultValue: 'Ingest Land Document' })}
+      description={t('officerDocuments.uploadModalDesc', { defaultValue: 'Upload historical scan or PDF into the registry pipeline.' })}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-blue-700 transition-colors bg-slate-50/50">
           <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-2" />
           <div className="text-xs font-semibold text-slate-700 mb-1">
-            {file ? file.name : 'Select or drag document to upload'}
+            {file ? file.name : t('officerDocuments.selectOrDrag', { defaultValue: 'Select or drag document to upload' })}
           </div>
           <p className="text-[11px] text-slate-500 mb-3">
-            Supports PDF, JPEG, PNG, WEBP, TIFF (Max 25MB)
+            {t('officerDocuments.supportedFormats', { defaultValue: 'Supports PDF, JPEG, PNG, WEBP, TIFF (Max 25MB)' })}
           </p>
           <input
             type="file"
@@ -63,7 +65,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Document Language
+              {t('officerDocuments.chooseLanguage', { defaultValue: 'Document Language' })}
             </label>
             <select
               value={language}
@@ -79,7 +81,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Record Category
+              {t('officerDocuments.chooseType', { defaultValue: 'Record Category' })}
             </label>
             <select
               value={fileType}
@@ -97,10 +99,10 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button type="submit" isLoading={isUploading}>
-            Ingest Document
+            {t('officerDocuments.uploadButton', { defaultValue: 'Ingest Document' })}
           </Button>
         </div>
       </form>

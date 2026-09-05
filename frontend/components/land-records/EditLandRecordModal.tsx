@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LandRecord } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -20,6 +21,7 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
   onRecordChange,
   isUpdating,
 }) => {
+  const { t } = useTranslation();
   if (!editRecord) return null;
 
   const handleFieldChange = (key: keyof LandRecord, value: any) => {
@@ -33,24 +35,24 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
     <Modal
       isOpen={Boolean(editRecord)}
       onClose={onClose}
-      title="Edit Cadastral Record"
+      title={t('officerLandRecords.editModalTitle', { defaultValue: 'Edit Land Record' })}
       description={`Updating parcel attributes for Survey #${editRecord.surveyNumber}`}
     >
       <form onSubmit={onUpdate} className="space-y-3">
         <Input
-          label="Owner Name"
+          label={t('officerLandRecords.primaryOwner', { defaultValue: 'Owner Name' })}
           value={editRecord.ownerName}
           onChange={(e) => handleFieldChange('ownerName', e.target.value)}
         />
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Survey Number"
+            label={t('officerLandRecords.surveyDivision', { defaultValue: 'Survey Number' })}
             value={editRecord.surveyNumber}
             onChange={(e) => handleFieldChange('surveyNumber', e.target.value)}
           />
           <Input
-            label="Khasra Number"
+            label={t('officerLandRecords.khasra', { defaultValue: 'Khasra Number' })}
             value={editRecord.khasraNumber}
             onChange={(e) => handleFieldChange('khasraNumber', e.target.value)}
           />
@@ -58,12 +60,12 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Khata Number"
+            label={t('officerLandRecords.khata', { defaultValue: 'Khata Number' })}
             value={editRecord.khataNumber}
             onChange={(e) => handleFieldChange('khataNumber', e.target.value)}
           />
           <Input
-            label="Plot Area"
+            label={t('officerLandRecords.plotArea', { defaultValue: 'Plot Area' })}
             value={editRecord.plotArea}
             onChange={(e) => handleFieldChange('plotArea', e.target.value)}
           />
@@ -71,7 +73,7 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Land Classification"
+            label={t('officerLandRecords.classification', { defaultValue: 'Land Classification' })}
             value={editRecord.landClassification}
             onChange={(e) => handleFieldChange('landClassification', e.target.value)}
             options={[
@@ -83,7 +85,7 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
             ]}
           />
           <Select
-            label="Ownership Type"
+            label={t('officerLandRecords.ownershipType', { defaultValue: 'Ownership Type' })}
             value={editRecord.ownershipType}
             onChange={(e) => handleFieldChange('ownershipType', e.target.value)}
             options={[
@@ -97,17 +99,17 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
 
         <div className="grid grid-cols-3 gap-2">
           <Input
-            label="Village"
+            label={t('officerLandRecords.village', { defaultValue: 'Village' })}
             value={editRecord.village}
             onChange={(e) => handleFieldChange('village', e.target.value)}
           />
           <Input
-            label="Tehsil"
+            label={t('officerLandRecords.tehsil', { defaultValue: 'Tehsil' })}
             value={editRecord.tehsil}
             onChange={(e) => handleFieldChange('tehsil', e.target.value)}
           />
           <Input
-            label="District"
+            label={t('officerLandRecords.district', { defaultValue: 'District' })}
             value={editRecord.district}
             onChange={(e) => handleFieldChange('district', e.target.value)}
           />
@@ -115,10 +117,10 @@ export const EditLandRecordModal: React.FC<EditLandRecordModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button type="submit" isLoading={isUpdating}>
-            Save Changes
+            {t('profile.saveChanges', { defaultValue: 'Save Changes' })}
           </Button>
         </div>
       </form>

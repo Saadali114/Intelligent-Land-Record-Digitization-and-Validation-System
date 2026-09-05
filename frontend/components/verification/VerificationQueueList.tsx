@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LandRecord } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Skeleton } from '../ui/Skeleton';
@@ -21,12 +22,14 @@ export const VerificationQueueList: React.FC<VerificationQueueListProps> = ({
   statusFilter,
   onStatusFilterChange,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="lg:col-span-4 flex flex-col space-y-3">
       <div className="gov-card p-3 flex items-center justify-between">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
           <FileCheck className="w-4 h-4 text-blue-900" />
-          Review Queue ({records.length})
+          {t('officerVerification.reviewQueue', { defaultValue: 'Review Queue' })} ({records.length})
         </span>
 
         <select
@@ -34,11 +37,11 @@ export const VerificationQueueList: React.FC<VerificationQueueListProps> = ({
           onChange={(e) => onStatusFilterChange(e.target.value)}
           className="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-700 focus:ring-1 focus:ring-blue-900"
         >
-          <option value="">All Statuses</option>
-          <option value="PENDING">Pending Review</option>
-          <option value="NEEDS_REVIEW">Needs Review</option>
-          <option value="VERIFIED">Verified</option>
-          <option value="REJECTED">Rejected</option>
+          <option value="">{t('officerDocuments.allStatuses', { defaultValue: 'All Statuses' })}</option>
+          <option value="PENDING">{t('officerVerification.pendingReview', { defaultValue: 'Pending Review' })}</option>
+          <option value="NEEDS_REVIEW">{t('officerVerification.needsReview', { defaultValue: 'Needs Review' })}</option>
+          <option value="VERIFIED">{t('status.verified', { defaultValue: 'Verified' })}</option>
+          <option value="REJECTED">{t('status.rejected', { defaultValue: 'Rejected' })}</option>
         </select>
       </div>
 
@@ -53,7 +56,7 @@ export const VerificationQueueList: React.FC<VerificationQueueListProps> = ({
 
         {!isLoading && records.length === 0 && (
           <div className="text-center py-8 text-xs text-slate-400">
-            No records in this verification queue.
+            {t('officerVerification.noRecords', { defaultValue: 'No records in this verification queue.' })}
           </div>
         )}
 

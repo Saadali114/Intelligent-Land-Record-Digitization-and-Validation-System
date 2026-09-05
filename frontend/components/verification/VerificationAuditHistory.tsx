@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { VerificationRecord } from '../../types';
 import { Badge } from '../ui/Badge';
 import { formatDateTime } from '../../lib/utils';
@@ -11,13 +12,14 @@ interface VerificationAuditHistoryProps {
 export const VerificationAuditHistory: React.FC<VerificationAuditHistoryProps> = ({
   history,
 }) => {
+  const { t } = useTranslation();
   if (!history || history.length === 0) return null;
 
   return (
     <div className="gov-card p-4 space-y-3">
       <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
         <History className="w-4 h-4 text-blue-900" />
-        Inspection Audit Trail ({history.length})
+        {t('officerVerification.auditHistoryTitle', { defaultValue: 'Inspection Audit Trail' })} ({history.length})
       </span>
 
       <div className="space-y-2">

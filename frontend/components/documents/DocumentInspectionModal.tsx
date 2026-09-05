@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DocumentRecord } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
@@ -23,6 +24,7 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
   onRunExtraction,
   isExtracting,
 }) => {
+  const { t } = useTranslation();
   const [imageZoom, setImageZoom] = useState(1);
 
   if (!doc) return null;
@@ -36,7 +38,7 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Document & Cadastral Inspection"
+      title={t('officerDocuments.inspectionModalTitle', { defaultValue: 'Cadastral Dual-Pane Inspection' })}
       description={`Record ID: ${doc.documentId} • ${doc.originalName}`}
       maxWidth="4xl"
     >
@@ -45,31 +47,31 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
           <div>
             <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              File Type
+              {t('officerDocuments.chooseType', { defaultValue: 'File Type' })}
             </span>
             <div className="font-semibold text-slate-800 truncate">{doc.fileType}</div>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              Language
+              {t('officerDocuments.chooseLanguage', { defaultValue: 'Language' })}
             </span>
             <div className="font-semibold text-slate-800">{doc.language}</div>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              File Size
+              {t('common.size', { defaultValue: 'File Size' })}
             </span>
             <div className="font-semibold text-slate-800">{formatFileSize(doc.fileSize)}</div>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              Uploaded
+              {t('status.uploaded', { defaultValue: 'Uploaded' })}
             </span>
             <div className="font-semibold text-slate-800">{formatDate(doc.uploadedAt)}</div>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              Status
+              {t('officerProfile.accountStatus', { defaultValue: 'Status' })}
             </span>
             <div className="mt-0.5">
               <Badge status={doc.processingStatus} />
@@ -100,10 +102,10 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
             isLoading={isExtracting}
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />
-            Re-run AI Extraction
+            {t('officerDocuments.runOcr', { defaultValue: 'Re-run AI Extraction' })}
           </Button>
           <Button variant="outline" size="sm" onClick={handleClose}>
-            Close
+            {t('common.close', { defaultValue: 'Close' })}
           </Button>
         </div>
       </div>

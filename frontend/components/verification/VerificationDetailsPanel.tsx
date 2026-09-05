@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LandRecord, VerificationAction } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -23,6 +24,7 @@ export const VerificationDetailsPanel: React.FC<VerificationDetailsPanelProps> =
   onOpenAction,
   canVerify,
 }) => {
+  const { t } = useTranslation();
   const sourceDoc = typeof record.sourceDocument === 'object' ? record.sourceDocument : null;
   const aiMeta = sourceDoc?.metadata?.aiExtraction;
 
@@ -50,7 +52,7 @@ export const VerificationDetailsPanel: React.FC<VerificationDetailsPanelProps> =
               className="text-xs border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-900"
             >
               <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-              Approve
+              {t('officerVerification.approveAction', { defaultValue: 'Approve' })}
             </Button>
             <Button
               size="sm"
@@ -59,7 +61,7 @@ export const VerificationDetailsPanel: React.FC<VerificationDetailsPanelProps> =
               className="text-xs border-blue-300 text-blue-800 bg-blue-50 hover:bg-blue-100 hover:text-blue-900"
             >
               <Edit3 className="w-3.5 h-3.5 mr-1 text-blue-600" />
-              Edit & Verify
+              {t('officerVerification.correctionAction', { defaultValue: 'Edit & Verify' })}
             </Button>
             <Button
               size="sm"
@@ -68,7 +70,7 @@ export const VerificationDetailsPanel: React.FC<VerificationDetailsPanelProps> =
               className="text-xs border-rose-300 text-rose-800 bg-rose-50 hover:bg-rose-100 hover:text-rose-900"
             >
               <XCircle className="w-3.5 h-3.5 mr-1 text-rose-600" />
-              Reject
+              {t('officerVerification.rejectAction', { defaultValue: 'Reject' })}
             </Button>
           </div>
         )}
@@ -77,43 +79,43 @@ export const VerificationDetailsPanel: React.FC<VerificationDetailsPanelProps> =
       {/* Cadastral Data Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Owner Name</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.primaryOwner', { defaultValue: 'Owner Name' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.ownerName}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Survey Number</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.surveyDivision', { defaultValue: 'Survey Number' })}</span>
           <div className="mt-0.5 font-bold font-mono text-slate-900">{record.surveyNumber}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Khasra Number</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.khasra', { defaultValue: 'Khasra Number' })}</span>
           <div className="mt-0.5 font-bold font-mono text-slate-900">{record.khasraNumber}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Khata Number</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.khata', { defaultValue: 'Khata Number' })}</span>
           <div className="mt-0.5 font-bold font-mono text-slate-900">{record.khataNumber}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Plot Area</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.plotArea', { defaultValue: 'Plot Area' })}</span>
           <div className="mt-0.5 font-bold text-emerald-800">{record.plotArea}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Village</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.village', { defaultValue: 'Village' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.village}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Tehsil</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.tehsil', { defaultValue: 'Tehsil' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.tehsil}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">District</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.district', { defaultValue: 'District' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.district}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Classification</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.classification', { defaultValue: 'Classification' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.landClassification}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">Ownership Type</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('officerLandRecords.ownershipType', { defaultValue: 'Ownership Type' })}</span>
           <div className="mt-0.5 font-bold text-slate-900">{record.ownershipType}</div>
         </div>
         <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 col-span-2">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -20,6 +21,7 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
   onCreate,
   isCreating,
 }) => {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -46,12 +48,12 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create Cadastral Record"
-      description="Manually ingest official land parcel attributes into repository."
+      title={t('officerLandRecords.createModalTitle', { defaultValue: 'Create Cadastral Record' })}
+      description={t('officerLandRecords.createModalDesc', { defaultValue: 'Manually ingest official land parcel attributes into repository.' })}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         <Input
-          label="Primary Owner Name"
+          label={t('officerLandRecords.primaryOwner', { defaultValue: 'Primary Owner Name' })}
           {...register('ownerName')}
           error={errors.ownerName?.message}
           placeholder="e.g. Ramesh Shankar Patil"
@@ -59,13 +61,13 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Survey Number"
+            label={t('officerLandRecords.surveyDivision', { defaultValue: 'Survey Number' })}
             {...register('surveyNumber')}
             error={errors.surveyNumber?.message}
             placeholder="e.g. 142/2A"
           />
           <Input
-            label="Khasra Number"
+            label={t('officerLandRecords.khasra', { defaultValue: 'Khasra Number' })}
             {...register('khasraNumber')}
             error={errors.khasraNumber?.message}
             placeholder="e.g. KH-88"
@@ -74,13 +76,13 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Khata Number"
+            label={t('officerLandRecords.khata', { defaultValue: 'Khata Number' })}
             {...register('khataNumber')}
             error={errors.khataNumber?.message}
             placeholder="e.g. 450"
           />
           <Input
-            label="Plot Area"
+            label={t('officerLandRecords.plotArea', { defaultValue: 'Plot Area' })}
             {...register('plotArea')}
             error={errors.plotArea?.message}
             placeholder="e.g. 1.45 Hectares"
@@ -89,7 +91,7 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Land Classification"
+            label={t('officerLandRecords.classification', { defaultValue: 'Land Classification' })}
             {...register('landClassification')}
             error={errors.landClassification?.message}
             options={[
@@ -101,7 +103,7 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
             ]}
           />
           <Select
-            label="Ownership Type"
+            label={t('officerLandRecords.ownershipType', { defaultValue: 'Ownership Type' })}
             {...register('ownershipType')}
             error={errors.ownershipType?.message}
             options={[
@@ -114,17 +116,17 @@ export const CreateLandRecordModal: React.FC<CreateLandRecordModalProps> = ({
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          <Input label="Village" {...register('village')} error={errors.village?.message} />
-          <Input label="Tehsil" {...register('tehsil')} error={errors.tehsil?.message} />
-          <Input label="District" {...register('district')} error={errors.district?.message} />
+          <Input label={t('officerLandRecords.village', { defaultValue: 'Village' })} {...register('village')} error={errors.village?.message} />
+          <Input label={t('officerLandRecords.tehsil', { defaultValue: 'Tehsil' })} {...register('tehsil')} error={errors.tehsil?.message} />
+          <Input label={t('officerLandRecords.district', { defaultValue: 'District' })} {...register('district')} error={errors.district?.message} />
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button type="submit" isLoading={isCreating}>
-            Create Record
+            {t('officerLandRecords.addRecord', { defaultValue: 'Create Record' })}
           </Button>
         </div>
       </form>
