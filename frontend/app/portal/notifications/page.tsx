@@ -15,8 +15,10 @@ import { PortalLayout } from '../../../components/portal/PortalLayout';
 import { Button } from '../../../components/ui/Button';
 import { citizenService } from '../../../services/citizen.service';
 import { CitizenNotification } from '../../../types/citizen';
+import { useTranslation } from 'react-i18next';
 
 export default function CitizenNotificationsPage() {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState<CitizenNotification[]>([]);
   const [filter, setFilter] = useState<'ALL' | 'UNREAD'>('ALL');
 
@@ -52,10 +54,10 @@ export default function CitizenNotificationsPage() {
             <span>Alerts &amp; Notices</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            Notification Center
+            {t('notifications.title')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            System notices regarding AI extraction, Talathi verification reviews, and mutation updates.
+            {t('notifications.subtitle')}
           </p>
         </div>
 
@@ -67,7 +69,7 @@ export default function CitizenNotificationsPage() {
             className="text-xs gap-1.5"
           >
             <CheckCheck className="w-4 h-4" />
-            <span>Mark All as Read</span>
+            <span>{t('notifications.markAllRead')}</span>
           </Button>
         </div>
       </div>
@@ -82,7 +84,7 @@ export default function CitizenNotificationsPage() {
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          All ({notifications.length})
+          {t('notifications.all')} ({notifications.length})
         </button>
         <button
           onClick={() => setFilter('UNREAD')}
@@ -92,7 +94,7 @@ export default function CitizenNotificationsPage() {
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          Unread ({notifications.filter((n) => !n.read).length})
+          {t('notifications.unread')} ({notifications.filter((n) => !n.read).length})
         </button>
       </div>
 
@@ -100,7 +102,7 @@ export default function CitizenNotificationsPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden divide-y divide-slate-100">
         {filtered.length === 0 ? (
           <div className="p-12 text-center text-xs text-slate-400">
-            No notifications in this view.
+            {t('notifications.empty')}
           </div>
         ) : (
           filtered.map((n) => {

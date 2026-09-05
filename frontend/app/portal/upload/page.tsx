@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   FileText,
   UploadCloud,
@@ -34,6 +35,7 @@ import {
 type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export default function CitizenUploadWizardPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   // Wizard state
@@ -50,7 +52,7 @@ export default function CitizenUploadWizardPage() {
   const [aiProgress, setAiProgress] = useState(0);
   const [aiStageIndex, setAiStageIndex] = useState(0);
 
-  // Extracted Fields for editing
+  // Extracted Fields for editing (Preserving original document legal values)
   const [fields, setFields] = useState<Record<string, ExtractedField>>({
     ownerName: {
       label: 'Land Owner Name',
@@ -129,27 +131,27 @@ export default function CitizenUploadWizardPage() {
   }[] = [
     {
       type: '7/12 Extract',
-      title: '7/12 Extract (Saatbara Utara)',
-      marathi: '७/१२ उतारा',
+      title: '7/12 Extract (Saatbara)',
+      marathi: '७/१२ उतारा (अधिकार अभिलेख)',
       desc: 'Contains ownership, crop details, land assessment, and encumbrances under Maharashtra Land Revenue Code.',
       popular: true,
     },
     {
       type: 'Ferfar / Mutation Record',
       title: 'Ferfar / Mutation Record (Form 6)',
-      marathi: 'फेरफार नोंदवही (नमुना ६)',
+      marathi: 'फेरफार नोंदवही (गाव नमुना ६)',
       desc: 'Official record recording change of title through sale, succession, partition, or court decree.',
     },
     {
       type: 'Sale Deed',
       title: 'Registered Sale Deed (Kharidi Khat)',
-      marathi: 'नोंदणीकृत खरेदीखत',
+      marathi: 'नोंदणीकृत खरेदीखत (दस्त)',
       desc: 'Conveyance deed executed at the Sub-Registrar office transferring ownership rights.',
     },
     {
       type: 'Other Land Document',
       title: 'Other Land Document',
-      marathi: 'इतर महसूल दस्ताऐवज',
+      marathi: 'इतर महसूल दस्ताऐवज / मिळकत पत्रिका',
       desc: '8-A Khatedar extract, City Survey Property Card (Malmatta Patrak), or Land Measurement Map (Mojani).',
     },
   ];
@@ -269,6 +271,16 @@ export default function CitizenUploadWizardPage() {
     setStep(8);
   };
 
+  const stepLabels = [
+    { s: 1, label: t('upload.step1') },
+    { s: 2, label: t('upload.step2') },
+    { s: 3, label: t('upload.step3') },
+    { s: 4, label: t('upload.step4') },
+    { s: 5, label: t('upload.step5') },
+    { s: 6, label: t('upload.step6') },
+    { s: 7, label: t('upload.step7') },
+  ];
+
   return (
     <PortalLayout>
       {/* Wizard Header */}
@@ -277,27 +289,21 @@ export default function CitizenUploadWizardPage() {
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 uppercase tracking-wider">
               <UploadCloud className="w-4 h-4" />
-              <span>Land Document Digitization Wizard</span>
+              <span>{t('upload.wizardTitle')}</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-              Submit Land Record for Cadastral AI Extraction
+              {t('upload.wizardSubtitle')}
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Upload your official land document. Our AI will transcribe the records, which you can verify before submission.
+              {t('upload.wizardDesc')}
             </p>
           </div>
 
           {step < 8 && (
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 self-start md:self-auto">
-              <span>Step {step} of 7:</span>
+              <span>{t('upload.step')} {step} {t('upload.of')} 7:</span>
               <span className="text-blue-900">
-                {step === 1 && 'Select Document'}
-                {step === 2 && 'Upload File'}
-                {step === 3 && 'Document Preview'}
-                {step === 4 && 'AI Processing'}
-                {step === 5 && 'Extracted Review'}
-                {step === 6 && 'Citizen Verification'}
-                {step === 7 && 'Declaration'}
+                {stepLabels.find((sl) => sl.s === step)?.label}
               </span>
             </div>
           )}
@@ -307,15 +313,7 @@ export default function CitizenUploadWizardPage() {
         {step < 8 && (
           <div className="mt-6 pt-4 border-t border-slate-100 hidden sm:block">
             <div className="grid grid-cols-7 gap-2">
-              {[
-                { s: 1, label: 'Type' },
-                { s: 2, label: 'Upload' },
-                { s: 3, label: 'Preview' },
-                { s: 4, label: 'AI OCR' },
-                { s: 5, label: 'Review' },
-                { s: 6, label: 'Identity' },
-                { s: 7, label: 'Submit' },
-              ].map((item) => (
+              {stepLabels.map((item) => (
                 <div key={item.s} className="flex flex-col gap-1">
                   <div
                     className={`h-1.5 rounded-full transition-colors ${
@@ -323,7 +321,7 @@ export default function CitizenUploadWizardPage() {
                     }`}
                   />
                   <span
-                    className={`text-[11px] font-medium text-center ${
+                    className={`text-[11px] font-medium text-center truncate ${
                       step === item.s ? 'text-blue-900 font-bold' : 'text-slate-400'
                     }`}
                   >
@@ -341,10 +339,10 @@ export default function CitizenUploadWizardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
-              Select Land Document Category
+              {t('upload.selectCategoryTitle')}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Choose the exact document type you are uploading. This helps our OCR model apply the correct revenue template.
+              {t('upload.selectCategorySubtitle')}
             </p>
           </div>
 
@@ -361,7 +359,7 @@ export default function CitizenUploadWizardPage() {
               >
                 {opt.popular && (
                   <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-900 text-white">
-                    Most Common
+                    {t('upload.mostCommon')}
                   </span>
                 )}
                 <div className="flex items-start gap-3">
@@ -391,7 +389,7 @@ export default function CitizenUploadWizardPage() {
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">
             <Link href="/portal">
               <Button variant="outline" size="md">
-                Cancel
+                {t('common.cancel')}
               </Button>
             </Link>
             <Button
@@ -400,7 +398,7 @@ export default function CitizenUploadWizardPage() {
               onClick={() => setStep(2)}
               className="gap-2"
             >
-              <span>Continue to Upload</span>
+              <span>{t('common.continue')}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -413,7 +411,7 @@ export default function CitizenUploadWizardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Upload {documentType}
+                {t('common.submitting')}: {documentType}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
                 Upload clear scanned copies or photos. Supported formats: PDF, PNG, JPG (up to 15 MB).
@@ -423,7 +421,7 @@ export default function CitizenUploadWizardPage() {
               onClick={() => setStep(1)}
               className="text-xs font-semibold text-blue-900 hover:underline flex items-center gap-1"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Change Document Type
+              <ArrowLeft className="w-3.5 h-3.5" /> {t('common.back')}
             </button>
           </div>
 
@@ -445,10 +443,10 @@ export default function CitizenUploadWizardPage() {
               <UploadCloud className="w-8 h-8" />
             </div>
             <h3 className="text-sm font-bold text-slate-900 mb-1">
-              Drag &amp; drop your document file here
+              {t('upload.dragDropTitle')}
             </h3>
             <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
-              Scanned 7/12 extract or official revenue certificate in high resolution (300 DPI recommended for Devanagari text).
+              {t('upload.dragDropSubtitle')}
             </p>
 
             <label className="inline-block">
@@ -459,7 +457,7 @@ export default function CitizenUploadWizardPage() {
                 className="hidden"
               />
               <span className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg bg-blue-900 text-white hover:bg-blue-800 cursor-pointer shadow-xs">
-                Browse File from Computer
+                {t('upload.browseFile')}
               </span>
             </label>
           </div>
@@ -470,10 +468,10 @@ export default function CitizenUploadWizardPage() {
               <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0" />
               <div>
                 <div className="text-xs font-bold text-amber-950">
-                  Quick Demo Evaluation Mode
+                  {t('upload.demoSampleTitle')}
                 </div>
                 <div className="text-[11px] text-amber-800">
-                  Don't have a file handy? Use our preloaded sample 7/12 Extract (Survey 142/3, Pune).
+                  {t('upload.demoSampleDesc')}
                 </div>
               </div>
             </div>
@@ -483,13 +481,13 @@ export default function CitizenUploadWizardPage() {
               onClick={handleUseSampleFile}
               className="bg-white border-amber-300 text-amber-900 hover:bg-amber-100/60 whitespace-nowrap text-xs font-bold"
             >
-              Load Sample Document
+              {t('upload.loadSample')}
             </Button>
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">
             <Button variant="outline" size="md" onClick={() => setStep(1)}>
-              Back
+              {t('common.back')}
             </Button>
           </div>
         </div>
@@ -501,7 +499,7 @@ export default function CitizenUploadWizardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Document Selected &amp; Ready
+                {uploadedFile.name}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
                 Confirm your uploaded file details before initiating automated AI digitization.
@@ -511,7 +509,7 @@ export default function CitizenUploadWizardPage() {
               onClick={() => setStep(2)}
               className="text-xs text-blue-900 font-semibold hover:underline"
             >
-              Re-upload different file
+              {t('common.cancel')}
             </button>
           </div>
 
@@ -533,7 +531,7 @@ export default function CitizenUploadWizardPage() {
 
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
-                <Check className="w-3.5 h-3.5" /> File Validated
+                <Check className="w-3.5 h-3.5" /> {t('upload.fileValidated')}
               </span>
             </div>
           </div>
@@ -553,7 +551,7 @@ export default function CitizenUploadWizardPage() {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                District
+                {t('common.district')}
               </label>
               <input
                 type="text"
@@ -564,7 +562,7 @@ export default function CitizenUploadWizardPage() {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Taluka
+                {t('common.taluka')}
               </label>
               <input
                 type="text"
@@ -577,7 +575,7 @@ export default function CitizenUploadWizardPage() {
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">
             <Button variant="outline" size="md" onClick={() => setStep(2)}>
-              Back
+              {t('common.back')}
             </Button>
             <Button
               variant="primary"
@@ -586,7 +584,7 @@ export default function CitizenUploadWizardPage() {
               className="gap-2 bg-blue-900 hover:bg-blue-800 text-white"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Start AI Extraction &amp; Processing</span>
+              <span>{t('upload.startAi')}</span>
             </Button>
           </div>
         </div>
@@ -600,17 +598,17 @@ export default function CitizenUploadWizardPage() {
               <Sparkles className="w-7 h-7" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">
-              Processing Document with Cadastral AI
+              {t('upload.aiProgressTitle')}
             </h2>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Please wait while our vision model transcribes Marathi and English land record details. Information will be presented for your review.
+              {t('upload.aiProgressSubtitle')}
             </p>
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold text-slate-700">
-              <span>Overall Progress</span>
+              <span>{t('common.status')}</span>
               <span className="font-mono text-blue-900">{aiProgress}%</span>
             </div>
             <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
@@ -650,9 +648,9 @@ export default function CitizenUploadWizardPage() {
                   </div>
 
                   <span className="text-[10px] uppercase font-bold tracking-wider">
-                    {isFinished && <span className="text-emerald-700">Completed</span>}
-                    {isCurrent && <span className="text-blue-800">Processing...</span>}
-                    {!isFinished && !isCurrent && <span className="text-slate-400">Waiting</span>}
+                    {isFinished && <span className="text-emerald-700">{t('common.completed')}</span>}
+                    {isCurrent && <span className="text-blue-800">{t('common.processing')}...</span>}
+                    {!isFinished && !isCurrent && <span className="text-slate-400">{t('common.pending')}</span>}
                   </span>
                 </div>
               );
@@ -660,7 +658,7 @@ export default function CitizenUploadWizardPage() {
           </div>
 
           <div className="text-center text-[11px] text-slate-400">
-            Realistic verification standard &bull; Does not make automated ownership declarations
+            {t('upload.aiRealisticStandard')}
           </div>
         </div>
       )}
@@ -672,9 +670,9 @@ export default function CitizenUploadWizardPage() {
             <div className="flex items-center gap-2.5">
               <Info className="w-5 h-5 text-blue-800 flex-shrink-0" />
               <div>
-                <strong>AI Extraction Complete. Please Review Carefully.</strong>
+                <strong>{t('upload.reviewBannerTitle')}</strong>
                 <p className="text-blue-900/80 text-[11px]">
-                  Compare the extracted data against your original document. You can click on any field to edit spelling or numbers before final submission.
+                  {t('upload.reviewBannerDesc')}
                 </p>
               </div>
             </div>
@@ -684,19 +682,18 @@ export default function CitizenUploadWizardPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left 5 Cols: Document Preview & Bounding Highlight */}
+            {/* Left 5 Cols: Document Preview & Bounding Highlight (Preserving Original Document Text) */}
             <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <Eye className="w-4 h-4 text-blue-900" />
-                  <span>Document View (Saatbara 142/3)</span>
+                  <span>{t('upload.documentView')} (142/3)</span>
                 </div>
                 <span className="text-[10px] text-slate-400">Page 1 of 1</span>
               </div>
 
-              {/* Mockup Scanned Document Representation */}
+              {/* Scanned Document Mockup Representation */}
               <div className="flex-1 min-h-[420px] rounded-lg border border-slate-300 bg-amber-50/20 p-5 font-mono text-[11px] text-slate-700 relative overflow-hidden shadow-inner flex flex-col justify-between select-none">
-                {/* Gov emblem header in document */}
                 <div className="text-center pb-3 border-b border-slate-300 space-y-1">
                   <div className="font-bold text-slate-900 text-xs">
                     महाराष्ट्र शासन - महसूल व वन विभाग
@@ -709,7 +706,6 @@ export default function CitizenUploadWizardPage() {
                   </div>
                 </div>
 
-                {/* Highlighted bounding box on Survey number */}
                 <div className="my-3 p-3 bg-white border border-slate-200 rounded text-xs space-y-2 relative">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500">भूमापन क्रमांक व उपविभाग:</span>
@@ -749,14 +745,14 @@ export default function CitizenUploadWizardPage() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Extracted Revenue Fields
+                    {t('upload.extractedFieldsTitle')}
                   </h3>
                   <p className="text-xs text-slate-500">
                     Review and modify any discrepancies detected.
                   </p>
                 </div>
                 <span className="text-[11px] text-slate-400">
-                  {Object.keys(editedFields).length} field(s) edited
+                  {Object.keys(editedFields).length} {t('upload.fieldsEdited')}
                 </span>
               </div>
 
@@ -779,7 +775,7 @@ export default function CitizenUploadWizardPage() {
                         <div className="flex items-center gap-1">
                           {isEdited ? (
                             <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                              Edited
+                              {t('upload.edited')}
                             </span>
                           ) : (
                             <span
@@ -807,7 +803,7 @@ export default function CitizenUploadWizardPage() {
 
               <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                 <Button variant="outline" size="md" onClick={() => setStep(3)}>
-                  Back
+                  {t('common.back')}
                 </Button>
                 <Button
                   variant="primary"
@@ -815,7 +811,7 @@ export default function CitizenUploadWizardPage() {
                   onClick={() => setStep(6)}
                   className="gap-2 bg-blue-900 hover:bg-blue-800 text-white"
                 >
-                  <span>Confirm Extracted Data</span>
+                  <span>{t('upload.confirmExtracted')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -832,31 +828,31 @@ export default function CitizenUploadWizardPage() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">
-              Aadhaar Mobile Identity Authentication
+              {t('upload.authTitle')}
             </h2>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              To prevent fraudulent land record submissions, verify your identity with an OTP sent to your linked mobile number.
+              {t('upload.authSubtitle')}
             </p>
           </div>
 
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Applicant:</span>
+              <span className="text-slate-500">{t('common.ownerName')}:</span>
               <span className="font-bold text-slate-900">Rahul Sitaram Patil</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Linked Mobile:</span>
+              <span className="text-slate-500">{t('common.mobileNumber')}:</span>
               <span className="font-mono font-bold text-slate-900">+91 98220 12345</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Document:</span>
+              <span className="text-slate-500">{t('common.status')}:</span>
               <span className="font-semibold text-slate-800">{documentType} (142/3)</span>
             </div>
           </div>
 
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700">
-              Enter 6-Digit OTP received on Mobile
+              {t('auth.otpLabel')}
             </label>
             <input
               type="text"
@@ -872,7 +868,7 @@ export default function CitizenUploadWizardPage() {
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">
             <Button variant="outline" size="md" onClick={() => setStep(5)}>
-              Back
+              {t('common.back')}
             </Button>
             <Button
               variant="primary"
@@ -884,7 +880,7 @@ export default function CitizenUploadWizardPage() {
               className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white"
             >
               <Check className="w-4 h-4" />
-              <span>Verify &amp; Continue</span>
+              <span>{t('upload.verifyAndContinue')}</span>
             </Button>
           </div>
         </div>
@@ -895,17 +891,17 @@ export default function CitizenUploadWizardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs max-w-2xl mx-auto space-y-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
-              Final Review &amp; Citizen Declaration
+              {t('upload.finalReviewTitle')}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Please review all submitted details before final submission to the Taluka Land Records Office.
+              {t('upload.finalReviewSubtitle')}
             </p>
           </div>
 
           {/* Summary Box */}
           <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
             <div className="bg-slate-100 px-4 py-2.5 font-bold text-slate-800 border-b border-slate-200">
-              Application Summary
+              {t('upload.summaryTitle')}
             </div>
             <div className="p-4 grid grid-cols-2 gap-3 divide-y divide-slate-100 sm:divide-y-0">
               <div>
@@ -913,25 +909,25 @@ export default function CitizenUploadWizardPage() {
                 <div className="font-bold text-slate-900">{documentType}</div>
               </div>
               <div>
-                <span className="text-slate-500">Owner Name:</span>
+                <span className="text-slate-500">{t('common.ownerName')}:</span>
                 <div className="font-bold text-slate-900">{fields.ownerName.value}</div>
               </div>
               <div>
-                <span className="text-slate-500">Survey / Gat No:</span>
+                <span className="text-slate-500">{t('common.surveyNumber')}:</span>
                 <div className="font-bold text-slate-900">{fields.surveyNumber.value}</div>
               </div>
               <div>
-                <span className="text-slate-500">Khata No:</span>
+                <span className="text-slate-500">{t('common.khataNumber')}:</span>
                 <div className="font-bold text-slate-900">{fields.khataNumber.value}</div>
               </div>
               <div>
-                <span className="text-slate-500">Location:</span>
+                <span className="text-slate-500">{t('common.village')}:</span>
                 <div className="font-bold text-slate-900">
                   {fields.village.value}, {fields.taluka.value}, {fields.district.value}
                 </div>
               </div>
               <div>
-                <span className="text-slate-500">Total Area:</span>
+                <span className="text-slate-500">{t('common.landArea')}:</span>
                 <div className="font-bold text-slate-900">{fields.landArea.value}</div>
               </div>
             </div>
@@ -947,14 +943,14 @@ export default function CitizenUploadWizardPage() {
                 className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-900 cursor-pointer"
               />
               <span className="text-xs text-slate-800 leading-relaxed">
-                <strong>Legal Undertaking:</strong> I hereby declare that the uploaded document and provided information are true, authentic, and accurate to the best of my knowledge. I understand that submitting fraudulent or tampered land records is a punishable offence under the Maharashtra Land Revenue Code and Indian Penal Code.
+                <strong>{t('upload.legalUndertakingTitle')}</strong> {t('upload.legalUndertakingText')}
               </span>
             </label>
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">
             <Button variant="outline" size="md" onClick={() => setStep(6)}>
-              Back
+              {t('common.back')}
             </Button>
             <Button
               variant="primary"
@@ -963,7 +959,7 @@ export default function CitizenUploadWizardPage() {
               onClick={handleFinalSubmit}
               className="gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold"
             >
-              <span>Submit Land Record Application</span>
+              <span>{t('upload.submitApplication')}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
@@ -979,20 +975,20 @@ export default function CitizenUploadWizardPage() {
 
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              Application Successfully Registered
+              {t('upload.successBadge')}
             </span>
             <h2 className="text-2xl font-bold text-slate-900">
-              Thank You! Your Land Record is Submitted
+              {t('upload.successTitle')}
             </h2>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Your application has been assigned an official reference number and entered into the cadastral verification queue.
+              {t('upload.successDesc')}
             </p>
           </div>
 
           {/* Reference ID Card */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 inline-block">
             <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              Application Reference Number
+              {t('upload.refNumberLabel')}
             </div>
             <div className="font-mono text-xl font-bold text-blue-950 mt-1">
               {submittedAppId || 'ILRDVS-2026-000125'}
@@ -1001,10 +997,10 @@ export default function CitizenUploadWizardPage() {
 
           <div className="text-xs text-slate-600 space-y-1 max-w-md mx-auto">
             <p>
-              An SMS confirmation has been dispatched to <strong>+91 98220 12345</strong>.
+              {t('upload.smsConfirmation')} (+91 98220 12345)
             </p>
             <p className="text-slate-400 text-[11px]">
-              The Taluka Land Records Officer / Talathi will review the cadastral alignment within 2-3 working days.
+              {t('common.pendingOfficerVerification')}
             </p>
           </div>
 
@@ -1012,12 +1008,12 @@ export default function CitizenUploadWizardPage() {
             <Link href={`/portal/applications/${submittedAppId}`}>
               <Button variant="primary" size="md" className="gap-2 bg-blue-900 hover:bg-blue-800">
                 <Layers className="w-4 h-4" />
-                <span>Track Application Timeline</span>
+                <span>{t('upload.trackTimeline')}</span>
               </Button>
             </Link>
             <Link href="/portal">
               <Button variant="outline" size="md">
-                Return to Dashboard
+                {t('upload.returnDashboard')}
               </Button>
             </Link>
           </div>

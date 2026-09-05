@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
   FileText,
@@ -26,39 +27,40 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   mobileOpen = false,
   onCloseMobile,
 }) => {
+  const { t } = useTranslation();
   const pathname = usePathname();
 
   const navigation = [
     {
-      name: 'Citizen Dashboard',
+      name: t('navbar.dashboard'),
       href: '/portal',
       icon: LayoutDashboard,
       exact: true,
     },
     {
-      name: 'Upload Document',
+      name: t('dashboard.uploadCta').replace('+', '').trim(),
       href: '/portal/upload',
       icon: UploadCloud,
       highlight: true,
       badge: 'New',
     },
     {
-      name: 'My Applications',
+      name: t('applications.title'),
       href: '/portal/applications',
       icon: FileText,
     },
     {
-      name: 'My Land Records',
+      name: t('landRecords.title'),
       href: '/portal/land-records',
       icon: Layers,
     },
     {
-      name: 'Notifications',
+      name: t('notifications.title'),
       href: '/portal/notifications',
       icon: Bell,
     },
     {
-      name: 'Citizen Profile',
+      name: t('profile.personalInfo'),
       href: '/portal/profile',
       icon: UserCheck,
     },
@@ -77,10 +79,10 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       <div className="p-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Citizen Services Workspace</span>
+          <span>{t('navbar.citizenPortal')}</span>
         </div>
         <div className="mt-1 text-[11px] text-slate-500">
-          Revenue &amp; Land Record Services
+          {t('common.revenueDept')}
         </div>
       </div>
 
@@ -143,10 +145,10 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
         <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-800 text-xs">
           <div className="flex items-center gap-2 font-semibold text-slate-200 mb-1">
             <PhoneCall className="w-3.5 h-3.5 text-amber-400" />
-            <span>Citizen Helpdesk</span>
+            <span>{t('common.helpdesk')}</span>
           </div>
           <p className="text-[11px] text-slate-400">
-            Toll-Free: <span className="text-slate-200 font-mono font-medium">1800-120-8040</span>
+            {t('common.tollFree')}
           </p>
           <p className="text-[10px] text-slate-500 mt-0.5">
             Mon–Sat: 9:00 AM to 6:00 PM
@@ -159,7 +161,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
         >
           <div className="flex items-center gap-2">
             <Building className="w-3.5 h-3.5" />
-            <span>Return to Main Website</span>
+            <span>{t('common.backToHome')}</span>
           </div>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>

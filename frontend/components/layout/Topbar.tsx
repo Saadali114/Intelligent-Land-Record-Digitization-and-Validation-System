@@ -1,17 +1,20 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { LogOut, User as UserIcon, Shield, Menu, Building2 } from 'lucide-react';
-import Link from 'next/link';
 
 export interface TopbarProps {
   onMobileMenuToggle?: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   return (
@@ -21,6 +24,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
           <button
             onClick={onMobileMenuToggle}
             className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+            aria-label="Toggle Navigation"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -33,49 +37,55 @@ export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-slate-900 tracking-tight">
-                Digital Land Registry Portal
+                {t('common.portalName')} Officer Portal
               </span>
               <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                Govt of India / DLRS
+                {t('common.govtOfIndia')}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 hidden sm:block">
-              Intelligent Land Record Digitization & Validation System
+              {t('common.portalFullName')}
             </p>
           </div>
         </div>
       </div>
 
-      {user && (
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="hidden md:flex flex-col items-end">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-900">{user.name}</span>
-              <Badge status={user.role} />
-            </div>
-            <span className="text-[11px] text-slate-500">
-              {user.department} &bull; {user.district}
-            </span>
-          </div>
+      <div className="flex items-center gap-3 sm:gap-4">
+        <LanguageSwitcher variant="header" />
 
-          <Link href="/profile">
-            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer">
-              <UserIcon className="w-4 h-4" />
+        {user && (
+          <>
+            <div className="hidden md:flex flex-col items-end">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-900">{user.name}</span>
+                <Badge status={user.role} />
+              </div>
+              <span className="text-[11px] text-slate-500">
+                {user.department} &bull; {user.district}
+              </span>
             </div>
-          </Link>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={logout}
-            className="text-slate-500 hover:text-rose-600 hover:bg-rose-50"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1 text-xs font-medium">Logout</span>
-          </Button>
-        </div>
-      )}
+            <Link href="/profile">
+              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer">
+                <UserIcon className="w-4 h-4" />
+              </div>
+            </Link>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="text-slate-500 hover:text-rose-600 hover:bg-rose-50"
+              title={t('common.logout')}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1 text-xs font-medium">
+                {t('common.logout')}
+              </span>
+            </Button>
+          </>
+        )}
+      </div>
     </header>
   );
 };

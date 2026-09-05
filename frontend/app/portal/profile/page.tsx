@@ -18,8 +18,11 @@ import { PortalLayout } from '../../../components/portal/PortalLayout';
 import { Button } from '../../../components/ui/Button';
 import { citizenService } from '../../../services/citizen.service';
 import { CitizenProfile } from '../../../types/citizen';
+import { useTranslation } from 'react-i18next';
+import { changeAppLanguage } from '../../../lib/i18n';
 
 export default function CitizenProfilePage() {
+  const { t, i18n } = useTranslation();
   const [profile, setProfile] = useState<CitizenProfile | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -39,8 +42,16 @@ export default function CitizenProfilePage() {
     setDistrict(prof.district);
     setTaluka(prof.taluka);
     setVillage(prof.village);
-    setLanguage((prof.preferredLanguage as 'English' | 'मराठी' | 'हिन्दी') || 'English');
-  }, []);
+    if (i18n.language === 'mr') setLanguage('मराठी');
+    else if (i18n.language === 'hi') setLanguage('हिन्दी');
+    else setLanguage('English');
+  }, [i18n.language]);
+
+  const handleLanguageSelect = (newLang: 'English' | 'मराठी' | 'हिन्दी') => {
+    setLanguage(newLang);
+    const code = newLang === 'मराठी' ? 'mr' : newLang === 'हिन्दी' ? 'hi' : 'en';
+    changeAppLanguage(code);
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +65,8 @@ export default function CitizenProfilePage() {
     });
     setProfile(updated);
     setSavedSuccess(true);
+    const code = language === 'मराठी' ? 'mr' : language === 'हिन्दी' ? 'hi' : 'en';
+    changeAppLanguage(code);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
@@ -63,20 +76,20 @@ export default function CitizenProfilePage() {
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 uppercase tracking-wider">
           <UserCheck className="w-4 h-4" />
-          <span>Citizen Profile</span>
+          <span>{t('profile.title')}</span>
         </div>
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-          Profile &amp; Communication Preferences
+          {t('profile.title')}
         </h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          Manage your verified citizen credentials, regional jurisdiction, and multilingual portal options.
+          {t('profile.subtitle')}
         </p>
       </div>
 
       {savedSuccess && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-2.5 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span>Profile preferences successfully saved and updated in local registry.</span>
+          <span>{t('profile.savedSuccess')}</span>
         </div>
       )}
 
@@ -85,13 +98,13 @@ export default function CitizenProfilePage() {
         <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
           <form onSubmit={handleSave} className="space-y-5">
             <h2 className="text-sm font-bold text-slate-900 pb-2 border-b border-slate-100">
-              Personal Information
+              {t('profile.personalInfo')}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Full Name (as per Aadhaar)
+                  {t('profile.fullName')}
                 </label>
                 <input
                   type="text"
@@ -104,7 +117,7 @@ export default function CitizenProfilePage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Email Address
+                  {t('contact.formEmail')}
                 </label>
                 <input
                   type="email"
@@ -116,7 +129,7 @@ export default function CitizenProfilePage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Aadhaar-Linked Mobile
+                  {t('auth.mobileLabel')}
                 </label>
                 <div className="relative">
                   <input
@@ -134,11 +147,11 @@ export default function CitizenProfilePage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Preferred Language
+                  {t('profile.preferredLanguage')}
                 </label>
                 <select
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value as any)}
+                  onChange={(e) => handleLanguageSelect(e.target.value as any)}
                   className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-900 focus:border-blue-900"
                 >
                   <option value="English">English</option>
@@ -149,13 +162,13 @@ export default function CitizenProfilePage() {
             </div>
 
             <h2 className="text-sm font-bold text-slate-900 pt-4 pb-2 border-b border-slate-100">
-              Primary Land Jurisdiction
+              {t('profile.jurisdiction')}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  District
+                  {t('upload.district') || 'District'}
                 </label>
                 <input
                   type="text"
@@ -166,7 +179,7 @@ export default function CitizenProfilePage() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Taluka
+                  {t('upload.taluka') || 'Taluka'}
                 </label>
                 <input
                   type="text"
@@ -177,7 +190,7 @@ export default function CitizenProfilePage() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Village
+                  {t('upload.village') || 'Village'}
                 </label>
                 <input
                   type="text"
@@ -191,7 +204,7 @@ export default function CitizenProfilePage() {
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <Button type="submit" variant="primary" size="md" className="gap-2 bg-blue-900 hover:bg-blue-800">
                 <Save className="w-4 h-4" />
-                <span>Save Profile Changes</span>
+                <span>{t('profile.saveChanges')}</span>
               </Button>
             </div>
           </form>
@@ -201,30 +214,30 @@ export default function CitizenProfilePage() {
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 pb-2 border-b border-slate-100">
-              Identity Verification Status
+              {t('profile.identityStatus')}
             </h2>
 
             <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-2">
               <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                <span>Aadhaar e-KYC Verified</span>
+                <span>{t('profile.aadhaarVerifiedBadge')}</span>
               </div>
               <p className="text-[11px] text-emerald-800/80 leading-relaxed">
-                Your identity is authenticated for online land mutation applications and 7/12 extract requests.
+                {t('profile.aadhaarVerifiedDesc')}
               </p>
             </div>
 
             <div className="space-y-3 pt-2 text-xs">
               <div className="flex justify-between py-1.5 border-b border-slate-100">
-                <span className="text-slate-500">Security Tier:</span>
+                <span className="text-slate-500">{t('profile.securityTier')}</span>
                 <span className="font-bold text-slate-900">Level 2 (Citizen e-Gov)</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100">
-                <span className="text-slate-500">Last Sign-in:</span>
+                <span className="text-slate-500">{t('profile.lastSignIn')}</span>
                 <span className="font-mono text-slate-700">{profile?.lastLogin}</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-500">Session IP:</span>
+                <span className="text-slate-500">{t('profile.sessionIp')}</span>
                 <span className="font-mono text-slate-700">103.21.58.12 (Pune)</span>
               </div>
             </div>
@@ -233,10 +246,10 @@ export default function CitizenProfilePage() {
           <div className="bg-slate-900 text-white rounded-xl p-5 shadow-xs text-xs space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-bold">
               <KeyRound className="w-4 h-4" />
-              <span>Data Protection Notice</span>
+              <span>{t('profile.dataProtectionNotice')}</span>
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
-              All land records and uploaded deeds are encrypted and stored in compliance with the Digital Personal Data Protection (DPDP) Act, 2023.
+              {t('profile.dataProtectionDesc')}
             </p>
           </div>
         </div>

@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   User,
   LogOut,
   Building2,
   FileCheck2,
-  Globe,
   Menu,
-  ChevronDown,
 } from 'lucide-react';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { citizenService } from '../../services/citizen.service';
 import { CitizenProfile, CitizenNotification } from '../../types/citizen';
 
@@ -21,17 +21,16 @@ interface PortalHeaderProps {
 }
 
 export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<CitizenProfile | null>(null);
   const [notifications, setNotifications] = useState<CitizenNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [language, setLanguage] = useState('English');
 
   useEffect(() => {
     const prof = citizenService.getProfile();
     setProfile(prof);
-    setLanguage(prof.preferredLanguage || 'English');
     const notifs = citizenService.getNotifications();
     setNotifications(notifs);
   }, [pathname]);
@@ -41,13 +40,6 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
   const handleLogout = () => {
     citizenService.logout();
     router.push('/portal/login');
-  };
-
-  const handleLanguageChange = (lang: string) => {
-    setLanguage(lang);
-    if (profile) {
-      citizenService.updateProfile({ preferredLanguage: lang as any });
-    }
   };
 
   return (
@@ -74,42 +66,30 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold text-slate-900 tracking-tight">
-                  ILRDVS <span className="text-blue-900 font-semibold">Citizen Portal</span>
+                  ILRDVS <span className="text-blue-900 font-semibold">{t('navbar.citizenPortal')}</span>
                 </span>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  Citizen Services
+                  {t('citizenCorner.title')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 hidden md:block">
-                Digital Land Records, Cadastral AI Extraction & Verification
+                {t('common.portalFullName')}
               </p>
             </div>
           </Link>
         </div>
 
         {/* Right: Actions, Language, Notifications, Profile */}
-        <div className="flex items-center gap-3">
-          {/* Language Selector */}
-          <div className="relative hidden sm:flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700">
-            <Globe className="w-3.5 h-3.5 text-slate-500" />
-            <select
-              value={language}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              aria-label="Select portal language"
-              className="bg-transparent text-xs font-medium text-slate-700 focus:outline-none cursor-pointer pr-1"
-            >
-              <option value="English">English</option>
-              <option value="मराठी">मराठी</option>
-              <option value="हिन्दी">हिन्दी</option>
-            </select>
-          </div>
+        <div className="flex items-center gap-2.5">
+          {/* Language Selector Component */}
+          <LanguageSwitcher variant="header" />
 
           {/* Notifications Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none transition-colors"
-              title="Notifications"
+              title={t('notifications.title')}
               aria-label="View notifications"
             >
               <Bell className="w-5 h-5" />
@@ -124,14 +104,14 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
               <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg border border-slate-200 bg-white shadow-xl py-2 z-50 animate-in fade-in">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
                   <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Notifications ({unreadCount} unread)
+                    {t('notifications.title')} ({unreadCount} {t('notifications.unread')})
                   </span>
                   <Link
                     href="/portal/notifications"
                     onClick={() => setShowNotifications(false)}
                     className="text-xs text-blue-800 hover:underline font-medium"
                   >
-                    View All
+                    {t('common.viewAll')}
                   </Link>
                 </div>
                 <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
@@ -174,7 +154,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
               <div className="text-xs font-semibold text-slate-900 leading-tight">
                 {profile?.name || 'Rahul Patil'}
               </div>
-              <div className="text-[10px] text-slate-500 leading-none">Citizen</div>
+              <div className="text-[10px] text-slate-500 leading-none">{t('navbar.citizenCorner')}</div>
             </div>
           </Link>
 
@@ -182,7 +162,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
           <button
             onClick={handleLogout}
             className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-            title="Sign out of Citizen Portal"
+            title={t('common.logout')}
             aria-label="Sign out of Citizen Portal"
           >
             <LogOut className="w-4 h-4" />

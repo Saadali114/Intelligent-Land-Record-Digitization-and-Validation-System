@@ -20,8 +20,10 @@ import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { citizenService } from '../../../services/citizen.service';
 import { CitizenLandRecord } from '../../../types/citizen';
+import { useTranslation } from 'react-i18next';
 
 export default function CitizenLandRecordsPage() {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<CitizenLandRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<CitizenLandRecord | null>(null);
 
@@ -40,16 +42,16 @@ export default function CitizenLandRecordsPage() {
             <span>Digital Repository</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            My Registered Land Records
+            {t('landRecords.title')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Officially verified land parcels, ULPIN codes, ownership titles, and mutation entries.
+            {t('landRecords.subtitle')}
           </p>
         </div>
 
         <Link href="/portal/upload">
           <Button variant="primary" size="md" className="gap-2 bg-blue-900 hover:bg-blue-800">
-            <span>+ Digitise Another Parcel</span>
+            <span>{t('landRecords.digitizeAnother')}</span>
           </Button>
         </Link>
       </div>
@@ -95,19 +97,19 @@ export default function CitizenLandRecordsPage() {
 
               <div className="grid grid-cols-2 gap-3 text-xs pt-1">
                 <div>
-                  <span className="text-slate-500">Area:</span>
+                  <span className="text-slate-500">{t('upload.landArea') || 'Area'}:</span>
                   <div className="font-bold text-slate-900">{record.area}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500">Land Type:</span>
+                  <span className="text-slate-500">{t('upload.landType') || 'Land Type'}:</span>
                   <div className="font-semibold text-slate-800">{record.landType}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500">Assessment Tax:</span>
+                  <span className="text-slate-500">{t('landRecords.assessmentTax')}</span>
                   <div className="font-medium text-slate-800">{record.assessment || '₹ 3.50 / year'}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500">Encumbrance:</span>
+                  <span className="text-slate-500">{t('landRecords.encumbrance')}</span>
                   <div className="font-medium text-emerald-700">{record.encumbrance || 'Clear Title'}</div>
                 </div>
               </div>
@@ -119,7 +121,7 @@ export default function CitizenLandRecordsPage() {
                 className="text-xs text-blue-900 font-bold hover:underline flex items-center gap-1"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>View Full Record &amp; Mutations</span>
+                <span>{t('landRecords.viewRecord')}</span>
               </button>
 
               <button
@@ -129,7 +131,7 @@ export default function CitizenLandRecordsPage() {
                 className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download 7/12</span>
+                <span>{t('landRecords.downloadExtract')}</span>
               </button>
             </div>
           </div>
@@ -165,14 +167,14 @@ export default function CitizenLandRecordsPage() {
             {/* Ownership & Co-Owners */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Registered Khatedar / Title Holders
+                {t('landRecords.khatedarHolders')}
               </h4>
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-2">
                 {(selectedRecord.owners || [selectedRecord.owner]).map((owner, i) => (
                   <div key={i} className="flex items-center justify-between">
                     <span className="font-semibold text-slate-900">{owner}</span>
                     <span className="text-[11px] text-emerald-700 font-medium">
-                      Primary Khatedar (100% Share)
+                      {t('landRecords.primaryKhatedar')}
                     </span>
                   </div>
                 ))}
@@ -183,7 +185,7 @@ export default function CitizenLandRecordsPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <History className="w-3.5 h-3.5" />
-                <span>Recorded Mutations (Ferfar Entries)</span>
+                <span>{t('landRecords.recordedMutations')}</span>
               </div>
               <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden text-xs">
                 {selectedRecord.mutationHistory.map((m, i) => (
@@ -209,7 +211,7 @@ export default function CitizenLandRecordsPage() {
                 size="md"
                 onClick={() => setSelectedRecord(null)}
               >
-                Close
+                {t('common.close') || 'Close'}
               </Button>
               <Button
                 variant="primary"
@@ -220,7 +222,7 @@ export default function CitizenLandRecordsPage() {
                 className="gap-2 bg-blue-900 hover:bg-blue-800 text-white"
               >
                 <Layers className="w-4 h-4 text-amber-400" />
-                <span>View GIS Cadastral Boundary</span>
+                <span>{t('landRecords.viewGisBoundary')}</span>
               </Button>
             </div>
           </div>

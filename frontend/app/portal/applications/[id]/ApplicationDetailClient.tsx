@@ -24,8 +24,10 @@ import { Button } from '../../../../components/ui/Button';
 import { Badge } from '../../../../components/ui/Badge';
 import { citizenService } from '../../../../services/citizen.service';
 import { CitizenApplication } from '../../../../types/citizen';
+import { useTranslation } from 'react-i18next';
 
 export default function ApplicationDetailClient() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const id = (params?.id as string) || '';
@@ -74,7 +76,7 @@ export default function ApplicationDetailClient() {
     return (
       <PortalLayout>
         <div className="p-12 text-center text-xs text-slate-500">
-          Loading application details...
+          {t('common.loading')}
         </div>
       </PortalLayout>
     );
@@ -86,14 +88,14 @@ export default function ApplicationDetailClient() {
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-4">
           <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto" />
           <h2 className="text-lg font-bold text-slate-900">
-            Application Not Found
+            {t('applications.noApplications')}
           </h2>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
             The application reference <span className="font-mono">{id}</span> could not be located in your citizen account.
           </p>
           <Link href="/portal/applications">
             <Button variant="outline" size="sm">
-              ← Return to My Applications
+              ← {t('applications.title')}
             </Button>
           </Link>
         </div>
@@ -138,7 +140,7 @@ export default function ApplicationDetailClient() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download Signed Extract</span>
+              <span>{t('applications.downloadSigned')}</span>
             </button>
           )}
         </div>
@@ -154,14 +156,14 @@ export default function ApplicationDetailClient() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-amber-950">
-                  Officer Action Required: Clarification on Discrepancy
+                  {t('applications.discrepancyBoxTitle')}
                 </h2>
                 <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-200 text-amber-900 rounded">
-                  Pending Citizen Response
+                  {t('applications.pendingCitizenResponse')}
                 </span>
               </div>
               <p className="text-xs text-amber-900/90 mt-1 leading-relaxed">
-                During the cadastral cross-verification of your registered Sale Deed against Mahabhunaksha GIS survey records, our system noticed a variance in the land parcel boundary area.
+                {t('applications.discrepancyBoxDesc')}
               </p>
             </div>
           </div>
@@ -172,11 +174,11 @@ export default function ApplicationDetailClient() {
               <table className="w-full text-left">
                 <thead className="bg-amber-100/70 text-amber-900 font-bold border-b border-amber-200">
                   <tr>
-                    <th className="p-3">Field</th>
-                    <th className="p-3">Mahabhunaksha / GIS</th>
-                    <th className="p-3">Found in Document</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Officer Note</th>
+                    <th className="p-3">{t('applications.field')}</th>
+                    <th className="p-3">{t('applications.mahabhunakshaGis')}</th>
+                    <th className="p-3">{t('applications.foundInDoc')}</th>
+                    <th className="p-3">{t('common.status')}</th>
+                    <th className="p-3">{t('applications.officerNote')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-amber-100 bg-amber-50/30">
@@ -201,7 +203,7 @@ export default function ApplicationDetailClient() {
           {/* Officer Remarks */}
           {application.officerRemarks && (
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1">
-              <span className="font-bold text-slate-700">Taluka Verification Officer Note:</span>
+              <span className="font-bold text-slate-700">{t('applications.officerRemarks')}:</span>
               <p className="text-slate-600 italic">
                 "{application.officerRemarks}"
               </p>
@@ -212,14 +214,14 @@ export default function ApplicationDetailClient() {
           <form onSubmit={handleClarificationSubmit} className="space-y-4 pt-2">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                Your Explanation / Clarification
+                {t('applications.yourExplanation')}
               </label>
               <textarea
                 rows={3}
                 required
                 value={clarificationText}
                 onChange={(e) => setClarificationText(e.target.value)}
-                placeholder="Explain the boundary division, recent road acquisition, or partition deed details..."
+                placeholder={t('applications.explanationPlaceholder')}
                 className="w-full text-xs p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
               />
             </div>
@@ -228,7 +230,7 @@ export default function ApplicationDetailClient() {
               <div className="flex items-center gap-2 text-xs">
                 <Paperclip className="w-4 h-4 text-slate-400" />
                 <label className="cursor-pointer text-blue-900 font-semibold hover:underline">
-                  <span>Attach Supporting Document (e.g. Tax Receipt / Mojani Map)</span>
+                  <span>{t('applications.attachSupporting')}</span>
                   <input
                     type="file"
                     className="hidden"
@@ -254,7 +256,7 @@ export default function ApplicationDetailClient() {
                 className="gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold"
               >
                 <Send className="w-4 h-4" />
-                <span>Submit Clarification to Officer</span>
+                <span>{t('applications.submitClarification')}</span>
               </Button>
             </div>
           </form>
@@ -266,7 +268,7 @@ export default function ApplicationDetailClient() {
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
           <div>
-            <strong>Clarification Successfully Submitted.</strong> Your explanation has been forwarded to the verification officer. The application status is now updated to <strong>Under Review</strong>.
+            <strong>{t('applications.clarificationSuccess')}</strong>
           </div>
         </div>
       )}
@@ -278,15 +280,15 @@ export default function ApplicationDetailClient() {
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Verification Pipeline &amp; Lifecycle
+                {t('applications.lifecycleTitle')}
               </h2>
               <p className="text-xs text-slate-500">
-                Government standard multi-tier verification process
+                {t('applications.lifecycleSubtitle')}
               </p>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 font-medium">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Audit Logged</span>
+              <span>{t('applications.auditLogged')}</span>
             </div>
           </div>
 
@@ -344,7 +346,7 @@ export default function ApplicationDetailClient() {
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2 className="text-sm font-bold text-slate-900">
-                Extracted Record Details
+                {t('applications.extractedDetails')}
               </h2>
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                 OCR {Math.round(application.ocrConfidence * 100)}%
@@ -401,10 +403,10 @@ export default function ApplicationDetailClient() {
           <div className="bg-slate-900 text-white rounded-xl p-5 shadow-xs text-xs space-y-2.5">
             <div className="flex items-center gap-2 text-amber-400 font-bold">
               <Building2 className="w-4 h-4" />
-              <span>Assigned Jurisdiction Office</span>
+              <span>{t('applications.jurisdictionTitle')}</span>
             </div>
             <p className="text-slate-300 text-[11px] leading-relaxed">
-              Haveli Taluka Land Records Office, Revenue Division Pune. Office of the Talathi Khadakwasla Sajja.
+              {t('applications.jurisdictionDesc')}
             </p>
             <div className="pt-1 text-[11px] text-slate-400 border-t border-slate-800">
               Inquiry Desk: <span className="text-slate-200 font-mono">020-24458911</span> (Ext 14)

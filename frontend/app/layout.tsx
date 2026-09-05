@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import QueryProvider from '../providers/QueryProvider';
 import { AuthProvider } from '../context/AuthContext';
+import I18nProvider from '../providers/I18nProvider';
 
 export const metadata: Metadata = {
   title: 'AI-Powered Intelligent Land Record Digitization and Validation System',
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </QueryProvider>
+        <I18nProvider>
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryProvider>
+        </I18nProvider>
       </body>
     </html>
   );

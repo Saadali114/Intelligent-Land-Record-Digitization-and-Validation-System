@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import {
   MapPin,
   ChevronDown,
@@ -9,8 +12,8 @@ import {
   Briefcase,
   PhoneCall,
   Eye,
-  Globe,
 } from 'lucide-react';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 const DISTRICTS_LIST = [
   'Pune',
@@ -28,6 +31,7 @@ const DISTRICTS_LIST = [
 ];
 
 export const MainNavbar: React.FC = () => {
+  const { t } = useTranslation();
   const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Select District');
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'small'>('normal');
@@ -41,10 +45,12 @@ export const MainNavbar: React.FC = () => {
           <div className="flex items-center gap-2.5 font-medium text-slate-300">
             <span className="text-amber-400 font-bold tracking-wider">🏛️ भारत सरकार</span>
             <span className="text-slate-600">|</span>
-            <span className="hidden sm:inline text-slate-300 font-semibold">GOVERNMENT OF INDIA</span>
+            <span className="hidden sm:inline text-slate-300 font-semibold uppercase">
+              {t('common.govtOfIndia')}
+            </span>
             <span className="text-slate-600 hidden md:inline">|</span>
             <span className="hidden md:inline text-slate-400">
-              Department of Land Resources & Revenue Governance (NLRMP)
+              {t('home.bannerBadge')}
             </span>
           </div>
 
@@ -52,29 +58,29 @@ export const MainNavbar: React.FC = () => {
           <div className="flex items-center gap-3 text-[10px] text-slate-300">
             <div className="hidden lg:flex items-center gap-1.5 text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/50">
               <PhoneCall className="w-2.5 h-2.5" />
-              <span>Toll Free: 1800-120-8040 (24x7)</span>
+              <span>{t('common.tollFree')}</span>
             </div>
 
             <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
-              <span className="text-slate-400">Text Size:</span>
+              <span className="text-slate-400">Text:</span>
               <button
                 onClick={() => setFontSize('small')}
                 className={`hover:text-white px-1 font-bold ${fontSize === 'small' ? 'text-amber-400' : ''}`}
-                title="Decrease font size"
+                title={t('navbar.decreaseText')}
               >
                 A-
               </button>
               <button
                 onClick={() => setFontSize('normal')}
                 className={`hover:text-white px-1 font-bold ${fontSize === 'normal' ? 'text-amber-400' : ''}`}
-                title="Reset font size"
+                title={t('navbar.standardText')}
               >
                 A
               </button>
               <button
                 onClick={() => setFontSize('large')}
                 className={`hover:text-white px-1 font-bold ${fontSize === 'large' ? 'text-amber-400' : ''}`}
-                title="Increase font size"
+                title={t('navbar.increaseText')}
               >
                 A+
               </button>
@@ -82,13 +88,11 @@ export const MainNavbar: React.FC = () => {
 
             <div className="hidden sm:flex items-center gap-1">
               <Eye className="w-3 h-3 text-slate-400" />
-              <span className="text-slate-300">Screen Reader</span>
+              <span className="text-slate-300">{t('navbar.screenReader')}</span>
             </div>
 
-            <div className="flex items-center gap-1 text-slate-300">
-              <Globe className="w-3 h-3 text-blue-400" />
-              <span>English / मराठी</span>
-            </div>
+            {/* Language Switcher in Top Bar */}
+            <LanguageSwitcher variant="dark" />
           </div>
         </div>
       </div>
@@ -103,14 +107,20 @@ export const MainNavbar: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-white font-semibold text-xs border border-slate-700 hover:border-blue-500 transition-all shadow-xs"
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400" />
-            <span>Districts ({selectedDistrict})</span>
-            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${districtDropdownOpen ? 'rotate-180' : ''}`} />
+            <span>
+              {t('navbar.districts')} ({selectedDistrict === 'Select District' ? t('common.all') : selectedDistrict})
+            </span>
+            <ChevronDown
+              className={`w-3 h-3 text-slate-400 transition-transform ${
+                districtDropdownOpen ? 'rotate-180' : ''
+              }`}
+            />
           </button>
 
           {districtDropdownOpen && (
-            <div className="absolute left-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-2 grid grid-cols-2 gap-1 text-xs">
-              <div className="col-span-2 px-2 py-1 text-[10px] font-bold text-amber-400 uppercase tracking-wider border-b border-slate-800">
-                Select Cadastral District
+            <div className="absolute top-full left-0 mt-1.5 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 max-h-64 overflow-y-auto">
+              <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 border-b border-slate-800">
+                Maharashtra Districts
               </div>
               {DISTRICTS_LIST.map((dist) => (
                 <button
@@ -121,7 +131,9 @@ export const MainNavbar: React.FC = () => {
                     setDistrictDropdownOpen(false);
                   }}
                   className={`text-left px-2 py-1.5 rounded hover:bg-blue-900/60 transition-colors truncate text-[11px] ${
-                    selectedDistrict === dist ? 'bg-blue-950 text-amber-300 font-bold' : 'text-slate-300'
+                    selectedDistrict === dist
+                      ? 'bg-blue-950 text-amber-300 font-bold'
+                      : 'text-slate-300'
                   }`}
                 >
                   {dist}
@@ -140,27 +152,27 @@ export const MainNavbar: React.FC = () => {
             title="Right to Information Act portal"
           >
             <Shield className="w-3.5 h-3.5 text-blue-400" />
-            <span>RTI (Right to Information)</span>
+            <span>{t('navbar.rti')}</span>
           </Link>
 
           {/* RTS */}
           <Link
             href="#services"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
-            title="Right to Services Act guaranteeing timely land extraction"
+            title="Right to Services Act"
           >
             <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>RTS (Right to Services)</span>
+            <span>{t('navbar.rts')}</span>
           </Link>
 
           {/* EODB */}
           <Link
             href="#services"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
-            title="Ease of Doing Business single window land registration"
+            title="Ease of Doing Business"
           >
             <Briefcase className="w-3.5 h-3.5 text-purple-400" />
-            <span>EODB (Ease of Doing Business)</span>
+            <span>{t('navbar.eodb')}</span>
           </Link>
 
           {/* Dashboard Direct Link */}
@@ -169,7 +181,7 @@ export const MainNavbar: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-900/80 hover:bg-blue-800 text-white font-semibold text-xs border border-blue-700/60 transition-all shadow-xs"
           >
             <LayoutDashboard className="w-3.5 h-3.5 text-amber-400" />
-            <span>Dashboard</span>
+            <span>{t('navbar.dashboard')}</span>
           </Link>
         </nav>
       </div>

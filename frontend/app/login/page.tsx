@@ -3,14 +3,17 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 import { LoginSchema, LoginFormData } from '../../schemas/auth.schema';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
 import { Building2, Shield, AlertCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,16 +49,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      {/* Top right language selector */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <LanguageSwitcher variant="header" />
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-900 text-amber-400 shadow-lg mb-4">
           <Building2 className="w-8 h-8" />
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-          Land Records Official Portal
+          {t('auth.officerLoginTitle')}
         </h2>
         <p className="mt-1 text-xs text-slate-600 font-medium">
-          Digital Land Record Digitization & Validation System
+          {t('auth.officerLoginSubtitle')}
         </p>
       </div>
 
@@ -70,7 +78,7 @@ export default function LoginPage() {
 
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <Input
-              label="Official Email Address"
+              label={t('auth.usernameLabel')}
               type="email"
               placeholder="officer@landrecord.gov.in"
               error={errors.email?.message}
@@ -78,7 +86,7 @@ export default function LoginPage() {
             />
 
             <Input
-              label="Secure Password"
+              label={t('auth.passwordLabel')}
               type="password"
               placeholder="••••••••"
               error={errors.password?.message}
@@ -87,7 +95,7 @@ export default function LoginPage() {
 
             <div className="pt-2">
               <Button type="submit" variant="primary" className="w-full h-10 font-semibold" isLoading={isSubmitting}>
-                Sign In to Portal
+                {t('auth.loginButton')}
               </Button>
             </div>
           </form>
@@ -138,9 +146,12 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="text-center mt-4">
-          <Link href="/" className="text-xs font-semibold text-blue-900 hover:underline">
-            &larr; Return to Portal Home
+        <div className="flex items-center justify-between mt-4 px-2 text-xs">
+          <Link href="/" className="font-semibold text-blue-900 hover:underline">
+            &larr; {t('common.backToHome')}
+          </Link>
+          <Link href="/portal/login" className="font-semibold text-amber-700 hover:underline">
+            {t('auth.citizenPortalLink')}
           </Link>
         </div>
       </div>

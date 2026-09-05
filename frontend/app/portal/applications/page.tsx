@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import {
   FileText,
   Search,
@@ -21,6 +22,7 @@ import { citizenService } from '../../../services/citizen.service';
 import { CitizenApplication } from '../../../types/citizen';
 
 export default function CitizenApplicationsPage() {
+  const { t } = useTranslation();
   const [applications, setApplications] = useState<CitizenApplication[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -38,11 +40,11 @@ export default function CitizenApplicationsPage() {
   };
 
   const statusFilters = [
-    { label: 'All Applications', value: 'ALL' },
-    { label: 'In Processing', value: 'PROCESSING' },
-    { label: 'Under Review', value: 'UNDER_REVIEW' },
-    { label: 'Verified & Digitized', value: 'VERIFIED' },
-    { label: 'Action Required', value: 'ACTION_REQUIRED' },
+    { label: t('applications.allTab'), value: 'ALL' },
+    { label: t('applications.processingTab'), value: 'PROCESSING' },
+    { label: t('applications.underReviewTab'), value: 'UNDER_REVIEW' },
+    { label: t('applications.verifiedTab'), value: 'VERIFIED' },
+    { label: t('applications.actionRequiredTab'), value: 'ACTION_REQUIRED' },
   ];
 
   return (
@@ -52,20 +54,20 @@ export default function CitizenApplicationsPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 uppercase tracking-wider">
             <FileText className="w-4 h-4" />
-            <span>Citizen Portal</span>
+            <span>{t('navbar.citizenPortal')}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            My Land Record Applications
+            {t('applications.title')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Monitor real-time progress of OCR extraction, cadastral cross-verification, and official officer review.
+            {t('applications.subtitle')}
           </p>
         </div>
 
         <Link href="/portal/upload">
           <Button variant="primary" size="md" className="gap-2 bg-blue-900 hover:bg-blue-800">
             <UploadCloud className="w-4 h-4 text-amber-300" />
-            <span>+ Upload Document</span>
+            <span>{t('dashboard.uploadCta')}</span>
           </Button>
         </Link>
       </div>
@@ -95,7 +97,7 @@ export default function CitizenApplicationsPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search by ID, Survey, Village..."
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-900 focus:border-blue-900"
@@ -109,14 +111,14 @@ export default function CitizenApplicationsPage() {
         {applications.length === 0 ? (
           <div className="p-12 text-center space-y-3">
             <FileText className="w-10 h-10 text-slate-300 mx-auto" />
-            <h3 className="text-sm font-bold text-slate-800">No Applications Found</h3>
+            <h3 className="text-sm font-bold text-slate-800">{t('applications.noApplications')}</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              No applications match your selected filter. Try choosing another status tab or upload a new land document.
+              {t('applications.noApplicationsDesc')}
             </p>
             <div className="pt-2">
               <Link href="/portal/upload">
                 <Button variant="primary" size="sm">
-                  Upload New Document
+                  {t('dashboard.uploadCta')}
                 </Button>
               </Link>
             </div>
@@ -134,28 +136,36 @@ export default function CitizenApplicationsPage() {
                       {app.id}
                     </span>
                     <Badge status={app.status}>
-                      {app.status.replace('_', ' ')}
+                      {app.status === 'UNDER_REVIEW'
+                        ? t('common.underReview')
+                        : app.status === 'VERIFIED'
+                        ? t('common.verified')
+                        : app.status === 'ACTION_REQUIRED'
+                        ? t('common.actionRequired')
+                        : app.status === 'PROCESSING'
+                        ? t('common.processing')
+                        : app.status.replace('_', ' ')}
                     </Badge>
                     <span className="text-xs text-slate-400">
-                      Submitted on {app.submittedDate}
+                      {app.submittedDate}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700 font-medium">
                     <span>
-                      Type: <strong>{app.documentType}</strong>
+                      {app.documentType}
                     </span>
                     <span className="text-slate-300">&bull;</span>
                     <span>
-                      Survey / Gat: <strong className="font-mono">{app.surveyNumber}</strong>
+                      {t('common.surveyNumber')}: <strong className="font-mono">{app.surveyNumber}</strong>
                     </span>
                     <span className="text-slate-300">&bull;</span>
                     <span>
-                      Village: <strong>{app.village}</strong>, {app.taluka}
+                      {t('common.village')}: <strong>{app.village}</strong>, {app.taluka}
                     </span>
                     <span className="text-slate-300">&bull;</span>
                     <span>
-                      Area: <strong>{app.landArea}</strong>
+                      {t('common.landArea')}: <strong>{app.landArea}</strong>
                     </span>
                   </div>
 
@@ -163,7 +173,7 @@ export default function CitizenApplicationsPage() {
                     <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2 mt-2">
                       <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
                       <div>
-                        <strong>Notice:</strong> Boundary/area clarification requested by Talathi. Please provide supporting information.
+                        {t('applications.noticeDiscrepancy')}
                       </div>
                     </div>
                   )}
@@ -182,8 +192,8 @@ export default function CitizenApplicationsPage() {
                     >
                       <span>
                         {app.status === 'ACTION_REQUIRED'
-                          ? 'Review Discrepancy'
-                          : 'View Timeline & Data'}
+                          ? t('applications.reviewDiscrepancy')
+                          : t('applications.viewTimeline')}
                       </span>
                       <ChevronRight className="w-4 h-4" />
                     </Button>

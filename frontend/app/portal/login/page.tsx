@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   Building2,
   ShieldCheck,
@@ -15,9 +16,11 @@ import {
   Lock,
 } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
+import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher';
 import { citizenService } from '../../../services/citizen.service';
 
 export default function CitizenLoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [mobileNumber, setMobileNumber] = useState('9822012345');
   const [otpSent, setOtpSent] = useState(false);
@@ -74,20 +77,23 @@ export default function CitizenLoginPage() {
             </div>
             <div>
               <div className="text-base font-bold text-slate-900">
-                ILRDVS <span className="text-blue-900 font-semibold">Citizen Portal</span>
+                ILRDVS <span className="text-blue-900 font-semibold">{t('navbar.citizenPortal')}</span>
               </div>
               <div className="text-xs text-slate-500">
-                Government Land Records Digitization &amp; Citizen Services
+                {t('common.portalFullName')}
               </div>
             </div>
           </Link>
 
-          <Link
-            href="/"
-            className="text-xs font-semibold text-slate-600 hover:text-blue-900 transition-colors hidden sm:block"
-          >
-            ← Back to Public Website
-          </Link>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher variant="header" />
+            <Link
+              href="/"
+              className="text-xs font-semibold text-slate-600 hover:text-blue-900 transition-colors hidden sm:block"
+            >
+              ← {t('common.backToHome')}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -98,14 +104,14 @@ export default function CitizenLoginPage() {
           <div className="flex items-center justify-center mb-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
-              Official Citizen Access
+              {t('common.aadhaarVerified')}
             </span>
           </div>
 
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">Citizen Sign In</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{t('auth.citizenLoginTitle')}</h1>
             <p className="text-xs text-slate-500 mt-1">
-              Access your digitized 7/12 extracts, mutation records, and application status.
+              {t('auth.citizenLoginSubtitle')}
             </p>
           </div>
 
@@ -119,7 +125,7 @@ export default function CitizenLoginPage() {
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Aadhaar-Linked Mobile Number
+                  {t('auth.mobileLabel')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-sm font-semibold">
@@ -130,13 +136,13 @@ export default function CitizenLoginPage() {
                     maxLength={10}
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder="9822012345"
+                    placeholder={t('auth.mobilePlaceholder')}
                     className="w-full pl-12 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
                   <Smartphone className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  A 6-digit one-time password (OTP) will be sent for secure identity authentication.
+                  {t('auth.mobileHelp')}
                 </p>
               </div>
 
@@ -147,7 +153,7 @@ export default function CitizenLoginPage() {
                 className="w-full justify-center"
                 isLoading={loading}
               >
-                Send OTP <ArrowRight className="w-4 h-4 ml-1.5" />
+                {t('auth.sendOtp')} <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </form>
           ) : (
@@ -155,13 +161,13 @@ export default function CitizenLoginPage() {
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5" />
                 <div>
-                  OTP sent to <strong>+91 {mobileNumber}</strong>. (Simulated demo code: 739241)
+                  {t('auth.otpSent')} (+91 {mobileNumber})
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Enter 6-Digit OTP
+                  {t('auth.otpLabel')}
                 </label>
                 <div className="relative">
                   <input
@@ -182,14 +188,14 @@ export default function CitizenLoginPage() {
                   onClick={() => setOtpSent(false)}
                   className="text-slate-500 hover:text-slate-800 underline"
                 >
-                  Change Mobile Number
+                  {t('auth.changeMobile')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setOtp('739241')}
                   className="text-blue-900 font-semibold hover:underline"
                 >
-                  Resend OTP
+                  {t('auth.resendOtp')}
                 </button>
               </div>
 
@@ -200,7 +206,7 @@ export default function CitizenLoginPage() {
                 className="w-full justify-center"
                 isLoading={loading}
               >
-                Verify &amp; Enter Portal <ArrowRight className="w-4 h-4 ml-1.5" />
+                {t('auth.verifyAndLogin')} <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </form>
           )}
@@ -216,10 +222,10 @@ export default function CitizenLoginPage() {
               className="w-full py-2.5 px-4 rounded-lg bg-amber-50 border border-amber-300 hover:bg-amber-100/80 text-amber-900 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>1-Click Demo Login as Rahul Patil</span>
+              <span>{t('auth.quickDemoLogin')}</span>
             </button>
             <p className="text-[10px] text-center text-slate-400 mt-2">
-              Populates 3 real-world demo applications (under review, verified &amp; discrepancy resolution).
+              {t('auth.demoLoginNote')}
             </p>
           </div>
 
@@ -229,7 +235,7 @@ export default function CitizenLoginPage() {
               className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-900"
             >
               <Lock className="w-3.5 h-3.5" />
-              Department Officer / Staff Login →
+              {t('auth.officialStaffLogin')}
             </Link>
           </div>
         </div>
@@ -238,7 +244,7 @@ export default function CitizenLoginPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
         <p>
-          Government of Maharashtra &bull; Revenue and Land Records Department &bull; Powered by ILRDVS
+          {t('common.stateGovt')} &bull; {t('common.revenueDept')} &bull; Powered by {t('common.portalName')}
         </p>
       </footer>
     </div>

@@ -9,8 +9,11 @@ import {
   Globe,
   Award,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const LandingFooter: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-800">
       {/* Top Footer Pillars & Portal Links */}
@@ -52,12 +55,12 @@ export const LandingFooter: React.FC = () => {
           {/* Col 2: Cadastral Services */}
           <div className="space-y-3">
             <h5 className="font-bold text-xs text-white uppercase tracking-wider">
-              Land Services
+              {t('navbar.services')}
             </h5>
             <ul className="space-y-2 text-[11px]">
               <li>
                 <Link href="/land-records" className="hover:text-amber-400 transition-colors">
-                  7/12 Satbara Extract
+                  {t('navbar.landRecords')}
                 </Link>
               </li>
               <li>
@@ -67,12 +70,12 @@ export const LandingFooter: React.FC = () => {
               </li>
               <li>
                 <Link href="/verification" className="hover:text-amber-400 transition-colors">
-                  Mutation Register (Ferfar)
+                  {t('navbar.mutationServices')}
                 </Link>
               </li>
               <li>
                 <Link href="/documents" className="hover:text-amber-400 transition-colors">
-                  Document Ingestion & OCR
+                  {t('navbar.docVerification')}
                 </Link>
               </li>
               <li>
@@ -164,7 +167,7 @@ export const LandingFooter: React.FC = () => {
               </li>
               <li>
                 <Link href="/login" className="text-amber-400 font-bold hover:underline">
-                  Official Employee Login &rarr;
+                  {t('navbar.employeeLogin')} &rarr;
                 </Link>
               </li>
             </ul>

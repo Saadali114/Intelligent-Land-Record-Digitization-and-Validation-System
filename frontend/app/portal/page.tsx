@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   FileText,
   UploadCloud,
@@ -28,13 +29,13 @@ import {
 } from '../../types/citizen';
 
 export default function CitizenDashboardPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [profile, setProfile] = useState<CitizenProfile | null>(null);
   const [applications, setApplications] = useState<CitizenApplication[]>([]);
   const [landRecords, setLandRecords] = useState<CitizenLandRecord[]>([]);
 
   useEffect(() => {
-    // Check auth or load profile
     const prof = citizenService.getProfile();
     setProfile(prof);
     const apps = citizenService.getApplications();
@@ -65,19 +66,19 @@ export default function CitizenDashboardPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/80 border border-blue-700/60 text-xs font-semibold text-blue-200">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Aadhaar Identity Verified Citizen</span>
+              <span>{t('dashboard.aadhaarBadge')}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Namaste, {profile?.name || 'Rahul Patil'}
+              {t('dashboard.welcome')}, {profile?.name || 'Rahul Patil'}
             </h1>
             <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs sm:text-sm text-slate-300">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                {profile?.village || 'Khadakwasla'}, Taluka {profile?.taluka || 'Haveli'}, {profile?.district || 'Pune'}
+                {profile?.village || 'Khadakwasla'}, {t('common.taluka')} {profile?.taluka || 'Haveli'}, {profile?.district || 'Pune'}
               </span>
               <span className="hidden sm:inline text-slate-600">&bull;</span>
               <span className="text-slate-300">
-                Mobile: <strong className="text-white font-mono">{profile?.mobile || '+91 98220 12345'}</strong>
+                {t('common.mobileNumber')}: <strong className="text-white font-mono">{profile?.mobile || '+91 98220 12345'}</strong>
               </span>
             </div>
           </div>
@@ -90,7 +91,7 @@ export default function CitizenDashboardPage() {
                 className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold border border-amber-300 shadow-md gap-2"
               >
                 <UploadCloud className="w-5 h-5 text-slate-950" />
-                <span>+ Upload Land Document</span>
+                <span>{t('dashboard.uploadCta')}</span>
               </Button>
             </Link>
           </div>
@@ -108,14 +109,14 @@ export default function CitizenDashboardPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-bold text-amber-950">
-                    Action Required on Application {discrepancyApp.id}
+                    {t('dashboard.actionAlertTitle')} {discrepancyApp.id}
                   </h2>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-200 text-amber-900">
-                    Discrepancy Noticed
+                    {t('common.actionRequired')}
                   </span>
                 </div>
                 <p className="text-xs text-amber-900/90 mt-1 max-w-3xl">
-                  A boundary/area variance ({discrepancyApp.surveyNumber}, {discrepancyApp.village}) was flagged during cadastral cross-verification. Please submit a clarification or supporting tax receipt to resume processing.
+                  {t('dashboard.actionAlertDesc')} ({discrepancyApp.surveyNumber}, {discrepancyApp.village})
                 </p>
               </div>
             </div>
@@ -125,7 +126,7 @@ export default function CitizenDashboardPage() {
                 size="sm"
                 className="bg-amber-600 hover:bg-amber-700 text-white font-semibold whitespace-nowrap shadow-xs"
               >
-                Review &amp; Clarify →
+                {t('dashboard.reviewAndClarify')}
               </Button>
             </Link>
           </div>
@@ -138,7 +139,7 @@ export default function CitizenDashboardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Total Applications
+              {t('dashboard.totalApplications')}
             </span>
             <div className="p-2 rounded-lg bg-blue-50 text-blue-800">
               <FileText className="w-4 h-4" />
@@ -146,7 +147,7 @@ export default function CitizenDashboardPage() {
           </div>
           <div className="text-2xl font-bold text-slate-900 mt-2">{totalCount}</div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Across 7/12, Mutation &amp; Deeds
+            {t('dashboard.totalDesc')}
           </p>
         </div>
 
@@ -154,7 +155,7 @@ export default function CitizenDashboardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              In Processing
+              {t('dashboard.inProcessing')}
             </span>
             <div className="p-2 rounded-lg bg-sky-50 text-sky-800">
               <Clock className="w-4 h-4" />
@@ -162,7 +163,7 @@ export default function CitizenDashboardPage() {
           </div>
           <div className="text-2xl font-bold text-sky-900 mt-2">{underReviewCount}</div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Cadastral AI &amp; Talathi review
+            {t('dashboard.inProcessingDesc')}
           </p>
         </div>
 
@@ -170,7 +171,7 @@ export default function CitizenDashboardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Verified &amp; Digitized
+              {t('dashboard.verifiedDigitized')}
             </span>
             <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800">
               <CheckCircle2 className="w-4 h-4" />
@@ -178,7 +179,7 @@ export default function CitizenDashboardPage() {
           </div>
           <div className="text-2xl font-bold text-emerald-700 mt-2">{verifiedCount}</div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Certified digitally signed records
+            {t('dashboard.verifiedDesc')}
           </p>
         </div>
 
@@ -192,7 +193,7 @@ export default function CitizenDashboardPage() {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Action Required
+              {t('dashboard.actionRequired')}
             </span>
             <div
               className={`p-2 rounded-lg ${
@@ -212,7 +213,7 @@ export default function CitizenDashboardPage() {
             {actionRequiredCount}
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Requires citizen response
+            {t('dashboard.actionRequiredDesc')}
           </p>
         </div>
       </div>
@@ -224,17 +225,17 @@ export default function CitizenDashboardPage() {
           <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Recent Land Record Applications
+                {t('dashboard.recentApplications')}
               </h2>
               <p className="text-xs text-slate-500">
-                Track status of your uploaded records and AI verification pipeline
+                {t('dashboard.recentSubtitle')}
               </p>
             </div>
             <Link
               href="/portal/applications"
               className="text-xs font-semibold text-blue-900 hover:text-blue-700 flex items-center gap-1"
             >
-              View All ({totalCount}) <ArrowRight className="w-3.5 h-3.5" />
+              {t('common.viewAll')} ({totalCount}) <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -250,19 +251,27 @@ export default function CitizenDashboardPage() {
                       {app.id}
                     </span>
                     <Badge status={app.status}>
-                      {app.status.replace('_', ' ')}
+                      {app.status === 'UNDER_REVIEW'
+                        ? t('common.underReview')
+                        : app.status === 'VERIFIED'
+                        ? t('common.verified')
+                        : app.status === 'ACTION_REQUIRED'
+                        ? t('common.actionRequired')
+                        : app.status === 'PROCESSING'
+                        ? t('common.processing')
+                        : app.status.replace('_', ' ')}
                     </Badge>
                   </div>
                   <div className="text-xs font-semibold text-slate-800">
-                    {app.documentType} &bull; Survey No: <span className="font-mono">{app.surveyNumber}</span>
+                    {app.documentType} &bull; {t('common.surveyNumber')}: <span className="font-mono">{app.surveyNumber}</span>
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-slate-500">
-                    <span>Village: {app.village}</span>
+                    <span>{t('common.village')}: {app.village}</span>
                     <span>&bull;</span>
-                    <span>Submitted: {app.submittedDate}</span>
+                    <span>{app.submittedDate}</span>
                     <span>&bull;</span>
                     <span className="text-emerald-700 font-medium">
-                      OCR Confidence: {Math.round(app.ocrConfidence * 100)}%
+                      OCR: {Math.round(app.ocrConfidence * 100)}%
                     </span>
                   </div>
                 </div>
@@ -270,7 +279,7 @@ export default function CitizenDashboardPage() {
                 <div className="flex items-center gap-2 sm:self-center">
                   <Link href={`/portal/applications/${app.id}`}>
                     <Button variant="outline" size="sm" className="text-xs gap-1">
-                      <span>Track Progress</span>
+                      <span>{t('common.track')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
@@ -288,14 +297,14 @@ export default function CitizenDashboardPage() {
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-blue-900" />
                 <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  My Verified Land Parcels
+                  {t('dashboard.myVerifiedParcels')}
                 </h3>
               </div>
               <Link
                 href="/portal/land-records"
                 className="text-xs text-blue-900 font-semibold hover:underline"
               >
-                View
+                {t('common.view')}
               </Link>
             </div>
 
@@ -307,17 +316,21 @@ export default function CitizenDashboardPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">
-                      Survey {record.surveyNumber}
+                      {t('common.surveyNumber')} {record.surveyNumber}
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                      {record.status || record.recordStatus || 'VERIFIED'}
+                      {record.recordStatus === 'VERIFIED'
+                        ? t('common.verified')
+                        : record.recordStatus === 'UNDER_REVIEW'
+                        ? t('common.underReview')
+                        : record.status || 'VERIFIED'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 mt-1">
-                    {record.village}, Taluka {record.taluka}
+                    {record.village}, {t('common.taluka')} {record.taluka}
                   </p>
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
-                    <span>Area: {record.area}</span>
+                    <span>{t('common.landArea')}: {record.area}</span>
                     <span className="font-mono text-[10px] text-slate-400">
                       ULPIN: {record.ulpin ? record.ulpin.slice(0, 10) + '...' : record.id}
                     </span>
@@ -331,17 +344,17 @@ export default function CitizenDashboardPage() {
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl border border-blue-200 p-5 text-xs text-slate-700 space-y-2.5">
             <div className="flex items-center gap-2 font-bold text-blue-950">
               <Sparkles className="w-4 h-4 text-blue-800" />
-              <span>How ILRDVS AI Works for You</span>
+              <span>{t('dashboard.aiTransparencyTitle')}</span>
             </div>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              When you upload a Marathi/English land document, our vision model automatically transcribes survey numbers, khata details, and owner names. You review every extracted field before official Talathi verification.
+              {t('dashboard.aiTransparencyDesc')}
             </p>
             <div className="pt-2">
               <Link
                 href="/portal/upload"
                 className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-700"
               >
-                Upload your first document now →
+                {t('dashboard.uploadCta')} →
               </Link>
             </div>
           </div>

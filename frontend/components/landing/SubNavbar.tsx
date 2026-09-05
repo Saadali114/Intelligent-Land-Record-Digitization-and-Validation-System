@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import {
   Building2,
   ChevronDown,
@@ -19,8 +22,10 @@ import {
   ExternalLink,
   ShieldCheck,
 } from 'lucide-react';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export const SubNavbar: React.FC = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
@@ -44,10 +49,10 @@ export const SubNavbar: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] font-semibold text-slate-600 tracking-tight leading-tight line-clamp-1">
-              Intelligent Land Record Digitization & Validation System
+              {t('common.portalFullName')}
             </p>
             <p className="text-[9px] text-slate-400 font-medium">
-              National Land Records Modernization Programme (NLRMP)
+              {t('home.bannerBadge')}
             </p>
           </div>
         </Link>
@@ -59,7 +64,7 @@ export const SubNavbar: React.FC = () => {
             href="/"
             className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
           >
-            Home
+            {t('navbar.home')}
           </Link>
 
           {/* About */}
@@ -67,7 +72,7 @@ export const SubNavbar: React.FC = () => {
             href="#about"
             className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
           >
-            About
+            {t('navbar.about')}
           </Link>
 
           {/* Services Dropdown */}
@@ -80,7 +85,7 @@ export const SubNavbar: React.FC = () => {
               type="button"
               className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
             >
-              <span>Services</span>
+              <span>{t('navbar.services')}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -92,8 +97,8 @@ export const SubNavbar: React.FC = () => {
                 >
                   <FileText className="w-4 h-4 text-blue-800 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-bold text-xs">Land Records</div>
-                    <div className="text-[10px] text-slate-500">7/12 Satbara & Khata Extracts</div>
+                    <div className="font-bold text-xs">{t('services.service1Title')}</div>
+                    <div className="text-[10px] text-slate-500">{t('services.service1Desc')}</div>
                   </div>
                 </Link>
                 <Link
@@ -102,7 +107,7 @@ export const SubNavbar: React.FC = () => {
                 >
                   <Layers className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-bold text-xs">Online Services</div>
+                    <div className="font-bold text-xs">{t('navbar.services')}</div>
                     <div className="text-[10px] text-slate-500">Single window digital portal</div>
                   </div>
                 </Link>
@@ -112,8 +117,8 @@ export const SubNavbar: React.FC = () => {
                 >
                   <FileCheck2 className="w-4 h-4 text-purple-700 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-bold text-xs">Document Verification</div>
-                    <div className="text-[10px] text-slate-500">Workstation inspector review</div>
+                    <div className="font-bold text-xs">{t('services.service4Title')}</div>
+                    <div className="text-[10px] text-slate-500">{t('services.service4Desc')}</div>
                   </div>
                 </Link>
                 <Link
@@ -122,8 +127,8 @@ export const SubNavbar: React.FC = () => {
                 >
                   <Sparkles className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-bold text-xs">Mutation Services</div>
-                    <div className="text-[10px] text-slate-500">Form 6 Ferfar registration</div>
+                    <div className="font-bold text-xs">{t('services.service2Title')}</div>
+                    <div className="text-[10px] text-slate-500">{t('services.service2Desc')}</div>
                   </div>
                 </Link>
                 <Link
@@ -132,8 +137,8 @@ export const SubNavbar: React.FC = () => {
                 >
                   <Building2 className="w-4 h-4 text-indigo-700 mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-bold text-xs">GIS / Map Services</div>
-                    <div className="text-[10px] text-slate-500">Tippan survey parcel boundary</div>
+                    <div className="font-bold text-xs">{t('services.service3Title')}</div>
+                    <div className="text-[10px] text-slate-500">{t('services.service3Desc')}</div>
                   </div>
                 </Link>
               </div>
@@ -150,7 +155,7 @@ export const SubNavbar: React.FC = () => {
               type="button"
               className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
             >
-              <span>Resources</span>
+              <span>{t('navbar.resources')}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -160,21 +165,21 @@ export const SubNavbar: React.FC = () => {
                   href="#faq"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">User Guides</div>
+                  <div className="font-bold">{t('resources.userGuides')}</div>
                   <div className="text-[10px] text-slate-500">Step-by-step portal manuals</div>
                 </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Forms & Documents</div>
-                  <div className="text-[10px] text-slate-500">Official cadastral templates</div>
+                  <div className="font-bold">{t('resources.actsRules')}</div>
+                  <div className="text-[10px] text-slate-500">Official cadastral guidelines</div>
                 </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Downloads</div>
+                  <div className="font-bold">{t('resources.downloads')}</div>
                   <div className="text-[10px] text-slate-500">Gazette circulars & guidelines</div>
                 </Link>
                 <Link
@@ -198,7 +203,7 @@ export const SubNavbar: React.FC = () => {
               type="button"
               className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
             >
-              <span>Schemes & Projects</span>
+              <span>{t('navbar.schemes')}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -208,22 +213,22 @@ export const SubNavbar: React.FC = () => {
                   href="#about"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Government Schemes</div>
+                  <div className="font-bold">{t('schemes.scheme1')}</div>
                   <div className="text-[10px] text-slate-500">DILRMP, NLRMP, SVAMITVA</div>
                 </Link>
                 <Link
                   href="#notices"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Ongoing Projects</div>
+                  <div className="font-bold">{t('schemes.scheme2')}</div>
                   <div className="text-[10px] text-slate-500">High-Resolution Drone Cadastral Mapping</div>
                 </Link>
                 <Link
                   href="#about"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Completed Projects</div>
-                  <div className="text-[10px] text-slate-500">100% Computerized Record Repositories</div>
+                  <div className="font-bold">{t('schemes.scheme3')}</div>
+                  <div className="text-[10px] text-slate-500">100% Computerized Repositories</div>
                 </Link>
               </div>
             )}
@@ -234,7 +239,7 @@ export const SubNavbar: React.FC = () => {
             href="#notices"
             className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors relative"
           >
-            <span>News & Notices</span>
+            <span>{t('navbar.news')}</span>
             <span className="absolute top-1.5 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
           </Link>
 
@@ -248,7 +253,7 @@ export const SubNavbar: React.FC = () => {
               type="button"
               className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
             >
-              <span>Citizen Corner</span>
+              <span>{t('navbar.citizenCorner')}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -260,36 +265,36 @@ export const SubNavbar: React.FC = () => {
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
                   <div>
-                    <div className="text-xs">Citizen Portal</div>
-                    <div className="text-[10px] text-amber-800 font-normal">Digitize &amp; Track Land Records</div>
+                    <div className="text-xs">{t('navbar.citizenPortal')}</div>
+                    <div className="text-[10px] text-amber-800 font-normal">{t('navbar.digitizeAndTrack')}</div>
                   </div>
                 </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Citizen Services</div>
+                  <div className="font-bold">{t('citizenCorner.portalLink')}</div>
                   <div className="text-[10px] text-slate-500">Title Search & Digital Extract Copy</div>
                 </Link>
                 <Link
                   href="/verification"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Application Status</div>
+                  <div className="font-bold">{t('citizenCorner.applicationStatus')}</div>
                   <div className="text-[10px] text-slate-500">Track Mutation or Verification Request</div>
                 </Link>
                 <Link
                   href="#contact"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Grievance</div>
+                  <div className="font-bold">{t('citizenCorner.grievance')}</div>
                   <div className="text-[10px] text-slate-500">Register Land Record Discrepancy</div>
                 </Link>
                 <Link
                   href="#contact"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Feedback</div>
+                  <div className="font-bold">{t('citizenCorner.feedback')}</div>
                   <div className="text-[10px] text-slate-500">Portal Experience & Suggestions</div>
                 </Link>
               </div>
@@ -306,7 +311,7 @@ export const SubNavbar: React.FC = () => {
               type="button"
               className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
             >
-              <span>More</span>
+              <span>{t('navbar.faq')} &bull; {t('navbar.contact')}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -317,35 +322,37 @@ export const SubNavbar: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <Image className="w-4 h-4 text-blue-700" />
-                  <span>Gallery</span>
+                  <span>{t('navbar.gallery')}</span>
                 </Link>
                 <Link
                   href="#faq"
                   className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <HelpCircle className="w-4 h-4 text-emerald-700" />
-                  <span>FAQ</span>
+                  <span>{t('navbar.faq')}</span>
                 </Link>
                 <Link
                   href="#contact"
                   className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <Phone className="w-4 h-4 text-indigo-700" />
-                  <span>Contact Us</span>
+                  <span>{t('navbar.contact')}</span>
                 </Link>
               </div>
             )}
           </div>
         </nav>
 
-        {/* Right CTA: Citizen Portal & Employee Login */}
+        {/* Right CTA: Language Switcher, Citizen Portal & Employee Login */}
         <div className="hidden sm:flex items-center gap-2.5">
+          <LanguageSwitcher variant="header" />
+
           <Link
             href="/portal"
             className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
           >
             <ShieldCheck className="w-4 h-4 text-slate-950" />
-            <span>Citizen Portal</span>
+            <span>{t('navbar.citizenPortal')}</span>
           </Link>
 
           <Link
@@ -353,22 +360,24 @@ export const SubNavbar: React.FC = () => {
             className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
           >
             <LogIn className="w-4 h-4 text-amber-400" />
-            <span>Officer Login</span>
+            <span>{t('navbar.employeeLogin')}</span>
           </Link>
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex xl:hidden items-center gap-2">
+          <LanguageSwitcher variant="header" />
           <Link
-            href="/login"
-            className="px-3 py-1.5 rounded-lg bg-blue-900 text-white font-bold text-xs"
+            href="/portal"
+            className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
           >
-            Login
+            Portal
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg text-slate-700 hover:bg-slate-100"
+            aria-label="Toggle Menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -383,49 +392,49 @@ export const SubNavbar: React.FC = () => {
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            Home
+            {t('navbar.home')}
           </Link>
           <Link
             href="#about"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            About Us
+            {t('navbar.about')}
           </Link>
           <Link
             href="/land-records"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            Services: Land Records
+            {t('services.service1Title')}
           </Link>
           <Link
             href="/verification"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            Document Verification
+            {t('services.service4Title')}
           </Link>
           <Link
             href="#notices"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            News & Notices
+            {t('navbar.news')}
           </Link>
           <Link
             href="#faq"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            FAQ
+            {t('navbar.faq')}
           </Link>
           <Link
             href="#contact"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg hover:bg-slate-50"
           >
-            Contact Us
+            {t('navbar.contact')}
           </Link>
           <div className="pt-2 space-y-2">
             <Link
@@ -434,7 +443,7 @@ export const SubNavbar: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
             >
               <ShieldCheck className="w-4 h-4 text-slate-950" />
-              <span>Citizen Portal</span>
+              <span>{t('navbar.citizenPortal')}</span>
             </Link>
             <Link
               href="/login"
@@ -442,7 +451,7 @@ export const SubNavbar: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-900 text-white font-bold"
             >
               <LogIn className="w-4 h-4 text-amber-400" />
-              <span>Official Employee Login</span>
+              <span>{t('navbar.employeeLogin')}</span>
             </Link>
           </div>
         </div>
