@@ -17,23 +17,11 @@ import {
   VerificationActionModal,
   VerificationAuditHistory,
 } from '../../components/verification';
-import { CheckCheck, ShieldCheck, Layers, FileCheck } from 'lucide-react';
-import { OfficerVerificationWorkspace } from '../../components/officer-verification/OfficerVerificationWorkspace';
-import { DemoBanner } from '../../components/citizen-verification/DemoBanner';
-import { DemoCaseSelector } from '../../components/citizen-verification/DemoCaseSelector';
-import {
-  verificationWorkflowService,
-  VerificationWorkflowData,
-} from '../../services/verificationWorkflowService';
+import { CheckCheck, Clock, AlertTriangle, CheckCircle2, XCircle, FileText, Search } from 'lucide-react';
 
 export default function VerificationPage() {
   const { t } = useTranslation();
-  const { isAdmin, isVerifier } = useAuth();
-  const [activeTab, setActiveTab] = useState<'workflow' | 'queue'>('workflow');
-  const [activePreset, setActivePreset] = useState<'CASE_1_GREEN' | 'CASE_2_YELLOW' | 'CASE_3_RED'>('CASE_1_GREEN');
-  const [workflowData, setWorkflowData] = useState<VerificationWorkflowData>(
-    verificationWorkflowService.getPreset('CASE_1_GREEN')
-  );
+  const { isAdmin, isVerifier, isOfficer } = useAuth();
 
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
@@ -47,7 +35,7 @@ export default function VerificationPage() {
 
   const { data: queueData, isLoading: queueLoading } = useVerificationRecordsQuery({
     status: statusFilter || undefined,
-    limit: 20,
+    limit: 50,
   });
 
   const records = queueData?.records || [];
@@ -98,107 +86,146 @@ export default function VerificationPage() {
     }
   };
 
+  // Quick statistics calculation
+  const totalCount = records.length;
+  const pendingCount = records.filter((r) => r.verificationStatus === 'PENDING').length;
+  const needsReviewCount = records.filter((r) => r.verificationStatus === 'NEEDS_REVIEW').length;
+  const verifiedCount = records.filter((r) => r.verificationStatus === 'VERIFIED').length;
+  const rejectedCount = records.filter((r) => r.verificationStatus === 'REJECTED').length;
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Prototype Environment Notice */}
-        <DemoBanner />
-
-        {/* Page Header with Mode Selector */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-5">
+        {/* Simple & Clean Header */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-900 animate-pulse"></span>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                Land Revenue & Title Verification
+              </span>
+            </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <CheckCheck className="w-6 h-6 text-blue-900" />
-              {t('officerVerification.title', { defaultValue: 'Cadastral Verification Workstation' })}
+              {t('officerVerification.title', { defaultValue: 'Verification Queue' })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              {t('officerVerification.subtitle', { defaultValue: 'Cross-validate OCR extracted records against archival physical scans.' })}
+              {t('officerVerification.subtitle', {
+                defaultValue:
+                  'Review OCR extracted land records, inspect original document scans, and record official verification decisions.',
+              })}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+          {/* Quick Metrics Bar */}
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => setActiveTab('workflow')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                activeTab === 'workflow'
-                  ? 'bg-blue-900 text-white shadow'
-                  : 'text-slate-600 hover:text-slate-900'
+              onClick={() => setStatusFilter('')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                statusFilter === ''
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>4-Pillar Workflow Dossiers</span>
+              All ({totalCount})
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('queue')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                activeTab === 'queue'
-                  ? 'bg-blue-900 text-white shadow'
-                  : 'text-slate-600 hover:text-slate-900'
+              onClick={() => setStatusFilter('PENDING')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                statusFilter === 'PENDING'
+                  ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                  : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Queue View</span>
+              <Clock className="w-3.5 h-3.5" />
+              Pending ({pendingCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('NEEDS_REVIEW')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                statusFilter === 'NEEDS_REVIEW'
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                  : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Needs Review ({needsReviewCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('VERIFIED')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                statusFilter === 'VERIFIED'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Verified ({verifiedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('REJECTED')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                statusFilter === 'REJECTED'
+                  ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                  : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+              }`}
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              Rejected ({rejectedCount})
             </button>
           </div>
         </div>
 
-        {activeTab === 'workflow' ? (
-          <div className="space-y-6">
-            <DemoCaseSelector
-              selectedPreset={activePreset}
-              onSelectPreset={(p) => {
-                setActivePreset(p);
-                setWorkflowData(verificationWorkflowService.getPreset(p));
-              }}
-            />
-            <OfficerVerificationWorkspace
-              key={workflowData.id}
-              initialWorkflow={workflowData}
-            />
-          </div>
-        ) : (
-          /* Main Workstation Layout */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Review Queue Sidebar */}
-            <VerificationQueueList
-              records={records}
-              isLoading={queueLoading}
-              selectedRecordId={selectedRecordId}
-              onSelectRecord={setSelectedRecordId}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-            />
+        {/* Main Workstation Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Review Queue Sidebar (Left Column) */}
+          <VerificationQueueList
+            records={records}
+            isLoading={queueLoading}
+            selectedRecordId={selectedRecordId}
+            onSelectRecord={setSelectedRecordId}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+          />
 
-            {/* Active Record Review Panel */}
-            <div className="lg:col-span-8 flex flex-col space-y-4">
-              {activeRecord ? (
-                <>
-                  <VerificationScanViewer
-                    sourceDocument={activeRecord.sourceDocument}
-                    scanZoom={scanZoom}
-                    onZoomChange={setScanZoom}
-                    showScanPreview={showScanPreview}
-                    onToggleScanPreview={() => setShowScanPreview(!showScanPreview)}
-                  />
+          {/* Active Record Review Panel (Right Column) */}
+          <div className="lg:col-span-8 flex flex-col space-y-4">
+            {activeRecord ? (
+              <>
+                <VerificationScanViewer
+                  sourceDocument={activeRecord.sourceDocument}
+                  scanZoom={scanZoom}
+                  onZoomChange={setScanZoom}
+                  showScanPreview={showScanPreview}
+                  onToggleScanPreview={() => setShowScanPreview(!showScanPreview)}
+                />
 
-                  <VerificationDetailsPanel
-                    record={activeRecord}
-                    onOpenAction={handleOpenAction}
-                    canVerify={isAdmin || isVerifier}
-                  />
+                <VerificationDetailsPanel
+                  record={activeRecord}
+                  onOpenAction={handleOpenAction}
+                  canVerify={isAdmin || isVerifier || isOfficer}
+                />
 
-                  <VerificationAuditHistory history={history} />
-                </>
-              ) : (
-                <div className="gov-card p-12 text-center text-slate-400 text-xs">
+                <VerificationAuditHistory history={history} />
+              </>
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-xl p-16 text-center text-slate-400">
+                <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                <p className="text-sm font-semibold text-slate-600">
                   {t('officerVerification.noRecords', { defaultValue: 'No active record selected for verification.' })}
-                </div>
-              )}
-            </div>
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Select an application from the review queue on the left to begin inspection.
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Verification Action Dialog */}

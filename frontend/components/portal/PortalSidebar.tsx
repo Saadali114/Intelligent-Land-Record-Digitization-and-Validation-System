@@ -47,7 +47,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       href: '/portal/verify',
       icon: ShieldCheck,
       highlight: true,
-      badge: '4-Pillar',
+      badge: 'AI',
     },
     {
       name: 'AI Verifications',
