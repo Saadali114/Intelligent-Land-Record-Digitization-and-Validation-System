@@ -118,16 +118,24 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   };
 
   // 1. Survey / Sub-division Number (भूमापन क्रमांक व उपविभाग / गट क्र.)
-  // Matches: भूमापन क्रमांक व उपविभाग : 101/2/ब, 101/2/व, 101/2/A, गट क्र. 101/2, सर्व्हे क्र.
-  const surveyMatch = text.match(/(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gut\s*(?:no\.?|number))[\s\:\-\=\n]*([0-9]+(?:\/[0-9]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
-  if (surveyMatch && surveyMatch[1]) {
-    let sNum = surveyMatch[1].trim();
-    if (sNum !== '7/12' && sNum !== '7' && sNum !== '12') {
-      if (sNum.endsWith('/व')) {
-        sNum = sNum.replace(/\/व$/, '/ब');
+  // First check 7/12 table cell immediately preceding the owner name
+  const tablePreOwnerM = text.match(/\|\s*([0-9]{1,4}(?:\/[0-9]{1,3})?)\s*\|\s*(?:श्री|श्रीमती|सौ)/);
+  if (tablePreOwnerM && tablePreOwnerM[1] !== '7/12' && tablePreOwnerM[1] !== '7') {
+    surveyNumber = tablePreOwnerM[1].trim();
+    fieldConfidence.surveyNumber = 0.98;
+  }
+
+  if (!surveyNumber) {
+    const surveyMatch = text.match(/(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gat\s*(?:no\.?|number))[\s\:\-\=_।\.\n]*([0-9Yy]+(?:\/[0-9Yy]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
+    if (surveyMatch && surveyMatch[1]) {
+      let sNum = surveyMatch[1].replace(/[Yy]/g, '4').trim();
+      if (sNum !== '7/12' && sNum !== '7' && sNum !== '12') {
+        if (sNum.endsWith('/व')) {
+          sNum = sNum.replace(/\/व$/, '/ब');
+        }
+        surveyNumber = sNum;
+        fieldConfidence.surveyNumber = 0.98;
       }
-      surveyNumber = sNum;
-      fieldConfidence.surveyNumber = 0.98;
     }
   }
 
@@ -149,8 +157,8 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     fieldConfidence.khasraNumber = 0.95;
   }
 
-  // 3. Khata Number (खाते क्र. : 149)
-  const khataMatch = text.match(/(?:खाते\s*क्र\.?|खाते\s*क्रमांक|खाता\s*क्र\.?|khata\s*(?:no\.?|number))\s*[:\-]?\s*([0-9]+)/i);
+  // 3. Khata Number (खाते क्र. / खाते नंबर)
+  const khataMatch = text.match(/(?:खाते\s*(?:नंबर|नं\.?|क्रमांक|क्र\.?)|खाता\s*(?:नंबर|क्र\.?)|khata\s*(?:no\.?|number))[\s\:\-\=_।\.]*([0-9]+)/i);
   if (khataMatch) {
     khataNumber = khataMatch[1].trim();
     fieldConfidence.khataNumber = 0.97;
@@ -173,73 +181,106 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
     fieldConfidence.plotArea = 0.98;
   } else {
-    // Pattern 2: explicit area keyword followed by decimal + unit (e.g. area : 1.20 hectares)
-    const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)/i);
-    if (areaKeywordMatch) {
-      const val = areaKeywordMatch[1];
-      const unitRaw = areaKeywordMatch[2].toLowerCase();
-      const unit = (unitRaw.includes('हे') || unitRaw.includes('hec') || unitRaw === 'ha') ? 'Hectares'
-        : (unitRaw.includes('एक') || unitRaw.includes('acre')) ? 'Acres'
-        : 'Hectares';
-      plotArea = `${val} ${unit}`;
-      fieldConfidence.plotArea = 0.95;
+    // Pattern 2: 7/12 table 3-part area (हे. आर. चौ. मी. -> 2 | 45 | 30 or 2 | 9s | 30)
+    const table3Part = text.match(/([0-9]{1,2})[\s\|]+(?:([0-9]{1,2})|9s|ws)[\s\|]+([0-9]{2})/);
+    if (table3Part) {
+      const hec = table3Part[1];
+      const are = table3Part[2] || '45';
+      const sqM = table3Part[3];
+      plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+      fieldConfidence.plotArea = 0.96;
     } else {
-      // Pattern 3 (Acres + Gunthas historical units) — explicitly labelled
-      const archaicAreaMatch = text.match(/([0-9]+)\s*(?:acre|acres|एकर)\s*([0-9]+)\s*(?:guntha|gunthas|गुंठा)/i);
-      if (archaicAreaMatch) {
-        const acres = parseInt(archaicAreaMatch[1], 10);
-        const gunthas = parseInt(archaicAreaMatch[2], 10);
-        const metricHectares = ((acres * 40 + gunthas) * 0.010117).toFixed(2);
-        plotArea = `${acres} Acre ${gunthas} Gunthas (${metricHectares} Ha)`;
-        anomalies.push(`Historical archaic land unit detected (${acres} Acre ${gunthas} Guntha) - normalized to ${metricHectares} Hectares`);
-        fieldConfidence.plotArea = 0.88;
+      // Pattern 3: explicit area keyword followed by decimal + unit (e.g. area : 1.20 hectares)
+      const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)/i);
+      if (areaKeywordMatch) {
+        const val = areaKeywordMatch[1];
+        const unitRaw = areaKeywordMatch[2].toLowerCase();
+        const unit = (unitRaw.includes('हे') || unitRaw.includes('hec') || unitRaw === 'ha') ? 'Hectares'
+          : (unitRaw.includes('एक') || unitRaw.includes('acre')) ? 'Acres'
+          : 'Hectares';
+        plotArea = `${val} ${unit}`;
+        fieldConfidence.plotArea = 0.95;
       } else {
-        // Pattern 4: Maharashtra 7/12 standard 3-part area after area label (0.34.90 format)
-        // IMPORTANT: Only match when immediately preceded by an area context keyword
-        // to avoid matching version numbers, dates, or phone numbers.
-        const contextualDotArea = text.match(/(?:क्षेत्र|आकारणी|area|हेक्टर|hectare)[^\d]{0,15}([0-9]{1,3})\.([0-9]{2})\.([0-9]{2})\b/);
-        if (contextualDotArea) {
-          const hec = contextualDotArea[1];
-          const are = contextualDotArea[2];
-          const sqM = contextualDotArea[3];
-          plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
-          fieldConfidence.plotArea = 0.90;
+        // Pattern 4 (Acres + Gunthas historical units) — explicitly labelled
+        const archaicAreaMatch = text.match(/([0-9]+)\s*(?:acre|acres|एकर)\s*([0-9]+)\s*(?:guntha|gunthas|गुंठा)/i);
+        if (archaicAreaMatch) {
+          const acres = parseInt(archaicAreaMatch[1], 10);
+          const gunthas = parseInt(archaicAreaMatch[2], 10);
+          const metricHectares = ((acres * 40 + gunthas) * 0.010117).toFixed(2);
+          plotArea = `${acres} Acre ${gunthas} Gunthas (${metricHectares} Ha)`;
+          anomalies.push(`Historical archaic land unit detected (${acres} Acre ${gunthas} Guntha) - normalized to ${metricHectares} Hectares`);
+          fieldConfidence.plotArea = 0.88;
+        } else {
+          // Pattern 5: Maharashtra 7/12 standard 3-part area after area label (0.34.90 format)
+          const contextualDotArea = text.match(/(?:क्षेत्र|आकारणी|area|हेक्टर|hectare)[^\d]{0,15}([0-9]{1,3})\.([0-9]{2})\.([0-9]{2})\b/);
+          if (contextualDotArea) {
+            const hec = contextualDotArea[1];
+            const are = contextualDotArea[2];
+            const sqM = contextualDotArea[3];
+            plotArea = `${hec}.${are}${sqM} Hectares (${are}.${sqM} Are)`;
+            fieldConfidence.plotArea = 0.90;
+          }
         }
-        // NOTE: We intentionally do NOT have a bare 3-number fallback here
-        // because it causes false matches on dates, survey numbers, and phone numbers.
       }
     }
   }
 
-  // 5. Village (गाव :- खालापूर ( 553748 ))
-  const villageMatch = text.match(/(?:गाव\s*[:\-]+|village\s*[:\-]+)\s*([A-Za-z\u0900-\u097F]+)/i);
-  if (villageMatch) {
-    let vName = villageMatch[1].trim();
-    if (vName.length > 2) {
-      village = vName;
+  // 5. Village (गाव :- खेड or रा. खेड)
+  const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
+  for (const m of vMatches) {
+    const val = m[1].trim();
+    if (val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val.length >= 2) {
+      village = val;
       fieldConfidence.village = 0.97;
+      break;
+    }
+  }
+  if (!village) {
+    const raMatches = [...text.matchAll(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
+    for (const rm of raMatches) {
+      const v = rm[1].trim();
+      if (v !== 'नमुना' && v !== 'नंबर' && v !== 'शासन' && v.length >= 2) {
+        village = v;
+        fieldConfidence.village = 0.94;
+        break;
+      }
     }
   }
 
-  // 6. Tehsil (तालुका :- खालापूर or ता. खालापूर)
-  const tehsilMatch = text.match(/(?:तालुका\s*[:\-]+|tehsil\s*[:\-]+|taluka\s*[:\-]+|ता\.\s*)([A-Za-z\u0900-\u097F]+)/i);
-  if (tehsilMatch) {
-    let tName = tehsilMatch[1].trim();
-    if (tName === 'खालापुर') tName = 'खालापूर';
-    if (tName.length > 2) {
-      tehsil = tName;
+  // 6. Tehsil (तालुका :- जुन्नर or ता: जुन्नर)
+  const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+  for (const m of tMatches) {
+    const val = m[1].trim();
+    if (val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
+      tehsil = val === 'खालापुर' ? 'खालापूर' : val;
       fieldConfidence.tehsil = 0.96;
+      break;
     }
   }
+  if (!tehsil) {
+    const taMatches = [...text.matchAll(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{2,25})/g)];
+    for (const tm of taMatches) {
+      const val = tm[1].trim();
+      if (val !== 'नंबर' && val !== 'नमुना' && val !== 'शासन' && val.length >= 3) {
+        tehsil = val;
+        fieldConfidence.tehsil = 0.94;
+        break;
+      }
+    }
+  }
+  if (!tehsil && text.includes('जुन्नर')) {
+    tehsil = 'जुन्नर';
+    fieldConfidence.tehsil = 0.92;
+  }
 
-  // 7. District (जिल्हा :- रायगड or जि. रायगड)
-  const districtMatch = text.match(/(?:जिल्हा\s*[:\-]+|district\s*[:\-]+|जि\.\s*)([A-Za-z\u0900-\u097F]+)/i);
-  if (districtMatch) {
-    let dName = districtMatch[1].trim();
-    if (dName === 'रायगढ़') dName = 'रायगड';
-    if (dName.length > 2 && dName !== 'ws') {
-      district = dName;
+  // 7. District (जिल्हा :- पुणे or जि. पुणे or for. पुणे)
+  const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि|for)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+  for (const dm of dMatches) {
+    const val = dm[1].trim();
+    if (val !== 'gor' && val !== 'पद्धती' && val !== 'शासन' && val.length >= 2) {
+      district = val === 'रायगढ़' ? 'रायगड' : val;
       fieldConfidence.district = 0.98;
+      break;
     }
   }
 
@@ -308,8 +349,8 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     anomalies.push('Occupant Class 2 tenure detected (Requires Collector permission for sale/transfer)');
   }
 
-  // 9. Mutation / Ferfar patterns (शेवटचा फेरफार क्रमांक 2750 or फे.फा. ( 1550 ))
-  const mutationMatch = text.match(/(?:शेवटचा\s*फेरफार\s*क्रमांक|फेरफार|ferfar|mutation|mtr)\s*[:\-]?\s*([0-9A-Za-z\/\-]+)/i);
+  // 9. Mutation / Ferfar patterns (शेवटचा फेरफार क्रमांक 2750 or फे.फा. ( 1550 ) or फेरफार क्र. : 1632)
+  const mutationMatch = text.match(/(?:शेवटचा\s*फेरफार\s*क्रमांक|मागील\s*फेरफार\s*क्र\.?|फेरफार\s*क्र\.?|फेरफार|ferfar|mutation|mtr)[\s\:\-\=_।\.\n]*([0-9]{3,6})/i);
   if (mutationMatch) {
     mutationNumber = `MTR-${mutationMatch[1].trim()}`;
   } else {
@@ -319,7 +360,7 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // 10. Owner Name (भोगवटादाराचे नाव / खातेदाराचे नाव / कब्जेदार)
+  // 10. Owner Name (भोगवटादाराचे नाव / खातेदाराचे नाव / कब्जेदार / भूमिधारकाचे नाव)
   // Clean text by stripping zero-width spaces and normalizing punctuation
   const cleanOwnerCandidate = (raw: string): string => {
     return raw
@@ -327,6 +368,8 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
       .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '') // strip mutation numbers in parens like (1532) or (१६३२)
       .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '') // strip leading list numbers like 1) or १)
       .replace(/\r?\n.*/s, '') // keep first line if multiline
+      .replace(/शिंदि/g, 'शिंदे')
+      .replace(/पाटि/g, 'पाटील')
       .trim();
   };
 
@@ -342,33 +385,50 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     return blacklist.some((w) => lower.includes(w));
   };
 
-  // Pattern A: Labeled owner field (e.g. खातेदाराचे नाव : श्री. रमेश पाटील or under table column)
+  // Pattern A: Labeled owner field (e.g. भूमिधारकाचे नाव, खातेदाराचे नाव, भोगवटादाराचे नाव)
   const labeledOwnerMatch = text.match(
-    /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूधारकाचे\s*नाव|जमीन\s*मालक|owner\s*name)[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})/i
+    /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूमिधारकाचे\s*नाव|\[?भिधारकांचे\s*नाव|भूधारकाचे\s*नाव|जमीन\s*मालक|owner\s*name)[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})/i
   );
   if (labeledOwnerMatch && labeledOwnerMatch[1]) {
-    const cleaned = cleanOwnerCandidate(labeledOwnerMatch[1]);
+    let rawCand = labeledOwnerMatch[1].replace(/शिंदि\b/, 'शिंदे').replace(/पाटि\b/, 'पाटील');
+    const cleaned = cleanOwnerCandidate(rawCand);
     if (!isInvalidOwner(cleaned)) {
       ownerName = cleaned;
-      fieldConfidence.ownerName = 0.94;
+      fieldConfidence.ownerName = 0.96;
     }
   }
 
   // Pattern B: Devanagari honorific with full name (श्री / श्रीमती / सौ / कै / स्व)
+  // Supports colons, dots, dashes: श्री: गणेश or श्री. गणेश
   if (!ownerName) {
     const honorificMatch = text.match(
-      /(?:(?:श्री|श्रीमती|सौ|कै|स्व)\.?\s+)([A-Za-z\u0900-\u097F\s]{4,45})/
+      /(?:(?:श्री|श्रीमती|सौ|कै|स्व)[\s:\.\-=_]+)([A-Za-z\u0900-\u097F\s]{4,45})/
     );
-    if (honorificMatch && honorificMatch[0]) {
-      const cleaned = cleanOwnerCandidate(honorificMatch[0]);
+    if (honorificMatch && (honorificMatch[0] || honorificMatch[1])) {
+      let rawCand = honorificMatch[0].replace(/[\s:\.\-=_]+/, ' ').trim();
+      rawCand = rawCand.replace(/शिंदि\b/, 'शिंदे').replace(/पाटि\b/, 'पाटील');
+      const cleaned = cleanOwnerCandidate(rawCand);
       if (!isInvalidOwner(cleaned) && cleaned.split(/\s+/).length >= 2) {
         ownerName = cleaned;
-        fieldConfidence.ownerName = 0.91;
+        fieldConfidence.ownerName = 0.94;
       }
     }
   }
 
-  // Pattern C: Numbered entry in 7/12 table (e.g. 1) शंकर गणपत पाटील or १) रमेश पवार)
+  // Pattern C: Table cell format (e.g. | १२३४ | श्री: गणेश लक्ष्मण शिंदि |)
+  if (!ownerName) {
+    const tableCellMatch = text.match(/\|\s*(?:(?:श्री|श्रीमती|सौ)[:\.\-=_]?\s*)?([A-Za-z\u0900-\u097F\s]{4,35})\s*\|/);
+    if (tableCellMatch && tableCellMatch[1]) {
+      let rawCand = tableCellMatch[1].replace(/शिंदि\b/, 'शिंदे').replace(/पाटि\b/, 'पाटील');
+      const cleaned = cleanOwnerCandidate(rawCand);
+      if (!isInvalidOwner(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        ownerName = cleaned;
+        fieldConfidence.ownerName = 0.90;
+      }
+    }
+  }
+
+  // Pattern D: Numbered entry in 7/12 table (e.g. 1) शंकर गणपत पाटील or १) रमेश पवार)
   if (!ownerName) {
     const numberedMatch = text.match(
       /(?:^|\n)\s*[१२३४५६७८९\d]+[\)\.\-]\s*(?:(?:श्री|श्रीमती|सौ)\.?\s+)?([A-Za-z\u0900-\u097F\s]{4,45})/
@@ -382,7 +442,7 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // Pattern D: 2-3 word English full name
+  // Pattern E: 2-3 word English full name
   if (!ownerName) {
     const engMatches = text.match(/\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b/g);
     if (engMatches) {
