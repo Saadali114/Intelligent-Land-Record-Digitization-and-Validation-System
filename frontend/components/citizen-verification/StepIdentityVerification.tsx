@@ -1,9 +1,9 @@
-'use client';
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, Smartphone, CheckCircle2, KeyRound, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Mail, CheckCircle2, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { VerificationWorkflowData } from '../../services/verificationWorkflowService';
+import { OtpInput } from '../ui/OtpInput';
+import { authService } from '../../services/auth.service';
 
 interface StepIdentityVerificationProps {
   workflow: VerificationWorkflowData;
@@ -15,17 +15,62 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
   onComplete,
 }) => {
   const { t } = useTranslation();
-  const [otp, setOtp] = useState('742198');
+  const [otpSent, setOtpSent] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [verified, setVerified] = useState(workflow.applicant.identityStatus === 'VERIFIED');
+  const [resendCooldown, setResendCooldown] = useState(60);
+  const [expiresIn, setExpiresIn] = useState(300);
 
-  const handleVerify = () => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-      setVerified(true);
-    }, 600);
+  const applicantEmail = workflow.applicant.email || 'citizen@example.com';
+
+  const handleSendOtp = async () => {
+    setIsSending(true);
+    setErrorMessage(null);
+    try {
+      const res = await authService.sendEmailOtp(applicantEmail, 'EMAIL_VERIFICATION');
+      setOtpSent(true);
+      if (res.resendAvailableIn) setResendCooldown(res.resendAvailableIn);
+      if (res.expiresIn) setExpiresIn(res.expiresIn);
+    } catch (err: any) {
+      setErrorMessage(
+        err.message || 'Unable to send Email OTP. Please check your network and try again.'
+      );
+    } finally {
+      setIsSending(false);
+    }
   };
+
+  const handleVerifyOtp = async (otpCode: string) => {
+    setIsVerifying(true);
+    setErrorMessage(null);
+    try {
+      const res = await authService.verifyEmailOtp(applicantEmail, otpCode, 'EMAIL_VERIFICATION');
+      if (res.verified) {
+        setVerified(true);
+      } else {
+        setErrorMessage(res.message || 'Invalid verification code.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Verification failed. Please check the code and try again.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setErrorMessage(null);
+    try {
+      const res = await authService.resendEmailOtp(applicantEmail, 'EMAIL_VERIFICATION');
+      if (res.resendAvailableIn) setResendCooldown(res.resendAvailableIn);
+      if (res.expiresIn) setExpiresIn(res.expiresIn);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to resend verification code.');
+      throw err;
+    }
+  };
+
 
   return (
     <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 shadow-xl">
@@ -59,11 +104,11 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
 
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">
-              {t('verificationWorkflow.registeredMobile', 'Registered Mobile Number')}
+              {t('verificationWorkflow.registeredEmail', 'Registered Email Address')}
             </label>
             <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-200 font-mono">
-              <Smartphone className="w-4 h-4 text-slate-500" />
-              <span>{workflow.applicant.mobile}</span>
+              <Mail className="w-4 h-4 text-slate-500" />
+              <span>{applicantEmail}</span>
             </div>
           </div>
 
@@ -73,68 +118,85 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
             </label>
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Registered Citizen Account • Tier-1 KYC Active</span>
+              <span>Registered Citizen Account • Email Verification Active</span>
             </div>
           </div>
         </div>
 
         <div className="bg-slate-950/60 rounded-xl p-5 border border-slate-800/80 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-2">
+            <div className="flex items-center gap-2 text-slate-300 text-sm font-medium mb-3">
               <KeyRound className="w-4 h-4 text-sky-400" />
               <span>{t('verificationWorkflow.enterOtp', 'Enter 6-Digit Verification OTP')}</span>
             </div>
-            <p className="text-xs text-slate-400 mb-4">
-              Demo OTP automatically generated for registered phone: <span className="font-mono text-sky-400">742198</span>
-            </p>
 
-            <div className="flex gap-2 mb-3">
-              <input
-                type="text"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="742198"
-                className="w-full tracking-widest text-center font-mono text-lg py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
-              />
-            </div>
-
-            <div className="text-[11px] text-slate-500 italic mb-4">
-              {workflow.applicant.demoNote}
-            </div>
-          </div>
-
-          <div>
             {verified ? (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs mb-3">
-                <span className="flex items-center gap-2 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  {t(
-                    'verificationWorkflow.identityVerifiedSuccess',
-                    'Identity Verified via Registered Mobile OTP'
+              <div className="p-4 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs mb-4">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="flex items-center gap-2 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    {t(
+                      'verificationWorkflow.identityVerifiedSuccess',
+                      'Email Verified via Real Inbox OTP'
+                    )}
+                  </span>
+                  <span className="text-[10px] uppercase font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">
+                    VERIFIED
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-200/80 mt-1">
+                  Email inbox control verified via 6-digit code for {workflow.applicant.name} ({applicantEmail}).
+                </p>
+              </div>
+            ) : !otpSent ? (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-400">
+                  Click below to dispatch a real 6-digit verification code to registered email{' '}
+                  <span className="font-mono text-white font-semibold">{applicantEmail}</span>.
+                </p>
+
+                {errorMessage && (
+                  <div className="p-3 rounded-lg bg-rose-950/30 border border-rose-500/40 text-rose-300 text-xs">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={isSending}
+                  className="w-full py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs transition-colors flex items-center justify-center gap-2"
+                >
+                  {isSending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sending Email OTP...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      <span>{t('verificationWorkflow.sendEmailOtp', 'Send Email Verification OTP')}</span>
+                    </>
                   )}
-                </span>
-                <span className="text-[10px] uppercase font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">
-                  PASSED
-                </span>
+                </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={handleVerify}
-                disabled={isVerifying || otp.length < 4}
-                className="w-full py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs transition-colors flex items-center justify-center gap-2 mb-3"
-              >
-                {isVerifying ? (
-                  <span>Authenticating...</span>
-                ) : (
-                  <>
-                    <span>{t('verificationWorkflow.verifyOtp', 'Verify Identity via OTP')}</span>
-                  </>
-                )}
-              </button>
+              <div className="space-y-3">
+                <OtpInput
+                  length={6}
+                  email={applicantEmail}
+                  onComplete={handleVerifyOtp}
+                  onResend={handleResendOtp}
+                  isLoading={isVerifying}
+                  errorMessage={errorMessage}
+                  resendCooldownSeconds={resendCooldown}
+                  expirySeconds={expiresIn}
+                />
+              </div>
             )}
+          </div>
 
+          <div className="pt-4 mt-4 border-t border-slate-800">
             <button
               type="button"
               onClick={onComplete}

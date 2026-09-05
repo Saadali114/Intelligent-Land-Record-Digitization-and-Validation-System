@@ -194,6 +194,16 @@
     "otpSent": "OTP sent to your mobile number.",
     "otpLabel": "Enter 6-Digit OTP",
     "resendOtp": "Resend OTP",
+    "verifyMobile": "Verify Mobile Number",
+    "enterOtp": "Enter 6-Digit OTP",
+    "otpExpired": "OTP expired. Please request a new code.",
+    "codeExpiresIn": "Code expires in",
+    "sendingOtp": "Sending OTP...",
+    "verifyingOtp": "Verifying...",
+    "invalidOtp": "Invalid or expired OTP code.",
+    "otpSentSuccessfully": "OTP sent successfully to your mobile number.",
+    "mobileVerified": "Mobile number verified successfully.",
+    "smsDisclaimer": "SMS OTP verifies mobile number control. It does not confer title or ownership to land records without cadastral verification.",
     "changeMobile": "Change Mobile Number",
     "verifyAndLogin": "Verify & Enter Portal",
     "quickDemoLogin": "1-Click Demo Login as Rahul Patil",
@@ -586,6 +596,29 @@
     "stageRecordMatched": "Official Record Matched",
     "stageRelChecked": "Relationship Checked",
     "stageOfficerReview": "Officer Review",
-    "stageFinalDecision": "Final Decision"
+    "stageFinalDecision": "Final Decision",
+    "registeredEmail": "Registered Email Address",
+    "sendEmailOtp": "Send Email Verification OTP"
+  },
+  "auth": {
+    "citizenLoginTitle": "Citizen Email Authentication",
+    "citizenLoginSubtitle": "Real 6-digit email OTP verification code delivered directly to your inbox.",
+    "emailLabel": "Email Address",
+    "emailHelp": "A genuine 6-digit verification code will be dispatched to your inbox via Resend.",
+    "sendEmailOtp": "Send Verification Code",
+    "invalidEmailError": "Please enter a valid email address (e.g. name@domain.com).",
+    "sendEmailOtpFailed": "Unable to dispatch Email OTP. Please verify email address or try again.",
+    "verifyEmail": "Verify Email Address",
+    "verifyMobile": "Verify Mobile Number",
+    "otpSent": "We sent a 6-digit verification code to",
+    "invalidOtp": "Please enter the full 6-digit OTP code.",
+    "codeExpiresIn": "Code expires in",
+    "otpExpired": "OTP expired. Please request a new code.",
+    "resendOtp": "Resend Code",
+    "sendingOtp": "Sending Code...",
+    "resendOtpFailed": "Unable to resend code at this time.",
+    "changeEmail": "Use another email address",
+    "emailDisclaimer": "Email verification confirms applicant inbox control. Official cadastral rights and land ownership are validated separately via revenue records."
   }
 }
+

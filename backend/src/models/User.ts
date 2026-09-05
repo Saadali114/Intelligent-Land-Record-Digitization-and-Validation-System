@@ -12,6 +12,12 @@ export interface IUser extends MongooseDocument {
   department: string;
   district: string;
   status: UserStatus;
+  emailVerified?: boolean;
+  emailVerifiedAt?: Date;
+  mobile?: string;
+  mobileVerified?: boolean;
+  mobileVerifiedAt?: Date;
+  mobileVerificationMethod?: string;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +40,32 @@ const UserSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
       index: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    emailVerifiedAt: {
+      type: Date,
+    },
+    mobile: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
+    mobileVerified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    mobileVerifiedAt: {
+      type: Date,
+    },
+    mobileVerificationMethod: {
+      type: String,
+      default: 'SMS',
     },
     password: {
       type: String,

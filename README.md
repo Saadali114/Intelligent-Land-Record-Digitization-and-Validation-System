@@ -322,3 +322,108 @@ All API responses strictly adhere to the uniform enterprise JSON format:
 ## 9. License & Team
 Developed for the National Land Record Digitization and Validation Initiative.
 Phase 1 Web Application Foundation complete and ready for AI Service integration.
+
+---
+
+## 10. Real SMS OTP Setup (MSG91 & India DLT Compliance)
+
+The ILRDVS platform features real SMS OTP authentication powered by the **MSG91 SendOTP API** with an extensible provider abstraction (`OTPProvider`).
+
+### Production SMS Delivery in India (DLT Compliance)
+Per Telecom Regulatory Authority of India (TRAI) regulations, commercial SMS delivery requires registration on an authorized DLT telecom portal (e.g. Vilpower, Jio DLT, Airtel DLT):
+
+1. **Entity Registration**: Register your government department or enterprise entity to obtain a registered Principal Entity (PE) ID.
+2. **Header / Sender ID Approval**: Register a 6-character alphabetic header (e.g., `ILRDVS`, `MHREV`).
+3. **Template Approval**: Register an explicit OTP content template on DLT, for example:
+   ```text
+   Your OTP for ILRDVS land record verification is {#var#}. Valid for 5 minutes. Do not share with anyone. - Revenue Dept
+   ```
+4. **MSG91 Dashboard Setup**:
+   - Navigate to **MSG91 Dashboard** → **OTP**.
+   - Create a new OTP template and link the approved **DLT Template ID** and **Sender ID**.
+   - Copy your **Authkey** and the **Template ID**.
+
+### Backend Environment Configuration
+Configure the following in `backend/.env` (never commit secrets to version control):
+```env
+# SMS Provider Selection
+SMS_PROVIDER=msg91
+SMS_PROVIDER_MODE=production
+
+# MSG91 Credentials
+MSG91_AUTH_KEY=your_production_msg91_authkey
+MSG91_OTP_TEMPLATE_ID=your_approved_dlt_template_id
+
+# Security & Rate Limiting Controls
+OTP_EXPIRY_MINUTES=5
+OTP_RESEND_COOLDOWN_SECONDS=60
+OTP_MAX_ATTEMPTS=5
+OTP_MAX_REQUESTS_PER_HOUR=5
+```
+
+### Local Development / Sandbox Mode
+For local development without an active MSG91 DLT account:
+- Set `SMS_PROVIDER_MODE=sandbox` in `backend/.env`.
+- The system generates time-based secure 6-digit codes and logs simulated dispatches to the server console.
+- **Production Guardrail**: In `NODE_ENV=production`, `SandboxOTPProvider` is strictly disabled and rejected by the factory engine.
+
+### Security Architecture & Legal Distinction
+- **Zero Exposure**: Plaintext OTP values are never returned to the frontend or exposed in API JSON responses.
+- **Strict Distinction**: Successful SMS OTP verification confirms **Proof of Mobile Control**. It does **NOT** confer land title ownership. Landholder standing is established solely through the subsequent Cadastral Record Match and User ↔ Land Legal Standing verification pillars.
+
+---
+
+## 11. Real Email OTP Authentication Engine (Resend & Dev Sandbox)
+
+ILRDVS features a production-ready **Email OTP Verification Engine** designed for citizen authentication, applicant verification, and high-trust account operations without requiring telecom DLT registration.
+
+### Email Delivery Provider Architecture
+The system employs an extensible `EmailProvider` interface utilizing native Node.js `fetch` (zero heavy external email client dependencies):
+
+1. **Resend (`EMAIL_PROVIDER=resend`)**:
+   - Dispatches transactional emails via the high-deliverability Resend REST API (`https://api.resend.com/emails`).
+   - Renders a responsive government-branded HTML template featuring a distinct 6-digit code box, expiry warning (5 minutes), and anti-phishing advisory.
+2. **Development Sandbox (`EMAIL_PROVIDER=dev`)**:
+   - When running locally without a Resend API key, the `DevEmailProvider` generates and formats verification emails directly to the server terminal.
+   - **Production Guardrail**: Rejects dev mode if `NODE_ENV=production` is detected.
+
+### Backend Environment Configuration
+Add the following variables to `backend/.env`:
+```env
+# Email Provider Selection ('resend' or 'dev')
+EMAIL_PROVIDER=resend
+
+# Resend Credentials
+RESEND_API_KEY=re_your_resend_api_key_here
+EMAIL_FROM_NAME="ILRDVS Land Authority"
+EMAIL_FROM_ADDRESS=onboarding@resend.dev
+
+# Cryptographic Salt (Falls back to JWT_SECRET if unset)
+OTP_HMAC_SECRET=your_secure_hmac_secret_key
+
+# Security & Expiry Controls
+OTP_EXPIRY_MINUTES=5
+OTP_RESEND_COOLDOWN_SECONDS=60
+OTP_MAX_ATTEMPTS=5
+OTP_MAX_REQUESTS_PER_HOUR=5
+```
+
+### Security Architecture
+- **Cryptographically Secure OTPs**: Generated using Node.js `crypto.randomInt(100000, 1000000)`.
+- **HMAC-SHA256 Hashed Storage**: Plaintext OTPs are **never saved** to MongoDB and **never logged**. Only the salted HMAC-SHA256 hash is retained.
+- **Single-Use Consumption**: Once verified, the database record status transitions to `VERIFIED`. Any re-verification attempt is immediately rejected.
+- **Automatic TTL Pruning**: MongoDB TTL index on `expiresAt` automatically cleans up expired verification sessions without scheduled background sweeps.
+- **Attempt Locking & Cooldown**: Maximum 5 attempts before session lockout, enforced 60-second resend cooldown, and hourly quota of 5 requests per email.
+
+### REST API Endpoints
+| Method | Endpoint | Request Body | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/email-otp/send` | `{ email, purpose }` | Generates and sends a 6-digit OTP code to the recipient's inbox |
+| `POST` | `/api/auth/email-otp/verify` | `{ email, otp, purpose }` | Verifies candidate 6-digit OTP against the HMAC hash |
+| `POST` | `/api/auth/email-otp/resend` | `{ email, purpose }` | Re-generates and re-dispatches OTP subject to cooldown controls |
+
+### Legal & Verification Distinction
+- **Email Verified**: Confirms only that the applicant controls the submitted email address.
+- **Statutory Cadastral Rights**: Ownership, co-ownership, tenancy, or legal heirship is validated independently through the 4-Pillar Cadastral Registry Cross-Check and Revenue Officer Approval workflow.
+
+

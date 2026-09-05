@@ -7,60 +7,103 @@ import { useTranslation } from 'react-i18next';
 import {
   Building2,
   ShieldCheck,
-  Smartphone,
-  KeyRound,
+  Mail,
   ArrowRight,
   Info,
   CheckCircle2,
-  Sparkles,
   Lock,
 } from 'lucide-react';
+
 import { Button } from '../../../components/ui/Button';
 import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher';
+import { OtpInput } from '../../../components/ui/OtpInput';
 import { citizenService } from '../../../services/citizen.service';
+import { authService } from '../../../services/auth.service';
 
 export default function CitizenLoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [mobileNumber, setMobileNumber] = useState('9822012345');
+  const [email, setEmail] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(60);
+  const [expiresIn, setExpiresIn] = useState(300);
 
-  const handleSendOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mobileNumber || mobileNumber.length < 10) {
-      setError('Please enter a valid 10-digit mobile number registered with Aadhaar.');
+  const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!email || !isValidEmail(email)) {
+      setError(
+        t('auth.invalidEmailError', {
+          defaultValue: 'Please enter a valid email address (e.g. name@domain.com).',
+        })
+      );
       return;
     }
     setError('');
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      const res = await authService.sendEmailOtp(email.trim().toLowerCase(), 'LOGIN');
       setOtpSent(true);
-      setOtp('739241'); // autofill realistic demo OTP
-    }, 600);
+      if (res.resendAvailableIn) setResendCooldown(res.resendAvailableIn);
+      if (res.expiresIn) setExpiresIn(res.expiresIn);
+    } catch (err: any) {
+      setError(
+        err.message ||
+          t('auth.sendEmailOtpFailed', {
+            defaultValue: 'Unable to dispatch Email OTP. Please verify email address or try again.',
+          })
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp || otp.length < 4) {
-      setError('Please enter the 6-digit OTP received on your mobile.');
+  const handleVerifyOtp = async (otpCode: string) => {
+    if (!otpCode || otpCode.length !== 6) {
+      setError(t('auth.invalidOtp', { defaultValue: 'Please enter the full 6-digit OTP code.' }));
       return;
     }
     setError('');
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const res = await authService.verifyEmailOtp(email.trim().toLowerCase(), otpCode, 'LOGIN');
+      if (res.verified) {
+        // Authenticate citizen session
+        citizenService.login(email.trim().toLowerCase());
+        router.push('/portal');
+      } else {
+        setError(res.message || t('auth.invalidOtp', { defaultValue: 'Invalid OTP code.' }));
+      }
+    } catch (err: any) {
+      setError(
+        err.message ||
+          t('auth.invalidOtp', {
+            defaultValue: 'Invalid or expired OTP code. Please check and try again.',
+          })
+      );
+    } finally {
       setLoading(false);
-      citizenService.login(`+91 ${mobileNumber}`, 'Rahul Patil');
-      router.push('/portal');
-    }, 600);
+    }
   };
 
-  const handleQuickDemoLogin = () => {
-    citizenService.login('+91 98220 12345', 'Rahul Patil');
-    router.push('/portal');
+  const handleResendOtp = async () => {
+    setError('');
+    try {
+      const res = await authService.resendEmailOtp(email.trim().toLowerCase(), 'LOGIN');
+      if (res.resendAvailableIn) setResendCooldown(res.resendAvailableIn);
+      if (res.expiresIn) setExpiresIn(res.expiresIn);
+    } catch (err: any) {
+      setError(
+        err.message ||
+          t('auth.resendOtpFailed', { defaultValue: 'Unable to resend OTP at this time.' })
+      );
+      throw err;
+    }
   };
 
   return (
@@ -79,9 +122,7 @@ export default function CitizenLoginPage() {
               <div className="text-base font-bold text-slate-900">
                 ILRDVS <span className="text-blue-900 font-semibold">{t('navbar.citizenPortal')}</span>
               </div>
-              <div className="text-xs text-slate-500">
-                {t('common.portalFullName')}
-              </div>
+              <div className="text-xs text-slate-500">{t('common.portalFullName')}</div>
             </div>
           </Link>
 
@@ -98,26 +139,26 @@ export default function CitizenLoginPage() {
       </header>
 
       {/* Center Auth Card */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-lg p-6 sm:p-8">
-          {/* Badge */}
-          <div className="flex items-center justify-center mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
-              {t('common.aadhaarVerified')}
-            </span>
-          </div>
-
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-6 sm:p-8">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">{t('auth.citizenLoginTitle')}</h1>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-center mx-auto mb-3">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900">
+              {t('auth.citizenLoginTitle', { defaultValue: 'Citizen Email Authentication' })}
+            </h1>
             <p className="text-xs text-slate-500 mt-1">
-              {t('auth.citizenLoginSubtitle')}
+              {t('auth.citizenLoginSubtitle', {
+                defaultValue: 'Real 6-digit email OTP verification code delivered directly to your inbox.',
+              })}
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700">
-              {error}
+            <div className="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2 animate-fade-in">
+              <span className="font-bold shrink-0">•</span>
+              <span>{error}</span>
             </div>
           )}
 
@@ -125,24 +166,26 @@ export default function CitizenLoginPage() {
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  {t('auth.mobileLabel')}
+                  {t('auth.emailLabel', { defaultValue: 'Email Address' })}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-sm font-semibold">
-                    +91
-                  </div>
                   <input
-                    type="tel"
-                    maxLength={10}
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder={t('auth.mobilePlaceholder')}
-                    className="w-full pl-12 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setError('');
+                      setEmail(e.target.value);
+                    }}
+                    placeholder="citizen@example.com"
+                    autoComplete="email"
+                    className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
-                  <Smartphone className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  {t('auth.mobileHelp')}
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  {t('auth.emailHelp', {
+                    defaultValue: 'A genuine 6-digit verification code will be dispatched to your inbox via Resend.',
+                  })}
                 </p>
               </div>
 
@@ -153,99 +196,56 @@ export default function CitizenLoginPage() {
                 className="w-full justify-center"
                 isLoading={loading}
               >
-                {t('auth.sendOtp')} <ArrowRight className="w-4 h-4 ml-1.5" />
+                {t('auth.sendEmailOtp', { defaultValue: 'Send Verification Code' })} <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5" />
-                <div>
-                  {t('auth.otpSent')} (+91 {mobileNumber})
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  {t('auth.otpLabel')}
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="739241"
-                    className="w-full px-4 py-2.5 text-center tracking-widest text-lg font-mono font-bold bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
-                  />
-                  <KeyRound className="w-4 h-4 text-slate-400 absolute right-3 top-3.5" />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <button
-                  type="button"
-                  onClick={() => setOtpSent(false)}
-                  className="text-slate-500 hover:text-slate-800 underline"
-                >
-                  {t('auth.changeMobile')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOtp('739241')}
-                  className="text-blue-900 font-semibold hover:underline"
-                >
-                  {t('auth.resendOtp')}
-                </button>
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full justify-center"
+            <div className="space-y-5">
+              <OtpInput
+                length={6}
+                email={email}
+                onComplete={handleVerifyOtp}
+                onResend={handleResendOtp}
                 isLoading={loading}
-              >
-                {t('auth.verifyAndLogin')} <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </form>
+                errorMessage={error}
+                resendCooldownSeconds={resendCooldown}
+                expirySeconds={expiresIn}
+              />
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpSent(false);
+                    setError('');
+                  }}
+                  className="text-xs text-slate-500 hover:text-slate-800 underline"
+                >
+                  ← {t('auth.changeEmail', { defaultValue: 'Use another email address' })}
+                </button>
+              </div>
+            </div>
           )}
 
-          {/* Quick Demo Login One-Click Button */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-3">
-              Fast Demo / Evaluation Access
-            </div>
-            <button
-              onClick={handleQuickDemoLogin}
-              type="button"
-              className="w-full py-2.5 px-4 rounded-lg bg-amber-50 border border-amber-300 hover:bg-amber-100/80 text-amber-900 font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
-            >
-              <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>{t('auth.quickDemoLogin')}</span>
-            </button>
-            <p className="text-[10px] text-center text-slate-400 mt-2">
-              {t('auth.demoLoginNote')}
-            </p>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-900"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              {t('auth.officialStaffLogin')}
-            </Link>
+          {/* Privacy & Legal Footer Notice */}
+          <div className="mt-6 pt-5 border-t border-slate-100 flex items-start gap-2 text-[11px] text-slate-400">
+            <Lock className="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" />
+            <span>
+              {t('auth.emailDisclaimer', {
+                defaultValue:
+                  'Email verification confirms applicant inbox control. Official cadastral rights and land ownership are validated separately via revenue records.',
+              })}
+            </span>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
-        <p>
-          {t('common.stateGovt')} &bull; {t('common.revenueDept')} &bull; Powered by {t('common.portalName')}
-        </p>
+
+      {/* Footer Bar */}
+      <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
+        <div>
+          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+        </div>
       </footer>
     </div>
   );
