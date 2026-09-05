@@ -661,7 +661,7 @@ def extract_cadastral_entities(
         field_confidence["plotArea"] = 0.20
 
     if not mutation_number:
-        mutation_number = f"MTR-{2024 + (name_hash % 3)}-{(name_hash % 900) + 100}"
+        mutation_number = ""
 
     import time
     if doc_registration_number:

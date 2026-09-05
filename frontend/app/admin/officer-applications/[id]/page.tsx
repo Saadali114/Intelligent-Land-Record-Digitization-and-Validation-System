@@ -1,5 +1,5 @@
 import React from 'react';
-import OfficerApplicationReviewClient from './OfficerApplicationReviewClient';
+import OfficerApplicationReviewClient from '@/components/admin/OfficerApplicationReviewClient';
 
 // Required for Next.js static export (output: 'export')
 export function generateStaticParams() {

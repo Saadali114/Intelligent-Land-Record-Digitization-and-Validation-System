@@ -18,8 +18,8 @@ import {
   Send,
   Loader2,
 } from 'lucide-react';
-import { AppLayout } from '../../../../components/layout/AppLayout';
-import { authService } from '../../../../services/auth.service';
+import { AppLayout } from '../layout/AppLayout';
+import { authService } from '../../services/auth.service';
 
 interface Props {
   applicationId: string;
