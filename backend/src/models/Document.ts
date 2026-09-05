@@ -1,6 +1,19 @@
 import mongoose, { Schema, Document as MongooseDocument } from 'mongoose';
 
-export type DocumentProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED' | 'NEEDS_REVIEW';
+export type DocumentProcessingStatus =
+  | 'UPLOADED'
+  | 'PROCESSING'
+  | 'OCR_COMPLETED'
+  | 'ANALYSIS_COMPLETED'
+  | 'PENDING_OFFICER_REVIEW'
+  | 'ACTION_REQUIRED'
+  | 'VERIFIED'
+  | 'REJECTED'
+  | 'PROCESSED'
+  | 'FAILED'
+  | 'NEEDS_REVIEW';
+
+export type LandDocumentType = '7_12' | '8A' | 'FERFAR' | 'SALE_DEED' | 'OTHER';
 
 export interface IDocument extends MongooseDocument {
   documentId: string;
@@ -13,6 +26,10 @@ export interface IDocument extends MongooseDocument {
   language: string;
   uploadedBy: mongoose.Types.ObjectId;
   processingStatus: DocumentProcessingStatus;
+  documentTypeEnum?: LandDocumentType;
+  checksum?: string;
+  version?: number;
+  pageCount?: number;
   uploadedAt: Date;
   metadata: Record<string, any>;
   createdAt: Date;
@@ -67,9 +84,39 @@ const DocumentSchema = new Schema<IDocument>(
     },
     processingStatus: {
       type: String,
-      enum: ['UPLOADED', 'PROCESSING', 'PROCESSED', 'FAILED', 'NEEDS_REVIEW'],
+      enum: [
+        'UPLOADED',
+        'PROCESSING',
+        'OCR_COMPLETED',
+        'ANALYSIS_COMPLETED',
+        'PENDING_OFFICER_REVIEW',
+        'ACTION_REQUIRED',
+        'VERIFIED',
+        'REJECTED',
+        'PROCESSED',
+        'FAILED',
+        'NEEDS_REVIEW',
+      ],
       default: 'UPLOADED',
       index: true,
+    },
+    documentTypeEnum: {
+      type: String,
+      enum: ['7_12', '8A', 'FERFAR', 'SALE_DEED', 'OTHER'],
+      default: '7_12',
+      index: true,
+    },
+    checksum: {
+      type: String,
+      index: true,
+    },
+    version: {
+      type: Number,
+      default: 1,
+    },
+    pageCount: {
+      type: Number,
+      default: 1,
     },
     uploadedAt: {
       type: Date,

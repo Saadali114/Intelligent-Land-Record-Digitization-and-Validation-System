@@ -50,6 +50,12 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       badge: '4-Pillar',
     },
     {
+      name: 'AI Verifications',
+      href: '/citizen/verifications',
+      icon: FileText,
+      badge: 'Active',
+    },
+    {
       name: t('applications.title'),
       href: '/portal/applications',
       icon: FileText,

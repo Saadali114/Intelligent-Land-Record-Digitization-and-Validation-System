@@ -220,8 +220,81 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
     }
     console.log(`Created ${documents.length} sample documents.`);
 
-    // Seed Land Records
-    console.log('Creating realistic Land Records with historical authenticity...');
+    // Seed Canonical Demo Reference Records
+    console.log('Seeding canonical Demo Reference Records (LR-001, LR-002, LR-003)...');
+    const demoReferenceRecords = [
+      {
+        recordId: 'LR-001',
+        ownerName: 'Shankar Ganpat Patil',
+        surveyNumber: '145/2A',
+        gatNumber: '145/2A',
+        khasraNumber: 'KH-1452',
+        khataNumber: 'KT-304',
+        plotArea: '1.25 Hectares',
+        village: 'Khadakwasla',
+        tehsil: 'Haveli',
+        district: 'Pune',
+        email: 'shankar.patil@example.com',
+        landClassification: 'Agricultural (Jirayat)',
+        ownershipType: 'Single Owner',
+        mutationNumber: 'MUT-2024-8812',
+        registrationNumber: 'MH-PUN-HAV-2024-001',
+        sourceType: 'DEMO_REFERENCE_RECORD' as const,
+        verificationStatus: 'VERIFIED' as const,
+        createdBy: admin._id,
+        confidenceScore: 0.98,
+        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+      },
+      {
+        recordId: 'LR-002',
+        ownerName: 'Meena Rajendra Kulkarni',
+        surveyNumber: '88/3',
+        gatNumber: '88/3',
+        khasraNumber: 'KH-0883',
+        khataNumber: 'KT-112',
+        plotArea: '0.85 Hectares',
+        village: 'Vani',
+        tehsil: 'Dindori',
+        district: 'Nashik',
+        email: 'meena.kulkarni@example.com',
+        landClassification: 'Agricultural (Bagayat)',
+        ownershipType: 'Single Owner',
+        mutationNumber: 'MUT-2023-4109',
+        registrationNumber: 'MH-NSK-DIN-2023-002',
+        sourceType: 'DEMO_REFERENCE_RECORD' as const,
+        verificationStatus: 'VERIFIED' as const,
+        createdBy: admin._id,
+        confidenceScore: 0.96,
+        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+      },
+      {
+        recordId: 'LR-003',
+        ownerName: 'Rahul Shankar Patil',
+        surveyNumber: '211/4',
+        gatNumber: '211/4',
+        khasraNumber: 'KH-2114',
+        khataNumber: 'KT-589',
+        plotArea: '2.10 Hectares',
+        village: 'Wagholi',
+        tehsil: 'Haveli',
+        district: 'Pune',
+        email: 'rahul.patil@example.com',
+        landClassification: 'Agricultural (Jirayat)',
+        ownershipType: 'Single Owner',
+        mutationNumber: 'MUT-2025-9921',
+        registrationNumber: 'MH-PUN-HAV-2025-003',
+        sourceType: 'DEMO_REFERENCE_RECORD' as const,
+        verificationStatus: 'VERIFIED' as const,
+        createdBy: admin._id,
+        confidenceScore: 0.99,
+        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+      },
+    ];
+
+    for (const demoRec of demoReferenceRecords) {
+      await LandRecord.create(demoRec);
+    }
+
     const landRecords = [];
     const classifications = ['Agricultural (Jirayat)', 'Agricultural (Bagayat)', 'Non-Agricultural Commercial', 'Residential Plot', 'Government Land'];
     const ownershipTypes = ['Single Owner', 'Joint Family Ownership', 'Partnership Trust', 'Co-operative Society'];

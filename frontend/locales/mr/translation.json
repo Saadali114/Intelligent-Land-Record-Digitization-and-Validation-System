@@ -664,6 +664,23 @@
     "registrationComplete": "नोंदणी पूर्ण झाली",
     "goToCitizenPortal": "नागरिक पोर्टलवर जा",
     "viewApplicationStatus": "अर्ज स्थिती ट्रॅकर पहा"
+  },
+  "verificationWorkflow": {
+    "officerWorkspaceTitle": "अधिकारी भूकर पडताळणी कार्यक्षेत्र",
+    "officerWorkspaceSubtitle": "कलम १४९ महाराष्ट्र जमीन महसूल संहिता अंतर्गत अधिकृत पुनरावलोकन आणि वैधानिक निर्णय",
+    "decisionRecorded": "अधिकाऱ्यांचा निर्णय अपरिवर्तनीय ऑडिट लॉगमध्ये नोंदवला गेला आहे.",
+    "dualPaneOcrTitle": "मूळ दस्तऐवज आणि ओसीआर घटक पुनरावलोकन",
+    "consistencyTitle": "दस्तऐवज सुसंगतता आणि अखंडता विश्लेषण",
+    "cadastralMatchTitle": "शासकीय भूकर नोंदवहीशी ताळमेळ",
+    "relationshipTitle": "अर्जदार आणि जमीन मालकी हक्क संबंध",
+    "riskAnalysisTitle": "एआय जोखीम गुण आणि तफावत मूल्यांकन",
+    "auditTimelineTitle": "वैधानिक ऑडिट कालमर्यादा",
+    "approveAction": "दस्तऐवज हक्क मंजूर करा",
+    "clarificationAction": "नागरिकाकडून स्पष्टीकरण मागा",
+    "rejectAction": "अर्ज फेटाळा",
+    "mandatoryRemarks": "अधिकृत वैधानिक शेरा / फेटाळण्याचे कारण",
+    "mandatoryClarification": "अर्जदारासाठी स्पष्टीकरण सूचना",
+    "prototypeNotice": "प्रोटोटाइप पडताळणी वातावरण: एआय संकेत केवळ निर्णय समर्थनासाठी आहेत. अंतिम कायदेशीर अधिकार महसूल अधिकाऱ्यांकडे आहेत."
   }
 }
 

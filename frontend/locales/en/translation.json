@@ -663,6 +663,23 @@
     "registrationComplete": "Registration Complete",
     "goToCitizenPortal": "Go to Citizen Portal",
     "viewApplicationStatus": "View Application Status Tracker"
+  },
+  "verificationWorkflow": {
+    "officerWorkspaceTitle": "Officer Cadastral Verification Workspace",
+    "officerWorkspaceSubtitle": "Authoritative Section 149 MLRC Review and Statutory Verdict",
+    "decisionRecorded": "Officer decision recorded in immutable audit log.",
+    "dualPaneOcrTitle": "Original Document & OCR Entity Review",
+    "consistencyTitle": "Document Consistency & Integrity Analysis",
+    "cadastralMatchTitle": "Cadastral Cross-Check Against Official Register",
+    "relationshipTitle": "Applicant to Land Title Relationship",
+    "riskAnalysisTitle": "AI Risk Score & Discrepancy Assessment",
+    "auditTimelineTitle": "Statutory Audit Timeline",
+    "approveAction": "Approve Document Title",
+    "clarificationAction": "Request Citizen Clarification",
+    "rejectAction": "Reject Application",
+    "mandatoryRemarks": "Official Statutory Remarks / Rejection Grounds",
+    "mandatoryClarification": "Clarification Instructions for Applicant",
+    "prototypeNotice": "Prototype Verification Environment: AI signals provide decision support only. Final determinations rest with the authorized Revenue Officer."
   }
 }
 

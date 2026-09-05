@@ -3,19 +3,23 @@ import mongoose, { Schema, Document as MongooseDocument } from 'mongoose';
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'NEEDS_REVIEW';
 
 export interface ILandRecord extends MongooseDocument {
+  recordId?: string;
   ownerName: string;
   surveyNumber: string;
+  gatNumber?: string;
   khasraNumber: string;
   khataNumber: string;
   plotArea: string; // e.g. "2.5 Acres" or "1.01 Hectares"
   village: string;
   tehsil: string;
   district: string;
+  email?: string;
   landClassification: string; // e.g. "Agricultural", "Non-Agricultural", "Residential", "Commercial", "Forest"
   ownershipType: string; // e.g. "Single Owner", "Joint Ownership", "Government", "Trust"
   mutationNumber?: string;
   registrationNumber?: string;
   sourceDocument?: mongoose.Types.ObjectId;
+  sourceType?: 'DEMO_REFERENCE_RECORD' | 'GOVERNMENT_REGISTRY';
   verificationStatus: VerificationStatus;
   createdBy: mongoose.Types.ObjectId;
   verifiedBy?: mongoose.Types.ObjectId;
@@ -27,6 +31,11 @@ export interface ILandRecord extends MongooseDocument {
 
 const LandRecordSchema = new Schema<ILandRecord>(
   {
+    recordId: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     ownerName: {
       type: String,
       required: [true, 'Owner name is required'],
@@ -37,6 +46,17 @@ const LandRecordSchema = new Schema<ILandRecord>(
       type: String,
       required: [true, 'Survey number is required'],
       trim: true,
+      index: true,
+    },
+    gatNumber: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
       index: true,
     },
     khasraNumber: {
@@ -99,6 +119,12 @@ const LandRecordSchema = new Schema<ILandRecord>(
     sourceDocument: {
       type: Schema.Types.ObjectId,
       ref: 'Document',
+      index: true,
+    },
+    sourceType: {
+      type: String,
+      enum: ['DEMO_REFERENCE_RECORD', 'GOVERNMENT_REGISTRY'],
+      default: 'DEMO_REFERENCE_RECORD',
       index: true,
     },
     verificationStatus: {

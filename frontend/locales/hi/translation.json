@@ -663,6 +663,23 @@
     "registrationComplete": "पंजीकरण पूर्ण",
     "goToCitizenPortal": "नागरिक पोर्टल पर जाएँ",
     "viewApplicationStatus": "आवेदन स्थिति ट्रैकर देखें"
+  },
+  "verificationWorkflow": {
+    "officerWorkspaceTitle": "अधिकारी भू-अभिलेख सत्यापन कार्यक्षेत्र",
+    "officerWorkspaceSubtitle": "धारा १४९ महाराष्ट्र भूमि राजस्व संहिता अंतर्गत अधिकृत समीक्षा एवं वैधानिक निर्णय",
+    "decisionRecorded": "अधिकारी का निर्णय अपरिवर्तनीय ऑडिट लॉग में दर्ज किया गया है।",
+    "dualPaneOcrTitle": "मूल दस्तावेज़ एवं ओसीआर घटक समीक्षा",
+    "consistencyTitle": "दस्तावेज़ संगति एवं अखंडता विश्लेषण",
+    "cadastralMatchTitle": "सरकारी भू-मापन पंजी से मिलान",
+    "relationshipTitle": "आवेदक एवं भूमि स्वामित्व संबंध",
+    "riskAnalysisTitle": "एआई जोखिम स्कोर एवं विसंगति मूल्यांकन",
+    "auditTimelineTitle": "वैधानिक ऑडिट समयरेखा",
+    "approveAction": "दस्तावेज़ स्वत्व स्वीकृत करें",
+    "clarificationAction": "नागरिक से स्पष्टीकरण का अनुरोध करें",
+    "rejectAction": "आवेदन अस्वीकृत करें",
+    "mandatoryRemarks": "अधिकृत वैधानिक टिप्पणी / अस्वीकृति का आधार",
+    "mandatoryClarification": "आवेदक के लिए स्पष्टीकरण निर्देश",
+    "prototypeNotice": "प्रोटोटाइप सत्यापन परिवेश: एआई संकेत केवल निर्णय सहायता के लिए हैं। अंतिम वैधानिक निर्धारण राजस्व अधिकारी के अधीन है।"
   }
 }
 

@@ -44,8 +44,21 @@ export interface IOfficialRecordMatchField {
   isMatch: boolean;
 }
 
+export type WorkflowStatus =
+  | 'UPLOADED'
+  | 'PROCESSING'
+  | 'OCR_COMPLETED'
+  | 'ANALYSIS_COMPLETED'
+  | 'PENDING_OFFICER_REVIEW'
+  | 'ACTION_REQUIRED'
+  | 'VERIFIED'
+  | 'REJECTED';
+
 export interface IVerificationWorkflowDocument extends Document {
   applicationId: string;
+  userId?: mongoose.Types.ObjectId;
+  documentId?: mongoose.Types.ObjectId;
+  status: WorkflowStatus;
   casePreset?: 'CASE_1_GREEN' | 'CASE_2_YELLOW' | 'CASE_3_RED';
   
   // 1. Identity Pillar
@@ -77,6 +90,34 @@ export interface IVerificationWorkflowDocument extends Document {
       anomalyNotes?: string;
     };
   };
+
+  ocrData?: {
+    language: string;
+    rawText: string;
+    confidence: number;
+    pages?: Array<{
+      pageNumber: number;
+      text: string;
+      confidence: number;
+    }>;
+  };
+
+  anomalyAnalysis?: {
+    level: 'LOW' | 'MEDIUM' | 'HIGH';
+    signals: Array<{
+      type: 'VISUAL' | 'METADATA' | 'STRUCTURAL';
+      description: string;
+      severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'INFO';
+    }>;
+  };
+
+  clarificationHistory?: Array<{
+    requestedAt: Date;
+    officerMessage: string;
+    respondedAt?: Date;
+    responseText?: string;
+    replacementDocumentId?: string;
+  }>;
 
   // 3. Official Cadastral Match Pillar
   officialRecordMatch: {
@@ -129,6 +170,23 @@ export interface IVerificationWorkflowDocument extends Document {
 const VerificationWorkflowSchema = new Schema<IVerificationWorkflowDocument>(
   {
     applicationId: { type: String, required: true, unique: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+    documentId: { type: Schema.Types.ObjectId, ref: 'Document', index: true },
+    status: {
+      type: String,
+      enum: [
+        'UPLOADED',
+        'PROCESSING',
+        'OCR_COMPLETED',
+        'ANALYSIS_COMPLETED',
+        'PENDING_OFFICER_REVIEW',
+        'ACTION_REQUIRED',
+        'VERIFIED',
+        'REJECTED',
+      ],
+      default: 'PENDING_OFFICER_REVIEW',
+      index: true,
+    },
     casePreset: { type: String, enum: ['CASE_1_GREEN', 'CASE_2_YELLOW', 'CASE_3_RED'] },
 
     applicant: {
@@ -165,6 +223,40 @@ const VerificationWorkflowSchema = new Schema<IVerificationWorkflowDocument>(
         anomalyNotes: String,
       },
     },
+
+    ocrData: {
+      language: { type: String, default: 'mar' },
+      rawText: { type: String, default: '' },
+      confidence: { type: Number, default: 0.95 },
+      pages: [
+        {
+          pageNumber: Number,
+          text: String,
+          confidence: Number,
+        },
+      ],
+    },
+
+    anomalyAnalysis: {
+      level: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH'], default: 'LOW' },
+      signals: [
+        {
+          type: { type: String, enum: ['VISUAL', 'METADATA', 'STRUCTURAL'] },
+          description: String,
+          severity: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'INFO'] },
+        },
+      ],
+    },
+
+    clarificationHistory: [
+      {
+        requestedAt: { type: Date, default: Date.now },
+        officerMessage: String,
+        respondedAt: Date,
+        responseText: String,
+        replacementDocumentId: String,
+      },
+    ],
 
     officialRecordMatch: {
       status: { type: String, enum: ['STRONG_MATCH', 'PARTIAL_MATCH', 'MISMATCH', 'NOT_FOUND'], default: 'STRONG_MATCH' },

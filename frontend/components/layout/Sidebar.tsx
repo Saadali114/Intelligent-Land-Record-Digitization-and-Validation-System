@@ -54,6 +54,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
+      label: 'Officer Worklist (AI Review)',
+      href: '/officer/verifications',
+      icon: CheckCheck,
+      roles: ['ADMIN', 'OFFICER'],
+    },
+    {
+      label: 'Cadastral Reference Records',
+      href: '/admin/land-records',
+      icon: FileSpreadsheet,
+      roles: ['ADMIN'],
+    },
+    {
       label: t('navbar.userManagement'),
       href: '/users',
       icon: Users,
