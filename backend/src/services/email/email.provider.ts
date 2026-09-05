@@ -39,8 +39,14 @@ export class ResendEmailProvider implements EmailProvider {
   }
 
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-    if (!this.apiKey) {
-      throw new Error('Resend configuration error: RESEND_API_KEY environment variable is not set.');
+    if (!this.apiKey || this.apiKey.trim() === '' || this.apiKey.startsWith('re_your_')) {
+      const errorMsg =
+        'RESEND_API_KEY is not set. To send real emails, get a free API key at https://resend.com and add RESEND_API_KEY=re_... to backend/.env';
+      console.warn(`\x1b[33m[Resend Notice]\x1b[0m ${errorMsg}`);
+      return {
+        success: false,
+        error: errorMsg,
+      };
     }
 
     try {
@@ -87,24 +93,20 @@ export class ResendEmailProvider implements EmailProvider {
 /**
  * Development Sandbox Email Provider
  * Formats and logs email dispatch to local developer console when in development.
- * Strictly blocked when NODE_ENV=production.
+ * Allows seamless offline testing without a third-party API key.
  */
 export class DevEmailProvider implements EmailProvider {
   readonly name = 'DEV_SANDBOX';
 
-  constructor() {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('CRITICAL SECURITY ERROR: DevEmailProvider cannot be used in production mode.');
-    }
-  }
-
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-    const maskedTo = input.to.replace(/^(.)(.*)(@.*)$/, (_, first, middle, domain) => {
-      return `${first}${'*'.repeat(Math.min(middle.length, 4))}${domain}`;
-    });
-
     console.log(
-      `\x1b[36m[DEV EMAIL SANDBOX]\x1b[0m Verification email dispatched to: \x1b[1m${maskedTo}\x1b[0m | Subject: "${input.subject}"`
+      `\n\x1b[36m┌────────────────────────────────────────────────────────────────────────┐\x1b[0m\n` +
+      `\x1b[36m│ [DEV EMAIL SANDBOX] TRANSACTIONAL EMAIL DISPATCHED                     │\x1b[0m\n` +
+      `\x1b[36m├────────────────────────────────────────────────────────────────────────┤\x1b[0m\n` +
+      `\x1b[36m│\x1b[0m \x1b[1mTo:\x1b[0m      ${input.to.padEnd(58)} \x1b[36m│\x1b[0m\n` +
+      `\x1b[36m│\x1b[0m \x1b[1mSubject:\x1b[0m ${input.subject.padEnd(58)} \x1b[36m│\x1b[0m\n` +
+      `\x1b[36m│\x1b[0m \x1b[1mMessage:\x1b[0m ${(input.text || '').padEnd(58)} \x1b[36m│\x1b[0m\n` +
+      `\x1b[36m└────────────────────────────────────────────────────────────────────────┘\x1b[0m\n`
     );
 
     return {
@@ -119,15 +121,29 @@ export class DevEmailProvider implements EmailProvider {
  */
 export function getEmailProvider(): EmailProvider {
   const isProduction = process.env.NODE_ENV === 'production';
-  const providerType = (process.env.EMAIL_PROVIDER || 'resend').toLowerCase();
+  const providerType = (process.env.EMAIL_PROVIDER || '').toLowerCase();
+  const apiKey = (process.env.RESEND_API_KEY || '').trim();
+  const hasValidApiKey = Boolean(apiKey && !apiKey.startsWith('re_your_') && apiKey.length > 5);
 
-  // If in production or explicitly configured with Resend credentials
-  if (isProduction || process.env.RESEND_API_KEY) {
-    if (providerType === 'resend') {
-      return new ResendEmailProvider();
-    }
+  // 1. If Dev Sandbox explicitly requested
+  if (providerType === 'dev' || providerType === 'sandbox') {
+    return new DevEmailProvider();
   }
 
-  // Fallback to development sandbox for local testing when API key is pending
-  return new DevEmailProvider();
+  // 2. If valid Resend API key is present, use Resend
+  if (hasValidApiKey) {
+    return new ResendEmailProvider(apiKey);
+  }
+
+  // 3. If in local development or API key is not configured, fall back to Dev sandbox
+  if (!isProduction) {
+    console.warn(
+      '\x1b[33m[EMAIL CONFIG NOTICE]\x1b[0m RESEND_API_KEY is not set. Automatically falling back to DevEmailProvider sandbox (OTP is printed to console). To receive real emails, set RESEND_API_KEY in backend/.env'
+    );
+    return new DevEmailProvider();
+  }
+
+  // 4. In production without API key, instantiate Resend which will return a descriptive error
+  return new ResendEmailProvider('', process.env.EMAIL_FROM_ADDRESS);
 }
+

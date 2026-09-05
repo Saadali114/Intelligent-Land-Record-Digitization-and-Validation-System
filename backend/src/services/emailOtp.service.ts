@@ -137,9 +137,10 @@ export class EmailOTPService {
 
       return {
         success: false,
-        message: 'Unable to send verification email right now. Please try again.',
+        message: emailRes.error || 'Unable to send verification email right now. Please try again.',
       };
     }
+
 
     // 5. Invalidate Any Previous Pending OTP for this Email & Purpose
     await OTPVerification.updateMany(
