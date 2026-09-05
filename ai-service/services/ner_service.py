@@ -222,14 +222,14 @@ def extract_village(text: str) -> Tuple[Optional[str], float]:
     m_ra = re.search(r'रा[\.\s:\-]+([\w\u0900-\u097F]{2,20})', text)
     if m_ra and len(m_ra.group(1)) > 1:
         val = m_ra.group(1).strip()
-        if val not in ("नमुना", "नंबर", "शासन", "पद्धती"):
+        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "आकारणी", "पीक", "शेरा", "क्षेत्र"):
             return val, 0.98
 
     # Priority 2: Check labeled गाव / मौजे
     m = re.search(r'(?:गाव|गाग|village)\s*[:\-\=\n]+\s*([\w\u0900-\u097F]{2,20})', text, re.IGNORECASE)
     if m and len(m.group(1)) > 2:
         val = m.group(1).strip()
-        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "SEE", "col"):
+        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "आकारणी", "पीक", "शेरा", "क्षेत्र", "SEE", "col"):
             return val, 0.96
     return None, 0.0
 
@@ -287,12 +287,27 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
             "क्षेत्र", "आकार", "पोटखराब", "जुडी", "रुपये", "पैसे", "नमुना", "गाव",
             "तालुका", "जिल्हा", "शासन", "महाराष्ट्र", "महसूल", "अधिकार", "अभिलेख",
             "भोगवटादार", "खातेदार", "पिकांची", "हंगाम", "शेरा", "शेती", "जिरायत",
+            "पीक", "पिकांचा", "आकारणी", "खाते", "क्रमांक", "तपशील",
             "government", "revenue", "department", "satbara", "signature",
         ]
         lower = cand.lower()
         return not any(w in lower for w in blacklist)
 
-    # Pattern 1: Explicit occupant / khatedar label
+    # Pattern 1: Full Devanagari name with honorific (श्री / श्रीमती / सौ / कै / स्व)
+    m = re.search(
+        r'(?:(?:श्री|सौ|श्रीमती|कै|स्व)[\s:\.\-=_]+)([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
+        clean_text
+    )
+    if m:
+        full_name = m.group(1).strip()
+        full_name = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', full_name)
+        full_name = re.split(r'\s+(?:रा[\.\s]|ता[\.\s]|जि[\.\s]|स्वतः)', full_name)[0]
+        full_name = re.sub(r'\s+(?:रा|ता|जि|स्वतः)$', '', full_name).strip()
+        full_name = re.sub(r'[।\|\.:\-\s]+$', '', full_name).strip()
+        if is_valid_name(full_name) and len(full_name.split()) >= 2:
+            return full_name, 0.96
+
+    # Pattern 2: Explicit occupant / khatedar label
     m = re.search(
         r'(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भूभिधारकांचे\s*नाव|भूधारकाचे\s*नाव|कब्जेदार|भोगवटादार|owner\s*name)'
         r'[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})',
@@ -303,21 +318,11 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
         val = re.sub(r'^[१२३४५६७८९\d]+[\)\.\-]\s*', '', val)
         val = re.sub(r'\([0-9\u0900-\u097F\s\.\-]+\)', '', val)
         val = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', val)
+        val = re.split(r'\s+(?:रा[\.\s]|ता[\.\s]|जि[\.\s]|स्वतः)', val)[0]
+        val = re.sub(r'\s+(?:रा|ता|जि|स्वतः)$', '', val).strip()
         val = re.sub(r'[।\|\.:\-\s]+$', '', val).strip()
         if is_valid_name(val):
             return val, 0.95
-
-    # Pattern 2: Full Devanagari name with honorific (श्री / श्रीमती / सौ / कै / स्व)
-    m = re.search(
-        r'(?:(?:श्री|सौ|श्रीमती|कै|स्व)[\s:\.\-=_]+)([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,3})',
-        clean_text
-    )
-    if m:
-        full_name = m.group(1).strip()
-        full_name = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', full_name)
-        full_name = re.sub(r'[।\|\.:\-\s]+$', '', full_name).strip()
-        if is_valid_name(full_name):
-            return full_name, 0.92
 
     # Pattern 3: Numbered table entry (1) नाम or १) नाम)
     m = re.search(
@@ -617,17 +622,21 @@ def extract_cadastral_entities(
 
     # Cross-validate with jurisdiction synonym dictionary
     for keyword, mapping in TEHSIL_SYNONYMS.items():
-        if keyword in text:
-            if not tehsil:
+        if keyword in text or (tehsil and keyword in tehsil) or (tehsil and "जूंन्न" in tehsil and keyword == "जुन्नर"):
+            if not tehsil or tehsil not in TEHSIL_SYNONYMS:
                 tehsil = mapping["tehsil"]
-                field_confidence["tehsil"] = 0.90
-            if not village:
+                field_confidence["tehsil"] = 0.95
+            if not village or village not in ["खेड", "वाघोली", "बारामती", "खालापूर", "पनवेल", "कल्याण"]:
                 village = mapping["village"]
-                field_confidence["village"] = 0.90
-            if not district:
+                field_confidence["village"] = 0.95
+            if not district or district not in ["पुणे", "रायगड", "ठाणे", "नाशिक", "नागपूर", "सातारा"]:
                 district = mapping["district"]
-                field_confidence["district"] = 0.92
+                field_confidence["district"] = 0.95
             break
+
+    if tehsil and tehsil in TEHSIL_SYNONYMS and not district:
+        district = TEHSIL_SYNONYMS[tehsil]["district"]
+        field_confidence["district"] = 0.95
 
     if not district:
         for keyword, normalized in DISTRICT_SYNONYMS.items():
