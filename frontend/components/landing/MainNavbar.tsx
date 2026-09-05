@@ -1,0 +1,178 @@
+import React, { useState } from 'react';
+import Link from 'next/link';
+import {
+  MapPin,
+  ChevronDown,
+  LayoutDashboard,
+  FileCheck,
+  Shield,
+  Briefcase,
+  PhoneCall,
+  Eye,
+  Globe,
+} from 'lucide-react';
+
+const DISTRICTS_LIST = [
+  'Pune',
+  'Mumbai City',
+  'Mumbai Suburban',
+  'Nagpur',
+  'Nashik',
+  'Thane',
+  'Chhatrapati Sambhajinagar',
+  'Kolhapur',
+  'Solapur',
+  'Amravati',
+  'Nanded',
+  'Satara',
+];
+
+export const MainNavbar: React.FC = () => {
+  const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('Select District');
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'small'>('normal');
+
+  return (
+    <div className="bg-slate-900 text-slate-200 text-[11px] border-b border-slate-800">
+      {/* Topmost Official Accessibility & Gov Ribbon */}
+      <div className="border-b border-slate-800/80 bg-slate-950/60 px-4 py-1.5">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          {/* Government Identification */}
+          <div className="flex items-center gap-2.5 font-medium text-slate-300">
+            <span className="text-amber-400 font-bold tracking-wider">🏛️ भारत सरकार</span>
+            <span className="text-slate-600">|</span>
+            <span className="hidden sm:inline text-slate-300 font-semibold">GOVERNMENT OF INDIA</span>
+            <span className="text-slate-600 hidden md:inline">|</span>
+            <span className="hidden md:inline text-slate-400">
+              Department of Land Resources & Revenue Governance (NLRMP)
+            </span>
+          </div>
+
+          {/* Accessibility & Utility Tools */}
+          <div className="flex items-center gap-3 text-[10px] text-slate-300">
+            <div className="hidden lg:flex items-center gap-1.5 text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/50">
+              <PhoneCall className="w-2.5 h-2.5" />
+              <span>Toll Free: 1800-120-8040 (24x7)</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+              <span className="text-slate-400">Text Size:</span>
+              <button
+                onClick={() => setFontSize('small')}
+                className={`hover:text-white px-1 font-bold ${fontSize === 'small' ? 'text-amber-400' : ''}`}
+                title="Decrease font size"
+              >
+                A-
+              </button>
+              <button
+                onClick={() => setFontSize('normal')}
+                className={`hover:text-white px-1 font-bold ${fontSize === 'normal' ? 'text-amber-400' : ''}`}
+                title="Reset font size"
+              >
+                A
+              </button>
+              <button
+                onClick={() => setFontSize('large')}
+                className={`hover:text-white px-1 font-bold ${fontSize === 'large' ? 'text-amber-400' : ''}`}
+                title="Increase font size"
+              >
+                A+
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1">
+              <Eye className="w-3 h-3 text-slate-400" />
+              <span className="text-slate-300">Screen Reader</span>
+            </div>
+
+            <div className="flex items-center gap-1 text-slate-300">
+              <Globe className="w-3 h-3 text-blue-400" />
+              <span>English / मराठी</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Top Navigation Row: Districts, RTI, RTS, EODB, Dashboard */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
+        {/* Left Side: Districts Dropdown */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setDistrictDropdownOpen(!districtDropdownOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-white font-semibold text-xs border border-slate-700 hover:border-blue-500 transition-all shadow-xs"
+          >
+            <MapPin className="w-3.5 h-3.5 text-amber-400" />
+            <span>Districts ({selectedDistrict})</span>
+            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${districtDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {districtDropdownOpen && (
+            <div className="absolute left-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-2 grid grid-cols-2 gap-1 text-xs">
+              <div className="col-span-2 px-2 py-1 text-[10px] font-bold text-amber-400 uppercase tracking-wider border-b border-slate-800">
+                Select Cadastral District
+              </div>
+              {DISTRICTS_LIST.map((dist) => (
+                <button
+                  key={dist}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDistrict(dist);
+                    setDistrictDropdownOpen(false);
+                  }}
+                  className={`text-left px-2 py-1.5 rounded hover:bg-blue-900/60 transition-colors truncate text-[11px] ${
+                    selectedDistrict === dist ? 'bg-blue-950 text-amber-300 font-bold' : 'text-slate-300'
+                  }`}
+                >
+                  {dist}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Key Governance Portals (RTI, RTS, EODB, Dashboard) */}
+        <nav className="flex items-center flex-wrap gap-1 sm:gap-2">
+          {/* RTI */}
+          <Link
+            href="#faq"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title="Right to Information Act portal"
+          >
+            <Shield className="w-3.5 h-3.5 text-blue-400" />
+            <span>RTI (Right to Information)</span>
+          </Link>
+
+          {/* RTS */}
+          <Link
+            href="#services"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title="Right to Services Act guaranteeing timely land extraction"
+          >
+            <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>RTS (Right to Services)</span>
+          </Link>
+
+          {/* EODB */}
+          <Link
+            href="#services"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title="Ease of Doing Business single window land registration"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-purple-400" />
+            <span>EODB (Ease of Doing Business)</span>
+          </Link>
+
+          {/* Dashboard Direct Link */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-900/80 hover:bg-blue-800 text-white font-semibold text-xs border border-blue-700/60 transition-all shadow-xs"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5 text-amber-400" />
+            <span>Dashboard</span>
+          </Link>
+        </nav>
+      </div>
+    </div>
+  );
+};
