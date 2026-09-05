@@ -45,9 +45,6 @@ export const SubNavbar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl font-black tracking-tight text-blue-950">ILRDVS</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
-                AI Cadastral
-              </span>
             </div>
             <p className="text-[11px] font-semibold text-slate-600 tracking-tight leading-tight line-clamp-1">
               {t('common.portalFullName')}
