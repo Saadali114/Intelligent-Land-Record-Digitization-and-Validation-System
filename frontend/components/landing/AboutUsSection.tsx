@@ -42,13 +42,10 @@ export const AboutUsSection: React.FC = () => {
               The Challenge of Archival Land Records
             </h3>
             <p>
-              For decades, village records including <strong className="text-slate-800">Village Form 7/12 (Satbara)</strong>,{' '}
-              <strong className="text-slate-800">Mutation Registers (Ferfar)</strong>, and registered Sale Deeds were recorded on
-              physical paper that suffers from yellowing, ink bleeds, tear damage, and manual transcription errors.
+              For decades, land records—including <strong className="text-slate-800">Records of Rights (RoR), mutation registers, and registered sale deeds</strong>—have been maintained on physical paper, making them vulnerable to yellowing, ink bleeding, tear damage, and manual transcription errors.
             </p>
             <p>
-              These vulnerabilities often facilitated fraudulent double-allocations, disputes in civil courts, and delays for citizens
-              seeking land verification. ILRDVS eliminates these hurdles through an end-to-end AI workflow.
+              These vulnerabilities can contribute to <strong className="text-slate-800">duplicate or conflicting land records, ownership disputes, lengthy civil litigation, and delays in land verification</strong>. <strong className="text-blue-900 font-bold">ILRDVS</strong> addresses these challenges through an end-to-end AI-powered workflow for <strong className="text-slate-800">digitizing, validating, and verifying land records</strong>.
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
