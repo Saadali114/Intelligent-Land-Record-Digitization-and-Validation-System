@@ -19,26 +19,55 @@ export const citizenService = {
   // Auth state
   isAuthenticated(): boolean {
     if (typeof window === 'undefined') return true;
-    return localStorage.getItem('ilrdvs_citizen_logged_in') === 'true';
+    const token = localStorage.getItem('token');
+    const citizenLoggedIn = localStorage.getItem('ilrdvs_citizen_logged_in') === 'true';
+    const userRaw = localStorage.getItem('user');
+    if (userRaw) {
+      try {
+        const u = JSON.parse(userRaw);
+        if (u.role === 'CITIZEN' && (token || citizenLoggedIn)) return true;
+      } catch {
+        // ignore
+      }
+    }
+    return citizenLoggedIn || !!token;
   },
 
-  login(mobile: string, name = 'Rahul Patil'): CitizenProfile {
+  login(userOrContact: string | Partial<CitizenProfile>, name?: string): CitizenProfile {
     if (typeof window !== 'undefined') {
       localStorage.setItem('ilrdvs_citizen_logged_in', 'true');
     }
     const profile = getStoredProfile();
-    const updated = {
-      ...profile,
-      name: name || profile.name,
-      mobile: mobile || profile.mobile,
-      lastLogin: new Date().toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    };
+    let updated: CitizenProfile;
+
+    if (typeof userOrContact === 'object' && userOrContact !== null) {
+      updated = {
+        ...profile,
+        ...userOrContact,
+        lastLogin: new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+    } else {
+      const isEmail = typeof userOrContact === 'string' && userOrContact.includes('@');
+      updated = {
+        ...profile,
+        name: name || (isEmail ? profile.name : name || profile.name),
+        email: isEmail ? userOrContact : profile.email,
+        mobile: !isEmail && userOrContact ? userOrContact : profile.mobile,
+        lastLogin: new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+    }
     saveStoredProfile(updated);
     return updated;
   },
@@ -46,6 +75,18 @@ export const citizenService = {
   logout(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('ilrdvs_citizen_logged_in');
+      const rawUser = localStorage.getItem('user');
+      if (rawUser) {
+        try {
+          const u = JSON.parse(rawUser);
+          if (u.role === 'CITIZEN') {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
+        } catch {
+          // ignore
+        }
+      }
     }
   },
 
@@ -242,7 +283,29 @@ export const citizenService = {
 
   // Profile
   getProfile(): CitizenProfile {
-    return getStoredProfile();
+    const stored = getStoredProfile();
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('user');
+      if (userRaw) {
+        try {
+          const u = JSON.parse(userRaw);
+          return {
+            ...stored,
+            name: u.name || stored.name,
+            email: u.email || stored.email,
+            mobile: u.mobileNumber || stored.mobile,
+            district: u.district || stored.district,
+            taluka: u.taluka || stored.taluka,
+            village: u.village || stored.village,
+            preferredLanguage: u.preferredLanguage || stored.preferredLanguage,
+            isIdentityVerified: u.emailVerified ?? stored.isIdentityVerified,
+          };
+        } catch {
+          // fallback to stored
+        }
+      }
+    }
+    return stored;
   },
 
   updateProfile(updates: Partial<CitizenProfile>): CitizenProfile {

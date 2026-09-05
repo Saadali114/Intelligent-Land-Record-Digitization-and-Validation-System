@@ -55,8 +55,18 @@ function CitizenVerifyEmailContent() {
       }
       if (res.user) {
         localStorage.setItem('user', JSON.stringify(res.user));
+        citizenService.login({
+          name: res.user.name,
+          email: res.user.email,
+          mobile: res.user.mobileNumber || '',
+          district: res.user.district || 'Pune',
+          taluka: res.user.taluka || 'Haveli',
+          village: res.user.village || 'Khadakwasla',
+          preferredLanguage: res.user.preferredLanguage || 'English',
+        });
+      } else {
+        citizenService.login(email);
       }
-      citizenService.login(email);
 
       setIsSuccess(true);
     } catch (err: any) {

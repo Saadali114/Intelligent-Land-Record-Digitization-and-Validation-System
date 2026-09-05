@@ -66,10 +66,10 @@ export default function CitizenDashboardPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800/80 border border-blue-700/60 text-xs font-semibold text-blue-200">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t('dashboard.aadhaarBadge')}</span>
+              <span>{t('dashboard.verifiedCitizenBadge', { defaultValue: 'Verified Citizen Account' })}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {t('dashboard.welcome')}, {profile?.name || 'Rahul Patil'}
+              {t('dashboard.welcome')}, {profile?.name || t('common.citizen', { defaultValue: 'Citizen' })}
             </h1>
             <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs sm:text-sm text-slate-300">
               <span className="flex items-center gap-1">
@@ -78,7 +78,7 @@ export default function CitizenDashboardPage() {
               </span>
               <span className="hidden sm:inline text-slate-600">&bull;</span>
               <span className="text-slate-300">
-                {t('common.mobileNumber')}: <strong className="text-white font-mono">{profile?.mobile || '+91 98220 12345'}</strong>
+                {t('common.mobileNumber')}: <strong className="text-white font-mono">{profile?.mobile || '—'}</strong>
               </span>
             </div>
           </div>

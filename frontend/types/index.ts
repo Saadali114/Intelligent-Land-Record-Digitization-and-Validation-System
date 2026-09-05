@@ -15,6 +15,9 @@ export interface User {
   role: UserRole;
   department: string;
   district: string;
+  taluka?: string;
+  village?: string;
+  mobileNumber?: string;
   status: UserStatus;
   accountStatus?: AccountStatus;
   preferredLanguage?: string;

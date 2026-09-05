@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { User, UserRole } from '../types';
 import { authService } from '../services/auth.service';
+import { citizenService } from '../services/citizen.service';
 import { LoginFormData, RegisterFormData } from '../schemas/auth.schema';
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   isOfficer: boolean;
   isVerifier: boolean;
   isViewer: boolean;
+  isCitizen: boolean;
   hasRole: (roles: UserRole[]) => boolean;
   login: (credentials: LoginFormData) => Promise<void>;
   register: (data: RegisterFormData) => Promise<void>;
@@ -65,6 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (loggedInUser.accountStatus === 'PENDING_APPROVAL') {
       router.push('/officer/application-status');
     } else if (loggedInUser.role === 'CITIZEN') {
+      citizenService.login({
+        name: loggedInUser.name,
+        email: loggedInUser.email,
+        mobile: loggedInUser.mobileNumber || '',
+        district: loggedInUser.district || 'Pune',
+        taluka: loggedInUser.taluka || 'Haveli',
+        village: loggedInUser.village || 'Khadakwasla',
+        preferredLanguage: loggedInUser.preferredLanguage || 'English',
+      });
       router.push('/portal');
     } else if (loggedInUser.role === 'OFFICER' || loggedInUser.role === 'VERIFIER') {
       router.push('/verification');
@@ -84,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      citizenService.logout();
       await authService.logout();
     } catch (e) {
       console.error('Logout error:', e);
@@ -100,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isOfficer = role === 'OFFICER';
   const isVerifier = role === 'VERIFIER';
   const isViewer = role === 'VIEWER';
+  const isCitizen = role === 'CITIZEN';
 
   const hasRole = (roles: UserRole[]): boolean => {
     if (!role) return false;
@@ -116,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isOfficer,
         isVerifier,
         isViewer,
+        isCitizen,
         hasRole,
         login,
         register,

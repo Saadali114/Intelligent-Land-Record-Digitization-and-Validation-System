@@ -249,6 +249,7 @@ export default function CitizenUploadWizardPage() {
 
   // Final Submit
   const handleFinalSubmit = () => {
+    const prof = citizenService.getProfile();
     const newApp = citizenService.submitApplication({
       documentType,
       fileName: uploadedFile?.name || 'document.pdf',
@@ -256,15 +257,15 @@ export default function CitizenUploadWizardPage() {
       surveyNumber: fields.surveyNumber.value,
       khasraNumber: fields.khasraNumber.value,
       khataNumber: fields.khataNumber.value,
-      village: fields.village.value,
-      taluka: fields.taluka.value,
-      district: fields.district.value,
+      village: fields.village.value || prof.village,
+      taluka: fields.taluka.value || prof.taluka,
+      district: fields.district.value || prof.district,
       landArea: fields.landArea.value,
       landType: fields.landType.value,
-      ownerName: fields.ownerName.value,
+      ownerName: fields.ownerName.value || prof.name,
       ocrConfidence: 0.97,
       extractedFields: fields,
-      mobileNumber: '+91 98220 12345',
+      mobileNumber: prof.mobile || '+91 98220 12345',
     });
 
     setSubmittedAppId(newApp.id);

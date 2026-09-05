@@ -37,8 +37,14 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     citizenService.logout();
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch {
+      // ignore
+    }
     router.push('/portal/login');
   };
 
@@ -148,11 +154,11 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
             className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
           >
             <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-900 flex items-center justify-center font-bold text-xs">
-              {profile?.name ? profile.name.charAt(0) : 'R'}
+              {(profile?.name || 'C').charAt(0).toUpperCase()}
             </div>
             <div className="hidden sm:block text-left">
               <div className="text-xs font-semibold text-slate-900 leading-tight">
-                {profile?.name || 'Rahul Patil'}
+                {profile?.name || t('common.citizen', { defaultValue: 'Citizen' })}
               </div>
               <div className="text-[10px] text-slate-500 leading-none">{t('navbar.citizenCorner')}</div>
             </div>

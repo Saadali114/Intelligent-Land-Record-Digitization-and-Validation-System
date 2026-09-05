@@ -74,7 +74,23 @@ export default function CitizenLoginPage() {
       const res = await authService.verifyEmailOtp(email.trim().toLowerCase(), otpCode, 'LOGIN');
       if (res.verified) {
         // Authenticate citizen session
-        citizenService.login(email.trim().toLowerCase());
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+        }
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+          citizenService.login({
+            name: res.user.name,
+            email: res.user.email,
+            mobile: res.user.mobileNumber || '',
+            district: res.user.district || 'Pune',
+            taluka: res.user.taluka || 'Haveli',
+            village: res.user.village || 'Khadakwasla',
+            preferredLanguage: res.user.preferredLanguage || 'English',
+          });
+        } else {
+          citizenService.login(email.trim().toLowerCase());
+        }
         router.push('/portal');
       } else {
         setError(res.message || t('auth.invalidOtp', { defaultValue: 'Invalid OTP code.' }));

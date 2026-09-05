@@ -48,14 +48,16 @@ export const authService = {
     email: string,
     otp: string,
     purpose: string = 'EMAIL_VERIFICATION'
-  ): Promise<{ verified: boolean; email: string; message: string }> => {
-    const response = await apiClient.post<ApiResponse<{ verified: boolean; email: string; purpose: string }>>(
+  ): Promise<{ verified: boolean; email: string; message: string; token?: string; user?: User }> => {
+    const response = await apiClient.post<ApiResponse<{ verified: boolean; email: string; purpose: string; token?: string; user?: User }>>(
       '/auth/email-otp/verify',
       { email, otp, purpose }
     );
     return {
       verified: response.data.data.verified,
       email: response.data.data.email,
+      token: response.data.data.token,
+      user: response.data.data.user,
       message: response.data.message,
     };
   },

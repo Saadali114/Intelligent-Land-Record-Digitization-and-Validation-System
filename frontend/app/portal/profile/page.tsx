@@ -135,13 +135,13 @@ export default function CitizenProfilePage() {
                   <input
                     type="text"
                     disabled
-                    value={profile?.mobile || '+91 98220 12345'}
+                    value={profile?.mobile || '—'}
                     className="w-full text-xs font-mono font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-lg p-2.5 cursor-not-allowed"
                   />
                   <ShieldCheck className="w-4 h-4 text-emerald-600 absolute right-3 top-3" />
                 </div>
                 <p className="text-[10px] text-slate-400 mt-1">
-                  Verified via OTP &bull; Linked with revenue authentication
+                  Verified Contact &bull; Linked with citizen account
                 </p>
               </div>
 
