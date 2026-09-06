@@ -74,14 +74,13 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
         remarks: lr.remarks || '',
         vendorName:
           entities.vendor_name ||
-          (lr.remarks?.match(/Vendor:\s*([^->|]+)/)?.[1]?.trim() ||
-            (lr.remarks?.includes('Deed of Absolute Sale') ? 'Sri. G. Nagendran' : '')),
+          (lr.remarks?.match(/Vendor:\s*([^->|]+)/)?.[1]?.trim() || ''),
         purchaserName:
           entities.purchaser_name ||
           (lr.remarks?.match(/Purchaser:\s*([^|]+)/)?.[1]?.trim() || lr.ownerName || ''),
         considerationAmount:
           entities.consideration_amount ||
-          (lr.remarks?.match(/Consideration:\s*([^|]+)/)?.[1]?.trim() || 'Rs. 5,000/-'),
+          (lr.remarks?.match(/Consideration:\s*([^|]+)/)?.[1]?.trim() || ''),
         locality: entities.locality || lr.village || '',
       };
 
@@ -152,27 +151,53 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
     translatedData.vendorName ||
     entities.vendor_name ||
     lr?.remarks?.match(/Vendor:\s*([^->|]+)/)?.[1]?.trim() ||
-    (lr?.remarks?.includes('Deed of Absolute Sale') ? 'Sri. G. Nagendran' : 'Not Specified');
+    'Not Specified';
   const purchaser =
     translatedData.purchaserName ||
     entities.purchaser_name ||
     lr?.remarks?.match(/Purchaser:\s*([^|]+)/)?.[1]?.trim() ||
     lr?.ownerName ||
-    '';
+    'Not Specified';
   const consideration =
     translatedData.considerationAmount ||
     entities.consideration_amount ||
     lr?.remarks?.match(/Consideration:\s*([^|]+)/)?.[1]?.trim() ||
-    'Rs. 5,000/- (Non-Judicial Stamp Duty)';
+    'Not Specified';
   const execDate =
     entities.execution_date ||
     lr?.remarks?.match(/(?:Date|Executed):\s*([^|]+)/)?.[1]?.trim() ||
-    '25.05.1992';
+    '';
   const stampDuty =
-    entities.stamp_duty || 'Rs. 5,000/- Non-Judicial India Stamp Paper (५००० रु. / पाच हजार रुपये)';
+    entities.stamp_duty || 'Non-Judicial Stamp Paper';
 
   return (
     <div className="lg:col-span-6 flex flex-col space-y-3">
+      {/* Re-uploaded Document Warning Banner */}
+      {(doc.isReuploaded ||
+        doc.metadata?.isReuploaded ||
+        doc.metadata?.aiExtraction?.anomalies?.some((a: string) =>
+          a.toLowerCase().includes('duplicate') || a.toLowerCase().includes('already exists')
+        )) && (
+        <div className="p-2.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 flex items-start gap-2 text-xs shadow-xs">
+          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <div className="font-bold flex items-center gap-1.5">
+              <span>Re-Uploaded Document Detected</span>
+              <span className="text-[10px] font-semibold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded">
+                Duplicate Parcel
+              </span>
+            </div>
+            <p className="text-[11px] text-amber-800 mt-0.5">
+              This document or land parcel already exists in the registry
+              {doc.reuploadedFromId || doc.metadata?.reuploadedFromId
+                ? ` (Original: ${doc.reuploadedFromId || doc.metadata?.reuploadedFromId})`
+                : ''}
+              . AI confidence has been adjusted to mandate revenue officer review.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Panel Header with Form Badge and PDF Export */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">

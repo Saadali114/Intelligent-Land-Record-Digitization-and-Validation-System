@@ -1,0 +1,68 @@
+{
+  "document_id": "SYN_712_002",
+  "document_type": "7_12",
+  "is_synthetic": true,
+  "text": "महाराष्ट्र शासन जमीन अभिलेख सातबारा\nगाव: Example Village Beta तालुका: Example Taluka Gamma जिल्हा: Nashik\n१. जमीन धारकांचे नांव : सुरेश बाबुराव गायकवाड\n२. सर्व्हे / गट नं. : 89/1B\n३. एकूण क्षेत्रफळ : 2.40 हेक्टर\n४. खाते क्रमांक : 245\n५. शेवटचा फेरफार क्रमांक : MTR-450/2019\n६. नोंदणी दिनांक : 10/08/2019\n७. भोगवटा प्रकार : Occupant Class 1\n",
+  "entities": [
+    {
+      "start": 41,
+      "end": 61,
+      "label": "VILLAGE",
+      "value": "Example Village Beta"
+    },
+    {
+      "start": 70,
+      "end": 90,
+      "label": "TALUKA",
+      "value": "Example Taluka Gamma"
+    },
+    {
+      "start": 99,
+      "end": 105,
+      "label": "DISTRICT",
+      "value": "Nashik"
+    },
+    {
+      "start": 130,
+      "end": 151,
+      "label": "OWNER_NAME",
+      "value": "सुरेश बाबुराव गायकवाड"
+    },
+    {
+      "start": 174,
+      "end": 179,
+      "label": "GAT_NUMBER",
+      "value": "89/1B"
+    },
+    {
+      "start": 200,
+      "end": 204,
+      "label": "LAND_AREA",
+      "value": "2.40"
+    },
+    {
+      "start": 205,
+      "end": 211,
+      "label": "LAND_AREA_UNIT",
+      "value": "हेक्टर"
+    },
+    {
+      "start": 230,
+      "end": 233,
+      "label": "KHATA_NUMBER",
+      "value": "245"
+    },
+    {
+      "start": 261,
+      "end": 273,
+      "label": "MUTATION_NUMBER",
+      "value": "MTR-450/2019"
+    },
+    {
+      "start": 293,
+      "end": 303,
+      "label": "DOCUMENT_DATE",
+      "value": "10/08/2019"
+    }
+  ]
+}

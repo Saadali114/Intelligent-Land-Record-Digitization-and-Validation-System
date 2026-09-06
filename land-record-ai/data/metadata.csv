@@ -1,0 +1,7 @@
+document_id,document_type,language,year,district,taluka,village,source,permission,anonymized,image_quality,notes
+SYN_712_001,7_12,Marathi,2020,Pune,Example Taluka Alpha,Example Village A,synthetic_demo,True,True,good,Fictional test record for pipeline verification only
+SYN_712_002,7_12,Marathi,2019,Nashik,Example Taluka Gamma,Example Village Beta,synthetic_demo,True,True,good,Fictional test record for pipeline verification only
+SYN_712_003,7_12,Marathi,2021,Satara,Example Taluka Epsilon,Example Village Delta,synthetic_demo,True,True,good,Fictional test record for pipeline verification only
+SYN_FERFAR_004,ferfar,Marathi,2022,Nagpur,Example Taluka Eta,Example Village Zeta,synthetic_demo,True,True,good,Fictional test record for pipeline verification only
+SYN_712_005,7_12,Marathi,2018,Kolhapur,Example Taluka Iota,Example Village Theta,synthetic_demo,True,True,good,Fictional test record for pipeline verification only
+SYN_DEED_006,sale_deed,Marathi,2023,Thane,Example Taluka Lambda,Example Village Kappa,synthetic_demo,True,True,good,Fictional test record for pipeline verification only

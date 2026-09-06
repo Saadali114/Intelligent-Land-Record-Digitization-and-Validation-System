@@ -30,6 +30,8 @@ export interface IDocument extends MongooseDocument {
   checksum?: string;
   version?: number;
   pageCount?: number;
+  isReuploaded?: boolean;
+  reuploadedFromId?: string;
   uploadedAt: Date;
   metadata: Record<string, any>;
   createdAt: Date;
@@ -117,6 +119,16 @@ const DocumentSchema = new Schema<IDocument>(
     pageCount: {
       type: Number,
       default: 1,
+    },
+    isReuploaded: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    reuploadedFromId: {
+      type: String,
+      default: null,
+      index: true,
     },
     uploadedAt: {
       type: Date,

@@ -1,13 +1,14 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-09-06T00:00:00Z",
-  "totalCorrectionsRecorded": 0,
+  "lastUpdated": "2026-09-06T05:52:36Z",
+  "totalCorrectionsRecorded": 1,
   "tokenReplacements": {
     "geel": "जुन्नर",
     "joel": "जुन्नर",
     "jeel": "जुन्नर",
     "gor": "पुणे",
-    "1532": "1632"
+    "1532": "1632",
+    "ramsh ptill": "Ramesh Patil"
   },
   "verifiedVillages": [
     "खेड",
@@ -23,7 +24,8 @@
     "खोपोली",
     "रसायनी",
     "पनवेल",
-    "अलिबाग"
+    "अलिबाग",
+    "ओतूर"
   ],
   "verifiedTehsils": [
     "जुन्नर",
@@ -78,7 +80,35 @@
     "खरात",
     "माने",
     "वाघ",
-    "जगत"
+    "जगत",
+    "Patil"
   ],
-  "correctionHistory": []
+  "correctionHistory": [
+    {
+      "documentId": "DOC-TEST-9999",
+      "timestamp": "2026-09-06T05:52:36Z",
+      "originalData": {
+        "village": "",
+        "tehsil": "Geel",
+        "district": "gor",
+        "ownerName": "Ramsh Ptill"
+      },
+      "correctedData": {
+        "village": "ओतूर",
+        "tehsil": "जुन्नर",
+        "district": "पुणे",
+        "ownerName": "Ramesh Patil"
+      },
+      "learnedReplacements": {
+        "Geel": "जुन्नर",
+        "gor": "पुणे",
+        "Ramsh Ptill": "Ramesh Patil"
+      },
+      "newVillages": [
+        "ओतूर"
+      ],
+      "newTehsils": [],
+      "verifierRemarks": "Corrected misread Geel to Junnar and added village Otur"
+    }
+  ]
 }

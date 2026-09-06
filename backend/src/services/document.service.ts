@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { DocumentModel, IDocument, DocumentProcessingStatus } from '../models/Document.js';
 import { LandRecord } from '../models/LandRecord.js';
 import { DocumentQueryInput } from '../schemas/document.schema.js';
@@ -21,6 +22,30 @@ export const createDocumentRecord = async (
 ) => {
   const documentId = generateDocumentId();
 
+  let checksum = '';
+  try {
+    const fileBuffer = fs.readFileSync(file.path);
+    checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+  } catch {
+    // Ignore checksum calculation failure
+  }
+
+  // Check if this document was previously uploaded (by hash or filename+size)
+  let isReuploaded = false;
+  let reuploadedFromId: string | undefined = undefined;
+
+  const existingDoc = await DocumentModel.findOne({
+    $or: [
+      checksum ? { checksum } : null,
+      { originalName: file.originalname, fileSize: file.size },
+    ].filter(Boolean) as any,
+  }).sort({ createdAt: 1 });
+
+  if (existingDoc) {
+    isReuploaded = true;
+    reuploadedFromId = existingDoc.documentId;
+  }
+
   const doc = await DocumentModel.create({
     documentId,
     fileName: file.filename,
@@ -32,12 +57,17 @@ export const createDocumentRecord = async (
     language: metadata.language || 'Marathi',
     uploadedBy: userId,
     processingStatus: 'UPLOADED',
+    checksum,
+    isReuploaded,
+    reuploadedFromId,
     uploadedAt: new Date(),
     metadata: {
       originalSize: file.size,
       mimeType: file.mimetype,
       encoding: file.encoding,
       uploadSource: 'Web Portal',
+      isReuploaded,
+      reuploadedFromId,
       aiPipeline: {
         ocrReady: true,
         engine: 'ILRDVS-Cadastral-AI-Engine-v2.4',

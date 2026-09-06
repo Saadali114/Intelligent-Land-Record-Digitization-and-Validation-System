@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Land Record AI — Interactive Document Annotator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(20, 27, 45, 0.85);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #3b82f6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #172554 0%, var(--bg) 80%);
+      color: var(--text);
+      font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: 500;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 65px);
+    }
+    .panel {
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .doc-viewer {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .doc-viewer img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn-secondary { background: #334155; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: #059669; }
+    .btn-success:hover { background: #047857; }
+    select, input, textarea {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+    }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+    .token-stream {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 12px;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .token-pill {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .token-pill:hover, .token-pill.selected {
+      background: #2563eb;
+      border-color: #60a5fa;
+      color: white;
+    }
+    .token-pill.labeled {
+      background: #065f46;
+      border-color: #34d399;
+      color: #ecfdf5;
+    }
+    .entity-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #1e293b;
+      border: 1px solid #475569;
+    }
+    .annotations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .annotation-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .del-btn {
+      color: #ef4444;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 2px 6px;
+    }
+    .del-btn:hover { color: #f87171; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h2 style="font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Land Record AI Annotator</h2>
+      <span class="badge">Human-in-the-Loop Studio</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <select id="docSelector" style="width: 260px;" onchange="loadSelectedDocument()">
+        <option value="">Select Document to Annotate...</option>
+      </select>
+      <button class="btn btn-secondary" onclick="refreshDocList()">🔄 Refresh</button>
+      <button class="btn btn-success" onclick="saveAnnotations()">💾 Save Annotations</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Left Pane: Document Scan View -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>Scanned Document Inspection</span>
+        <span id="docStatusBadge" class="badge">No Doc Loaded</span>
+      </div>
+      <div class="doc-viewer" id="viewerBox">
+        <div id="noDocPrompt" style="color: #64748b; font-size: 14px;">Select a document to begin annotating</div>
+        <img id="docImage" style="display: none;" src="" alt="Document Scan" />
+      </div>
+      <div class="card">
+        <h4 style="font-size: 14px; margin-bottom: 8px; color: #cbd5e1;">OCR Text Editor</h4>
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">Edit any misread OCR text before assigning entities:</p>
+        <textarea id="ocrFullTextArea" placeholder="Raw OCR text will appear here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Right Pane: Interactive Token Selector & Labeling -->
+    <div class="panel" style="border-right: none;">
+      <div class="panel-title">
+        <span>Token Selection & Entity Assignment</span>
+        <span id="selectedCountBadge" class="badge">0 words selected</span>
+      </div>
+
+      <!-- Token Stream -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 13px; color: #cbd5e1;">Click or drag across OCR words to select:</span>
+          <button style="background: none; border: none; color: #60a5fa; cursor: pointer; font-size: 12px;" onclick="clearSelection()">Clear Selection</button>
+        </div>
+        <div class="token-stream" id="tokenStreamBox">
+          <span style="color: #64748b; font-size: 13px;">No OCR tokens available.</span>
+        </div>
+      </div>
+
+      <!-- Assign Label Form -->
+      <div class="card">
+        <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: center;">
+          <div>
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Entity Label</label>
+            <select id="entityLabelSelect">
+              <option value="OWNER_NAME">OWNER_NAME (खातेदार / मालक)</option>
+              <option value="CO_OWNER_NAME">CO_OWNER_NAME (सह-खातेदार)</option>
+              <option value="GAT_NUMBER">GAT_NUMBER (गट क्रमांक)</option>
+              <option value="SURVEY_NUMBER">SURVEY_NUMBER (भूमापन / सर्व्हे क्र.)</option>
+              <option value="KHATA_NUMBER">KHATA_NUMBER (खाते क्रमांक)</option>
+              <option value="VILLAGE">VILLAGE (गाव / मौजे)</option>
+              <option value="TALUKA">TALUKA (तालुका)</option>
+              <option value="DISTRICT">DISTRICT (जिल्हा)</option>
+              <option value="LAND_AREA">LAND_AREA (क्षेत्रफळ)</option>
+              <option value="LAND_AREA_UNIT">LAND_AREA_UNIT (हेक्टर / आर)</option>
+              <option value="LAND_TYPE">LAND_TYPE (जिरायत / बागायत)</option>
+              <option value="CROP">CROP (पिकाचे नाव)</option>
+              <option value="MUTATION_NUMBER">MUTATION_NUMBER (फेरफार क्र.)</option>
+              <option value="MUTATION_DATE">MUTATION_DATE (फेरफार दिनांक)</option>
+              <option value="DOCUMENT_DATE">DOCUMENT_DATE (दस्तऐवज दिनांक)</option>
+              <option value="BOUNDARY_NORTH">BOUNDARY_NORTH (उत्तर सीमा)</option>
+              <option value="BOUNDARY_SOUTH">BOUNDARY_SOUTH (दक्षिण सीमा)</option>
+              <option value="BOUNDARY_EAST">BOUNDARY_EAST (पूर्व सीमा)</option>
+              <option value="BOUNDARY_WEST">BOUNDARY_WEST (पश्चिम सीमा)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Selected Text</label>
+            <input type="text" id="selectedTextDisplay" readonly placeholder="Select text..." />
+          </div>
+          <div style="padding-top: 20px;">
+            <button class="btn" onclick="applyLabelToSelection()">Assign Label</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Annotations -->
+      <div class="card" style="flex: 1;">
+        <h4 style="font-size: 14px; margin-bottom: 10px; color: #cbd5e1;">Annotated Entities (<span id="annCount">0</span>)</h4>
+        <div class="annotations-list" id="annotationsListBox">
+          <span style="color: #64748b; font-size: 13px;">No annotations saved for this document yet.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDocId = '';
+    let currentTokens = [];
+    let selectedIndices = new Set();
+    let annotations = [];
+
+    async function refreshDocList() {
+      try {
+        const res = await fetch('/api/v1/documents');
+        const docs = await res.json();
+        const sel = document.getElementById('docSelector');
+        sel.innerHTML = '<option value="">Select Document to Annotate...</option>';
+        docs.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.id;
+          opt.textContent = `${d.id} (${d.type}) - ${d.filename}`;
+          sel.appendChild(opt);
+        });
+      } catch (e) {
+        console.warn('Failed to load documents list from API:', e);
+      }
+    }
+
+    async function loadSelectedDocument() {
+      const docId = document.getElementById('docSelector').value;
+      if (!docId) return;
+      currentDocId = docId;
+      selectedIndices.clear();
+
+      try {
+        const res = await fetch(`/api/v1/documents/${docId}`);
+        const data = await res.json();
+
+        document.getElementById('docStatusBadge').textContent = `Loaded: ${docId}`;
+        document.getElementById('noDocPrompt').style.display = 'none';
+        const imgEl = document.getElementById('docImage');
+        imgEl.src = data.imageUrl || `/api/v1/documents/${docId}/image`;
+        imgEl.style.display = 'block';
+
+        // Set OCR text
+        document.getElementById('ocrFullTextArea').value = data.text || '';
+
+        // Load tokens
+        currentTokens = data.tokens || [];
+        renderTokens();
+
+        // Load existing annotations
+        annotations = data.entities || [];
+        renderAnnotations();
+      } catch (e) {
+        alert('Error loading document data: ' + e);
+      }
+    }
+
+    function renderTokens() {
+      const box = document.getElementById('tokenStreamBox');
+      box.innerHTML = '';
+
+      if (!currentTokens.length) {
+        box.innerHTML = '<span style="color: #64748b; font-size: 13px;">No OCR tokens available. Click on text editor to annotate.</span>';
+        return;
+      }
+
+      currentTokens.forEach((t, idx) => {
+        const pill = document.createElement('span');
+        pill.className = 'token-pill' + (selectedIndices.has(idx) ? ' selected' : '');
+        pill.textContent = t.text;
+        pill.onclick = () => toggleTokenSelection(idx);
+        box.appendChild(pill);
+      });
+    }
+
+    function toggleTokenSelection(idx) {
+      if (selectedIndices.has(idx)) {
+        selectedIndices.delete(idx);
+      } else {
+        selectedIndices.add(idx);
+      }
+      updateSelectionUI();
+    }
+
+    function clearSelection() {
+      selectedIndices.clear();
+      updateSelectionUI();
+    }
+
+    function updateSelectionUI() {
+      const pills = document.querySelectorAll('.token-pill');
+      pills.forEach((p, idx) => {
+        if (selectedIndices.has(idx)) {
+          p.classList.add('selected');
+        } else {
+          p.classList.remove('selected');
+        }
+      });
+
+      const sortedIndices = Array.from(selectedIndices).sort((a, b) => a - b);
+      const selectedWords = sortedIndices.map(i => currentTokens[i].text).join(' ');
+      document.getElementById('selectedTextDisplay').value = selectedWords;
+      document.getElementById('selectedCountBadge').textContent = `${sortedIndices.length} words selected`;
+    }
+
+    function applyLabelToSelection() {
+      const label = document.getElementById('entityLabelSelect').value;
+      const textVal = document.getElementById('selectedTextDisplay').value.trim();
+      const fullText = document.getElementById('ocrFullTextArea').value;
+
+      if (!textVal) {
+        alert('Please select text or tokens to label.');
+        return;
+      }
+
+      // Calculate start/end offset in full text
+      let startIdx = fullText.indexOf(textVal);
+      if (startIdx === -1) {
+        startIdx = 0;
+      }
+      let endIdx = startIdx + textVal.length;
+
+      annotations.push({
+        label: label,
+        value: textVal,
+        start: startIdx,
+        end: endIdx,
+      });
+
+      clearSelection();
+      renderAnnotations();
+    }
+
+    function deleteAnnotation(idx) {
+      annotations.splice(idx, 1);
+      renderAnnotations();
+    }
+
+    function renderAnnotations() {
+      const list = document.getElementById('annotationsListBox');
+      list.innerHTML = '';
+      document.getElementById('annCount').textContent = annotations.length;
+
+      if (!annotations.length) {
+        list.innerHTML = '<span style="color: #64748b; font-size: 13px;">No annotations assigned yet.</span>';
+        return;
+      }
+
+      annotations.forEach((a, idx) => {
+        const row = document.createElement('div');
+        row.className = 'annotation-row';
+        row.innerHTML = `
+          <div>
+            <span class="entity-tag" style="border-left: 3px solid #38bdf8;">${a.label}</span>
+            <strong style="margin-left: 8px; color: #f1f5f9;">${a.value}</strong>
+            <span style="font-size: 11px; color: #64748b; margin-left: 6px;">[${a.start}:${a.end}]</span>
+          </div>
+          <button class="del-btn" onclick="deleteAnnotation(${idx})">✕</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    async function saveAnnotations() {
+      if (!currentDocId) {
+        alert('No document selected.');
+        return;
+      }
+
+      const payload = {
+        document_id: currentDocId,
+        text: document.getElementById('ocrFullTextArea').value,
+        entities: annotations,
+      };
+
+      try {
+        const res = await fetch('/api/v1/annotations/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          alert(`Saved ${annotations.length} entity annotations for ${currentDocId}!`);
+        } else {
+          alert('Save failed: ' + await res.text());
+        }
+      } catch (e) {
+        alert('Save error: ' + e);
+      }
+    }
+
+    window.onload = refreshDocList;
+  </script>
+</body>
+</html>

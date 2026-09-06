@@ -12,6 +12,14 @@ Port: 8000  (called by Express backend at http://localhost:8000)
 """
 
 import os
+import sys
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -53,6 +61,7 @@ async def extract_document(
     file: UploadFile = File(...),
     language: str = "Marathi",
     file_name: str = "document",
+    clean_background: bool = True,
 ):
     """
     Main endpoint — receives a raw image/PDF file from Express backend,
@@ -65,6 +74,7 @@ async def extract_document(
             mime_type=file.content_type or "image/jpeg",
             language=language,
             original_name=file_name,
+            clean_background=clean_background,
         )
         return result
     except Exception as e:

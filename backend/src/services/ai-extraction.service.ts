@@ -93,21 +93,6 @@ const MAHARASHTRA_TEHSILS: Record<string, { tehsil: string; district: string; al
   'कागल': { tehsil: 'कागल', district: 'कोल्हापूर', aliases: ['Kagal'] },
 };
 
-const SAMPLE_OWNERS = [
-  'Ramesh Shankar Patil',
-  'Sunita Dattatray Deshmukh',
-  'Ganesh Bapurao Shinde',
-  'Prakash Narayan Kulkarni',
-  'Anusuya Pandurang Jadhav',
-  'Eknath Tukaram More',
-  'Suresh Vithalrao Pawar',
-  'Laxmibai Madhavrao Gaikwad',
-  'Santosh Bhikaji Chavan',
-  'Vijay Baburao Bhosale',
-  'Ashok Kisanrao Jagtap',
-  'Nirmala Dnyaneshwar Kale',
-];
-
 /**
  * Intelligent parser that extracts cadastral entities from raw text
  */
@@ -224,9 +209,9 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   }
 
   if (!surveyNumber) {
-    const surveyMatch = text.match(/(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gat\s*(?:no\.?|number))[\s\:\-\=_।\.\n]*([0-9Yy]+(?:\/[0-9Yy]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
+    const surveyMatch = text.match(/(?:भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|सर्व्हे\s*(?:क्रमांक|क्र\.?|नंबर)|सर्वे\s*(?:क्रमांक|क्र\.?|नंबर)|गट\s*(?:क्रमांक|क्र\.?|नंबर)|survey\s*(?:no\.?|number)|gat\s*(?:no\.?|number))[\s\:\-\=_।\.\n]*([0-9Yy]+(?:\/[0-9Yy]+[A-Za-z\^अ-ह]?(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)/i);
     if (surveyMatch && surveyMatch[1]) {
-      let sNum = surveyMatch[1].replace(/[Yy]/g, '4').trim();
+      let sNum = surveyMatch[1].replace(/[Yy]/g, '4').replace(/\^/g, 'A').trim();
       if (sNum !== '7/12' && sNum !== '7' && sNum !== '12') {
         if (sNum.endsWith('/व')) {
           sNum = sNum.replace(/\/व$/, '/ब');
@@ -238,10 +223,10 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   }
 
   if (!surveyNumber) {
-    // Check fallback pattern: e.g. '101/2/व' or '101/2/ब' anywhere in text, excluding form title 7/12
-    const generalSurveyMatch = text.match(/\b([0-9]{1,4}\/[0-9]{1,3}(?:\/[0-9\u0900-\u097FA-Za-z]+)?)\b/);
+    // Check fallback pattern: e.g. '145/2A' or '101/2/ब' anywhere in text, excluding form title 7/12
+    const generalSurveyMatch = text.match(/\b([0-9]{1,4}\/[0-9]{1,3}[A-Za-z\^अ-ह]?(?:\/[0-9\u0900-\u097FA-Za-z]+)?)\b/);
     if (generalSurveyMatch && generalSurveyMatch[1] && generalSurveyMatch[1] !== '7/12') {
-      let sNum = generalSurveyMatch[1].trim();
+      let sNum = generalSurveyMatch[1].replace(/\^/g, 'A').trim();
       if (sNum.endsWith('/व')) sNum = sNum.replace(/\/व$/, '/ब');
       surveyNumber = sNum;
       fieldConfidence.surveyNumber = 0.91;
@@ -255,7 +240,7 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     fieldConfidence.khasraNumber = 0.95;
   }
 
-  // 3. Khata Number (खाते क्र. / खाते नंबर)
+  // 3. Khata Number (खाते क्र. / खाते नंबर / खाता नं.)
   // Check table pattern first: number directly preceding owner name (e.g. | 1234 | श्री: गणेश लक्ष्मण शिंदे)
   const preOwnerKhata = text.match(/\|\s*([0-9]{1,5})\s*\|\s*(?:श्री|श्रीमती|सौ)/);
   if (preOwnerKhata && preOwnerKhata[1] !== '7/12' && preOwnerKhata[1] !== '7') {
@@ -264,7 +249,7 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   }
 
   if (!khataNumber) {
-    const khataMatch = text.match(/(?:खाते\s*(?:नंबर|नं\.?|क्रमांक|क्र\.?)|खाता\s*(?:नंबर|क्र\.?)|khata\s*(?:no\.?|number))[\s\:\-\=_।\.]*([0-9]+)/i);
+    const khataMatch = text.match(/(?:खाते\s*(?:नंबर|नं[॰\.]?|क्रमांक|क्र\.?)|खाता\s*(?:नंबर|नं[॰\.]?|क्र\.?)|khata\s*(?:no\.?|number))[\s\:\-\=_।\.\n]*([0-9]+)/i);
     if (khataMatch) {
       khataNumber = khataMatch[1].trim();
       fieldConfidence.khataNumber = 0.97;
@@ -311,8 +296,8 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
           fieldConfidence.plotArea = 0.96;
         }
       } else {
-        // Pattern 3: explicit area keyword followed by decimal + unit (e.g. area : 1.20 hectares)
-        const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)/i);
+        // Pattern 3: explicit area keyword followed by decimal + unit (e.g. 1.25 हे or 1.20 hectares)
+        const areaKeywordMatch = text.match(/(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)[\s:\-=_।\.\n]*([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|हे\.?|आर|एकर|hectares?|acres?|hec|ha\b)/i);
         if (areaKeywordMatch) {
           const val = areaKeywordMatch[1];
           const unitRaw = areaKeywordMatch[2].toLowerCase();
@@ -326,29 +311,28 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // 5. Village (गाव :- खेड or रा. खेड)
-  // Priority 1: Check resident address (रा. खेड) as it provides full, un-truncated Devanagari text
-  const raMatch = text.match(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,20})/);
-  if (raMatch && raMatch[1]) {
-    const v = raMatch[1].trim();
-    if (v.length >= 2 && !['नमुना', 'नंबर', 'शासन', 'पद्धती'].includes(v)) {
-      village = v;
-      fieldConfidence.village = 0.98;
+  // 5. Village (गाव :- हिंगवडी / गाव : खेड)
+  const villageBlacklist = ['उतारा', 'नमुना', 'नंबर', 'शासन', 'पद्धती', 'विभाग', 'अभिलेख', 'सातबारा', 'पुणे', 'जिल्हा', 'तालुका'];
+
+  // Priority 1: Check labeled गाव / मौजे header
+  const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|\n]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
+  for (const m of vMatches) {
+    const val = m[1].trim();
+    if (!villageBlacklist.includes(val) && val.length >= 2 && !['SEE', 'col', 'and', 'the'].includes(val)) {
+      village = val;
+      fieldConfidence.village = 0.97;
+      break;
     }
   }
 
-  // Priority 2: Check labeled गाव / मौजे with sanity check against single-syllable/noise tokens
+  // Priority 2: Check resident address (रा. खेड) — reject blacklist words
   if (!village) {
-    const vMatches = [...text.matchAll(/(?:गाव|मौजे|village)[\s:\-=_।\|]+([A-Za-z\u0900-\u097F]{2,25})/gi)];
-    for (const m of vMatches) {
-      const val = m[1].trim();
-      if (
-        val !== 'नमुना' && val !== 'नंबर' && val !== 'शासन' && val !== 'पद्धती' &&
-        val.length >= 3 && !['SEE', 'col', 'and', 'the'].includes(val)
-      ) {
-        village = val;
-        fieldConfidence.village = 0.97;
-        break;
+    const raMatch = text.match(/रा[\.\s:\-]+([A-Za-z\u0900-\u097F]{2,20})/);
+    if (raMatch && raMatch[1]) {
+      const v = raMatch[1].trim();
+      if (v.length >= 2 && !villageBlacklist.includes(v)) {
+        village = v;
+        fieldConfidence.village = 0.95;
       }
     }
   }
@@ -367,35 +351,36 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // 6. Tehsil (तालुका :- जुन्नर, ता: जुन्नर, मंडळ अधिकारी जुन्नर)
-  // Priority 1: Check address "ता: जुन्नर" or "ता. जुन्नर"
-  const taMatch = text.match(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{3,20})/);
-  if (taMatch && taMatch[1]) {
-    const val = taMatch[1].trim();
-    if (!['नंबर', 'नमुना', 'शासन', 'SEE', 'col', 'Geel', 'gor'].includes(val)) {
+  // 6. Tehsil (तालुका :- मुळशी, जुन्नर, ता: जुन्नर)
+  const tehsilBlacklist = ['नंबर', 'नं°', 'नं', 'SEE', 'नमुना', 'शासन', 'Geel', 'gor', 'col', 'अभिलेख', 'विभाग', 'पुणे'];
+
+  // Priority 1: Check standard labeled तालुका header
+  const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.\n]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+  for (const m of tMatches) {
+    const val = m[1].trim();
+    if (
+      !tehsilBlacklist.includes(val) &&
+      val.length >= 3 && !/^[a-zA-Z]{1,4}$/.test(val)
+    ) {
       tehsil = val === 'खालापुर' ? 'खालापूर' : val;
-      fieldConfidence.tehsil = 0.97;
+      fieldConfidence.tehsil = 0.96;
+      break;
     }
   }
 
-  // Priority 2: Check standard labeled तालुका header
+  // Priority 2: Check address "ता: जुन्नर" or "ता. जुन्नर"
   if (!tehsil) {
-    const tMatches = [...text.matchAll(/(?:तालुका|तहसील|tehsil|taluka)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
-    for (const m of tMatches) {
-      const val = m[1].trim();
-      if (
-        val !== 'नंबर' && val !== 'SEE' && val !== 'नमुना' && val !== 'शासन' &&
-        val !== 'Geel' && val !== 'gor' && val !== 'col' &&
-        val.length >= 3 && !/^[a-zA-Z]{1,4}$/.test(val)
-      ) {
+    const taMatch = text.match(/ता[\s:\.\-]+([A-Za-z\u0900-\u097F]{3,20})/);
+    if (taMatch && taMatch[1]) {
+      const val = taMatch[1].trim();
+      if (!tehsilBlacklist.includes(val)) {
         tehsil = val === 'खालापुर' ? 'खालापूर' : val;
-        fieldConfidence.tehsil = 0.96;
-        break;
+        fieldConfidence.tehsil = 0.95;
       }
     }
   }
 
-  // Priority 3: Cross-reference Maharashtra Tehsils dictionary & aliases (e.g. Junnar, Khed, Khalapur)
+  // Priority 3: Cross-reference Maharashtra Tehsils dictionary & aliases
   for (const [key, meta] of Object.entries(MAHARASHTRA_TEHSILS)) {
     if (text.includes(key)) {
       tehsil = meta.tehsil;
@@ -419,7 +404,7 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
 
   // 7. District (जिल्हा :- पुणे or जि. पुणे)
   if (!district || district === 'Maharashtra' || district === 'gor') {
-    const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि)[\s:\-=_।\.]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
+    const dMatches = [...text.matchAll(/(?:जिल्हा|district|जि)[\s:\-=_।\.\n]+\s*([A-Za-z\u0900-\u097F]{2,25})/gi)];
     for (const dm of dMatches) {
       const val = dm[1].trim();
       if (val !== 'gor' && val !== 'पद्धती' && val !== 'शासन' && val.length >= 2) {
@@ -469,26 +454,33 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     anomalies.push('Occupant Class 2 tenure detected (Requires Collector permission for sale/transfer)');
   }
 
-  // 9. Mutation / Ferfar patterns (शेवटचा फेरफार क्रमांक 2750 or फे.फा. ( 1550 ) or फेरफार क्र. : 1632)
-  const mutationMatch = text.match(/(?:शेवटचा\s*फेरफार\s*क्रमांक|मागील\s*फेरफार\s*क्र\.?|फेरफार\s*क्र\.?|फेरफार|ferfar|mutation|mtr)[\s\:\-\=_।\.\n]*([0-9]{3,6})/i);
-  if (mutationMatch) {
-    mutationNumber = `MTR-${mutationMatch[1].trim()}`;
-  } else {
-    const feFaMatch = text.match(/फे\.फा\.[^\d]*([0-9]{2,6})/i);
+  // 9. Mutation / Ferfar patterns (फेरफार नं 312/2020 or शेवटचा फेरफार क्रमांक 2750 or फे.फा. 1550)
+  const mutationMatches = [...text.matchAll(/(?:फेरफार\s*(?:क्र[॰\.]?|नं[॰\.]?|क्रमांक|नंबर)?|मागील\s*फेरफार|शेवटचा\s*फेरफार|ferfar|mutation)[\s\:\-\=_।\.\n]*([0-9]{1,6}(?:\/[0-9]{2,4})?)/gi)];
+  if (mutationMatches.length > 0) {
+    const valid = mutationMatches
+      .map(m => m[1].trim())
+      .filter(v => v !== '7/12' && v !== '7' && v !== '12' && v.length >= 2);
+    if (valid.length > 0) {
+      mutationNumber = `MTR-${valid[valid.length - 1].replace(/\s+/g, '')}`;
+    }
+  }
+
+  if (!mutationNumber) {
+    const feFaMatch = text.match(/फे\.फा\.[^\d]*([0-9]{1,6}(?:\/[0-9]{2,4})?)/i);
     if (feFaMatch) {
       mutationNumber = `MTR-${feFaMatch[1].trim()}`;
     }
   }
 
-  // 10. Owner Name (भोगवटादाराचे नाव / खातेदाराचे नाव / कब्जेदार / भूमिधारकाचे नाव)
-  // Clean text by stripping zero-width spaces and normalizing punctuation
+  // 10. Owner Name (जमीन धारकांचे नांव / भोगवटादाराचे नाव / खातेदाराचे नाव / कब्जेदार)
   const cleanOwnerCandidate = (raw: string): string => {
     return raw
       .replace(/[\u200B-\u200D\uFEFF]/g, '')
-      .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '') // strip mutation numbers in parens like (1532) or (१६३२)
+      .replace(/\([0-9\u0900-\u097F\s\.\-]+\)/g, '') // strip mutation numbers in parens like (1532)
       .replace(/^[१२३४५६७८९\d]+[\)\.\-]\s*/, '') // strip leading list numbers like 1) or १)
       .replace(/^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+/g, '') // strip leading honorifics
       .replace(/[।\|\.:\-\s]+$/g, '') // strip trailing dandas or punctuation
+      .replace(/\s*(?:[०-९\d]+[\.\)]\s*)?खाता.*$/i, '') // strip leak into next line: 5. खाता नं
       .replace(/\r?\n.*/s, '') // keep first line if multiline
       .replace(/शिंदि/g, 'शिंदे')
       .replace(/पाटि/g, 'पाटील')
@@ -500,16 +492,17 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     const blacklist = [
       'क्षेत्र', 'आकार', 'पोटखराब', 'जुडी', 'रुपये', 'पैसे', 'नमुना', 'गाव',
       'तालुका', 'जिल्हा', 'शासन', 'महाराष्ट्र', 'महसूल', 'अधिकार', 'अभिलेख',
-      'भोगवटादार', 'खातेदार', 'पिकांची', 'हंगाम', 'शेरा', 'शेती', 'जिरायत',
+      'भोगवटादार', 'खातेदार', 'खाता', 'खाते', 'नोंद', 'उतारा', 'पिकांची', 'हंगाम',
+      'शेरा', 'शेती', 'जिरायत', 'दिनांक', 'ठिकाण', 'नंबर', 'क्रमांक',
       'government', 'revenue', 'department', 'satbara', 'signature',
     ];
     const lower = cand.toLowerCase();
     return blacklist.some((w) => lower.includes(w));
   };
 
-  // Pattern A: Labeled owner field (e.g. भूमिधारकाचे नाव, खातेदाराचे नाव, भोगवटादाराचे नाव)
+  // Pattern A: Labeled owner field (e.g. जमीन धारकांचे नांव, भूमिधारकाचे नाव, खातेदाराचे नाव, भोगवटादाराचे नाव)
   const labeledOwnerMatch = text.match(
-    /(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूमिधारकाचे\s*नाव|\[?भिधारकांचे\s*नाव|भूधारकाचे\s*नाव|जमीन\s*मालक|owner\s*name)[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})/i
+    /(?:जमीन\s*धारकांचे\s*नांव|जमीन\s*धारकांचे\s*नाव|जमीन\s*धारक|खाता\s*धारक|खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|कब्जेदार(?:ाचे\s*नाव)?|खातेदाराचे\s*नांव\s*व\s*पत्ता|भूमिधारकाचे\s*नाव|\[?भिधारकांचे\s*नाव|भूधारकाचे\s*नाव|जमीन\s*मालक|owner\s*name)[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})/i
   );
   if (labeledOwnerMatch && labeledOwnerMatch[1]) {
     let rawCand = labeledOwnerMatch[1].replace(/शिंदि\b/, 'शिंदे').replace(/पाटि\b/, 'पाटील');
@@ -521,7 +514,6 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
   }
 
   // Pattern B: Devanagari honorific with full name (श्री / श्रीमती / सौ / कै / स्व)
-  // Supports colons, dots, dashes: श्री: गणेश or श्री. गणेश
   if (!ownerName) {
     const honorificMatch = text.match(
       /(?:(?:श्री|श्रीमती|सौ|कै|स्व)[\s:\.\-=_]+)([A-Za-z\u0900-\u097F\s]{4,45})/
@@ -564,7 +556,26 @@ export const parseCadastralEntities = (rawText: string, originalName: string, la
     }
   }
 
-  // Pattern E: 2-3 word English full name
+  // Pattern E: 2-3 word Devanagari name with recognized regional surname (e.g. गणेश लक्ष्मण शिंदे)
+  if (!ownerName) {
+    const COMMON_SURNAMES = [
+      'शिंदे', 'पाटील', 'देशमुख', 'कुलकर्णी', 'जाधव', 'पवार', 'गायकवाड', 'चव्हाण',
+      'भोसले', 'काळे', 'कदम', 'मोरे', 'वाघ', 'जोशी', 'शेट्ये', 'चौधरी', 'ठाकूर',
+      'मोटे', 'माने', 'सावंत', 'खरात', 'शेळके', 'राऊत', 'जगताप', 'नाईक',
+    ];
+    const surRegex = new RegExp(`(?:^|[\\s\\n\\r|])([A-Za-z\\u0900-\\u097F]{2,20}(?:\\s+[A-Za-z\\u0900-\\u097F]{2,20}){1,2}\\s+(?:${COMMON_SURNAMES.join('|')}))(?:$|[\\s\\n\\r|,.:])`);
+    const surMatch = text.match(surRegex);
+    if (surMatch && surMatch[1]) {
+      let cand = surMatch[1].replace(/^[०-९0-9\s\n\r]+/, '').trim();
+      const cleaned = cleanOwnerCandidate(cand);
+      if (!isInvalidOwner(cleaned) && cleaned.split(/\s+/).length >= 2) {
+        ownerName = text.includes('श्री') ? `श्री. ${cleaned}` : cleaned;
+        fieldConfidence.ownerName = 0.94;
+      }
+    }
+  }
+
+  // Pattern F: 2-3 word English full name
   if (!ownerName) {
     const engMatches = text.match(/\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b/g);
     if (engMatches) {
@@ -944,6 +955,13 @@ export const extractLandRecordFromDocument = async (
         document._id.toString()
       );
       if (dupCheck && dupCheck.isDuplicate) {
+        document.isReuploaded = true;
+        document.metadata = {
+          ...(document.metadata || {}),
+          isReuploaded: true,
+          reuploadedFromId: document.reuploadedFromId,
+          duplicateReason: dupCheck.reason,
+        };
         extractedData.anomalies.push(`[Registry Anomaly] ${dupCheck.reason}`);
         // If conflict, slightly reduce overall confidence to mandate review
         extractedData.overallConfidence = Math.min(extractedData.overallConfidence, 0.72);

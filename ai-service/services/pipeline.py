@@ -20,6 +20,7 @@ async def run_full_pipeline(
     mime_type: str = "image/jpeg",
     language: str = "Marathi",
     original_name: str = "document",
+    clean_background: bool = True,
 ) -> OCRResponse:
     """
     Executes the self-diagnosing, multi-pass adaptive extraction pipeline.
@@ -29,6 +30,7 @@ async def run_full_pipeline(
         mime_type=mime_type,
         language=language,
         original_name=original_name,
+        clean_background=clean_background,
     )
 
     field_conf = cadastral_data.get("fieldConfidence", {})

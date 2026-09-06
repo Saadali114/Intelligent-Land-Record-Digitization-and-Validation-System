@@ -64,8 +64,9 @@ def _preprocess_clahe_boost(image_bytes: bytes) -> Tuple[bytes, List[str]]:
     Applies aggressive CLAHE contrast stretching and sharpening to rescue faint stamp ink.
     """
     try:
-        import cv2
-        import numpy as np
+        # pyrefly: ignore [missing-import]
+        import cv2  # type: ignore
+        import numpy as np  # type: ignore
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
         if img is None:
@@ -136,9 +137,11 @@ async def run_adaptive_pipeline(
     mime_type: str = "image/jpeg",
     language: str = "Marathi",
     original_name: str = "document",
+    clean_background: bool = True,
 ) -> Dict[str, Any]:
     """
-    Orchestrates the self-diagnosing, multi-pass adaptive extraction pipeline.
+    Orchestrates the self-diagnosing, multi-pass adaptive extraction pipeline with
+    dual-mode Otsu binarization / CLAHE gradient preprocessing.
     """
     t0 = time.time()
     steps_applied: List[str] = []
@@ -148,7 +151,8 @@ async def run_adaptive_pipeline(
     image_bytes = file_bytes
     if "pdf" in mime_type.lower() or original_name.lower().endswith(".pdf"):
         try:
-            import fitz
+            # pyrefly: ignore [missing-import]
+            import fitz  # type: ignore
             doc = fitz.open(stream=file_bytes, filetype="pdf")
             if len(doc) > 0:
                 pix = doc[0].get_pixmap(dpi=200)
@@ -157,8 +161,11 @@ async def run_adaptive_pipeline(
         except Exception as e:
             steps_applied.append(f"pdf_fallback_to_bytes: {str(e)}")
 
-    # 2. PASS 1: Baseline Adaptive Pass
-    p1_prep, p1_steps = preprocess_image(image_bytes)
+    # 2. PASS 1: Dual-Mode Primary Pass (Otsu Binarization / Image Cleaning)
+    # When clean_background=True, for_neural_ocr=False runs Otsu thresholding + Devanagari morphological closing
+    # to eliminate dark stamps, dirty paper backgrounds, and scanner shadows.
+    p1_for_neural = not clean_background
+    p1_prep, p1_steps = preprocess_image(image_bytes, for_neural_ocr=p1_for_neural)
     steps_applied.extend(p1_steps)
     p1_raw_text, p1_ocr_conf, p1_char_count = run_easyocr(p1_prep, language=language)
 
@@ -179,13 +186,18 @@ async def run_adaptive_pipeline(
     ocr_chars = p1_char_count
     best_raw_text = p1_raw_text
 
-    # 4. PASS 2 (Self-Healing Strategy Shift if errors diagnosed)
+    # 4. PASS 2 (Self-Healing Dual-Mode Strategy Shift if errors diagnosed)
     if diagnosed_errors:
         error_recovery_logs.append(f"Pass 1 Diagnosed Errors: {'; '.join(diagnosed_errors)}")
 
-        # Strategy A: If low yield or faint ink/missing owner or area -> run CLAHE contrast boost
-        if any(e in diagnosed_errors for e in ["low_char_yield", "potential_faint_ink_or_table_distortion", "low_ocr_confidence"]):
-            p2_prep, p2_steps = _preprocess_clahe_boost(image_bytes)
+        # Strategy A: Dual-mode alternate representation
+        # If Pass 1 ran Otsu binarization, Pass 2 evaluates CLAHE contrast boost.
+        # If Pass 1 ran neural gradient, Pass 2 evaluates Otsu binarization to clear background noise.
+        if any(e in diagnosed_errors for e in ["low_char_yield", "potential_faint_ink_or_table_distortion", "low_ocr_confidence", "missing_core_fields"]):
+            if clean_background:
+                p2_prep, p2_steps = _preprocess_clahe_boost(image_bytes)
+            else:
+                p2_prep, p2_steps = preprocess_image(image_bytes, for_neural_ocr=False)
             steps_applied.extend(p2_steps)
             p2_raw_text, p2_ocr_conf, p2_char_count = run_easyocr(p2_prep, language=language)
 
@@ -201,13 +213,13 @@ async def run_adaptive_pipeline(
                 best_raw_text = p2_raw_text
                 ocr_chars = p2_char_count
             error_recovery_logs.append(
-                f"Pass 2A CLAHE contrast recovery executed: Char count {p1_char_count} -> {p2_char_count}"
+                f"Pass 2 Dual-Mode Recovery executed ({'CLAHE Boost' if clean_background else 'Otsu Binarized'}): Char count {p1_char_count} -> {p2_char_count}"
             )
 
         # Strategy B: If characters are critically low (< 40), test 90-degree clockwise auto-orientation
         if ocr_chars < 40:
             rotated_bytes = _rotate_image_bytes(image_bytes, 90)
-            p2b_prep, _ = preprocess_image(rotated_bytes)
+            p2b_prep, _ = preprocess_image(rotated_bytes, for_neural_ocr=False)
             p2b_text, p2b_conf, p2b_chars = run_easyocr(p2b_prep, language=language)
             if p2b_chars > ocr_chars + 30:
                 p2b_cadastral = extract_cadastral_entities(p2b_text, original_name, language=language)

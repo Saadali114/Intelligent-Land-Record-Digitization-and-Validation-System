@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -18,9 +18,18 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
   isUploading,
 }) => {
   const { t } = useTranslation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('Marathi');
   const [fileType, setFileType] = useState('7/12 Extract');
+
+  const handleClose = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    onClose();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +45,15 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
 
     await onUpload(formData);
     setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={t('officerDocuments.uploadModalTitle', { defaultValue: 'Ingest Land Document' })}
       description={t('officerDocuments.uploadModalDesc', { defaultValue: 'Upload historical scan or PDF into the registry pipeline.' })}
     >
@@ -55,6 +67,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
             {t('officerDocuments.supportedFormats', { defaultValue: 'Supports PDF, JPEG, PNG, WEBP, TIFF (Max 25MB)' })}
           </p>
           <input
+            ref={fileInputRef}
             type="file"
             accept=".pdf,.png,.jpg,.jpeg,.webp,.tiff"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
@@ -98,7 +111,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={handleClose}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button type="submit" isLoading={isUploading}>

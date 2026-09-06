@@ -85,7 +85,9 @@ export interface DocumentRecord {
   language: string;
   uploadedBy: User | string;
   processingStatus: DocumentProcessingStatus;
-  uploadedAt: string;
+  uploadedAt?: string;
+  isReuploaded?: boolean;
+  reuploadedFromId?: string;
   metadata?: Record<string, any>;
   fileUrl?: string;
   landRecord?: LandRecord;

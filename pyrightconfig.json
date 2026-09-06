@@ -1,0 +1,17 @@
+{
+  "venvPath": "ai-service",
+  "venv": "venv",
+  "extraPaths": [
+    "ai-service",
+    "ai-service/venv/Lib/site-packages"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "ai-service",
+      "extraPaths": [
+        "ai-service",
+        "ai-service/venv/Lib/site-packages"
+      ]
+    }
+  ]
+}

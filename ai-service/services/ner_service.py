@@ -57,6 +57,8 @@ TEHSIL_SYNONYMS = {
     "Panvel": {"tehsil": "पनवेल", "village": "पनवेल", "district": "रायगड"},
     "हवेली": {"tehsil": "हवेली", "village": "वाघोली", "district": "पुणे"},
     "Haveli": {"tehsil": "हवेली", "village": "वाघोली", "district": "पुणे"},
+    "मुळशी": {"tehsil": "मुळशी", "village": "हिंगवडी", "district": "पुणे"},
+    "Mulshi": {"tehsil": "मुळशी", "village": "हिंगवडी", "district": "पुणे"},
     "बारामती": {"tehsil": "बारामती", "village": "बारामती", "district": "पुणे"},
     "Baramati": {"tehsil": "बारामती", "village": "बारामती", "district": "पुणे"},
     "कल्याण": {"tehsil": "कल्याण", "village": "कल्याण", "district": "ठाणे"},
@@ -72,38 +74,33 @@ DISTRICT_SYNONYMS = {
     "ठाणे": "ठाणे", "Thane": "ठाणे",
 }
 
-SAMPLE_OWNERS = [
-    "Ramesh Shankar Patil", "Sunita Dattatray Deshmukh", "Ganesh Bapurao Shinde",
-    "Prakash Narayan Kulkarni", "Anusuya Pandurang Jadhav", "Eknath Tukaram More",
-]
-
-
 # ---------------------------------------------------------------------------
 # Individual field extractors
 # ---------------------------------------------------------------------------
 
 def extract_survey_number(text: str) -> Tuple[Optional[str], float]:
-    # Primary: explicitly labelled Gat/Survey number (handling newline after label)
+    # Primary: explicitly labelled Gat/Survey number (handling newline after label and suffixes like 145/2A)
     m = re.search(
-        r'(?:गट\s*(?:नंबर|नं\.?|क्र[॰\.]?|क्रमांक)|सर्वे\s*(?:नंबर|नं\.?|क्र[॰\.]?|क्रमांक)|भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र\.?)|survey\s*(?:no\.?|number)|gut\s*(?:no\.?|number))'
-        r'[\s\:\-\=\n]*([0-9]+(?:\/[0-9]+(?:\/[0-9\u0900-\u097FA-Za-z]+)?)?)',
+        r'(?:गट\s*(?:नंबर|नं[॰\.]?|क्र[॰\.]?|क्रमांक)|सर्वे\s*(?:नंबर|नं[॰\.]?|क्र[॰\.]?|क्रमांक)|भूमापन\s*(?:क्रमांक\s*व\s*उपविभाग|क्रमांक|क्र[॰\.]?)|survey\s*(?:no\.?|number)|gut\s*(?:no\.?|number))'
+        r'[\s\:\-\=\n]*([0-9]+(?:\/[0-9]+(?:\/?[0-9A-Za-z\^]+)?)?)',
         text, re.IGNORECASE
     )
     if m:
-        val = m.group(1).strip()
+        val = m.group(1).replace('^', 'A').strip()
         # Ensure we don't accidentally capture '7/12' form title
         if val not in ("7/12", "7", "12"):
             if val.endswith('/व'):
                 val = val[:-2] + '/ब'
-            # OCR disambiguation: Devanagari ४ (4) is frequently misread as ५ (5) in handwriting
-            if val == "1235" and "1917" in text:
-                val = "1234"
             return val, 0.98
 
-    # Fallback: bare fraction pattern (e.g. 101/2/ब), excluding 7/12
-    m = re.search(r'\b([0-9]{1,4}\/[0-9]{1,3}(?:\/[0-9\u0900-\u097FA-Za-z]+)?)\b', text)
-    if m and m.group(1) not in ("7/12", "2021/22", "2022/23", "2023/24"):
-        return m.group(1), 0.82
+    # Fallback: bare fraction pattern (e.g. 101/2/ब or 145/2A), excluding 7/12
+    m = re.search(r'\b([0-9]{1,4}\/[0-9]{1,3}(?:\/?[0-9A-Za-z\^]+)?)\b', text)
+    if m:
+        val = m.group(1).replace('^', 'A').strip()
+        if val not in ("7/12", "7/1", "7", "12", "2021/22", "2022/23", "2023/24"):
+            if val.endswith('/व'):
+                val = val[:-2] + '/ब'
+            return val, 0.90
 
     return None, 0.0
 
@@ -192,17 +189,17 @@ def extract_plot_area(text: str) -> Tuple[Optional[str], float]:
         hec, are, sqm = m.group(1), m.group(2), m.group(3)
         return f"{hec}.{are}{sqm} Hectares ({are}.{sqm} Are)", 0.97
 
-    # Pattern 4: Area keyword + decimal + unit
+    # Pattern 4: Area keyword + decimal + unit (allowing newline and abbreviated हे)
     m = re.search(
-        r'(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)\s*[:\-]?\s*'
-        r'([0-9]+(?:\.[0-9]+)?)\s*(हेक्टर|आर|एकर|hectares?|acres?|hec|ha\b)',
+        r'(?:क्षेत्र|एकूण\s*क्षेत्रफळ|area|क्षेत्रफळ)[\s:\-\=\.\n]*'
+        r'([0-9]+(?:\.[0-9]+)?)\s*(हे(?:क्टर)?|आर|एकर|गुंठा|hectares?|acres?|hec|ha\b)',
         text, re.IGNORECASE
     )
     if m:
         val, unit_raw = m.group(1), m.group(2).lower()
         unit = "Hectares" if any(k in unit_raw for k in ["हे", "hec", "ha"]) else \
                "Acres" if any(k in unit_raw for k in ["एक", "acre"]) else "Hectares"
-        return f"{val} {unit}", 0.93
+        return f"{val} {unit}", 0.95
 
     # Pattern 5: Historical acres + gunthas
     m = re.search(
@@ -218,19 +215,22 @@ def extract_plot_area(text: str) -> Tuple[Optional[str], float]:
 
 
 def extract_village(text: str) -> Tuple[Optional[str], float]:
-    # Priority 1: Check resident address (रा. खेड)
-    m_ra = re.search(r'रा[\.\s:\-]+([\w\u0900-\u097F]{2,20})', text)
-    if m_ra and len(m_ra.group(1)) > 1:
-        val = m_ra.group(1).strip()
-        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "आकारणी", "पीक", "शेरा", "क्षेत्र"):
-            return val, 0.98
+    blacklist = ("नमुना", "नंबर", "शासन", "पद्धती", "आकारणी", "पीक", "शेरा", "क्षेत्र", "SEE", "col", "उतारा", "अभिलेख", "विभाग", "नोंदवही")
 
-    # Priority 2: Check labeled गाव / मौजे
+    # Priority 1: Check labeled गाव / मौजे
     m = re.search(r'(?:गाव|गाग|village)\s*[:\-\=\n]+\s*([\w\u0900-\u097F]{2,20})', text, re.IGNORECASE)
     if m and len(m.group(1)) > 2:
         val = m.group(1).strip()
-        if val not in ("नमुना", "नंबर", "शासन", "पद्धती", "आकारणी", "पीक", "शेरा", "क्षेत्र", "SEE", "col"):
+        if val not in blacklist:
             return val, 0.96
+
+    # Priority 2: Check resident address (रा. खेड) with word boundary to avoid matching trailing syllables like 'सातबारा उतारा'
+    m_ra = re.search(r'(?:^|[\s,;])(?:रा|मु)[\.\s:\-]+([\w\u0900-\u097F]{2,20})', text)
+    if m_ra and len(m_ra.group(1)) > 1:
+        val = m_ra.group(1).strip()
+        if val not in blacklist:
+            return val, 0.98
+
     return None, 0.0
 
 
@@ -287,7 +287,8 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
             "क्षेत्र", "आकार", "पोटखराब", "जुडी", "रुपये", "पैसे", "नमुना", "गाव",
             "तालुका", "जिल्हा", "शासन", "महाराष्ट्र", "महसूल", "अधिकार", "अभिलेख",
             "भोगवटादार", "खातेदार", "पिकांची", "हंगाम", "शेरा", "शेती", "जिरायत",
-            "पीक", "पिकांचा", "आकारणी", "खाते", "क्रमांक", "तपशील",
+            "पीक", "पिकांचा", "आकारणी", "खाते", "क्रमांक", "तपशील", "खाता", "नंबर",
+            "नोंद", "उतारा", "विभाग", "नकाशा",
             "government", "revenue", "department", "satbara", "signature",
         ]
         lower = cand.lower()
@@ -307,14 +308,14 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
         if is_valid_name(full_name) and len(full_name.split()) >= 2:
             return full_name, 0.96
 
-    # Pattern 2: Explicit occupant / khatedar label
+    # Pattern 2: Explicit occupant / khatedar label (including जमीन धारकांचे नांव)
     m = re.search(
-        r'(?:खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भूभिधारकांचे\s*नाव|भूधारकाचे\s*नाव|कब्जेदार|भोगवटादार|owner\s*name)'
-        r'[\s\:\-\=\n]+([^\n\r,;:–|]{3,60})',
+        r'(?:जमीन\s*धारकांचे\s*नांव|जमीन\s*धारकांचे\s*नाव|जमीनधारकांचे\s*नांव|जमीनधारकांचे\s*नाव|खातेदाराचे\s*नाव|भोगवटादाराचे\s*नांव|भोगवटादाराचे\s*नाव|भूभिधारकांचे\s*नाव|भूधारकाचे\s*नाव|कब्जेदार|भोगवटादार|owner\s*name)'
+        r'[\s\:\-\=\.\n]+([^\r,;:–|]{3,60})',
         clean_text, re.IGNORECASE
     )
     if m:
-        val = m.group(1).strip()
+        val = m.group(1).split('\n')[0].strip()
         val = re.sub(r'^[१२३४५६७८९\d]+[\)\.\-]\s*', '', val)
         val = re.sub(r'\([0-9\u0900-\u097F\s\.\-]+\)', '', val)
         val = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', val)
@@ -322,7 +323,7 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
         val = re.sub(r'\s+(?:रा|ता|जि|स्वतः)$', '', val).strip()
         val = re.sub(r'[।\|\.:\-\s]+$', '', val).strip()
         if is_valid_name(val):
-            return val, 0.95
+            return val, 0.96
 
     # Pattern 3: Numbered table entry (1) नाम or १) नाम)
     m = re.search(
@@ -334,7 +335,22 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
         if is_valid_name(val):
             return val, 0.88
 
-    # Pattern 4: Capitalized English name (2-3 words)
+    # Pattern 4: 2-3 word Devanagari name with recognized regional surname (e.g. गणेश लक्ष्मण शिंदे)
+    COMMON_SURNAMES = [
+        "शिंदे", "पाटील", "देशमुख", "कुलकर्णी", "जाधव", "पवार", "गायकवाड", "चव्हाण",
+        "भोसले", "काळे", "कदम", "मोरे", "वाघ", "जोशी", "शेट्ये", "चौधरी", "ठाकूर",
+        "मोटे", "माने", "सावंत", "खरात", "शेळके", "राऊत", "जगताप", "नाईक"
+    ]
+    p_sur = r'(?:^|[\s\n\r|])([A-Za-z\u0900-\u097F]{2,20}(?:\s+[A-Za-z\u0900-\u097F]{2,20}){1,2}\s+(?:' + '|'.join(COMMON_SURNAMES) + r'))(?:$|[\s\n\r|,.:])'
+    m_sur = re.search(p_sur, clean_text)
+    if m_sur:
+        cand = m_sur.group(1).strip()
+        cand = re.sub(r'^[०-९0-9\s\n\r]+', '', cand).strip()
+        cand = re.sub(r'^(?:(?:श्री|श्रीमती|सौ|स्व|कै)[\s:\.\-]+)+', '', cand).strip()
+        if is_valid_name(cand) and len(cand.split()) >= 2:
+            return f"श्री. {cand}" if "श्री" in clean_text else cand, 0.94
+
+    # Pattern 5: Capitalized English name (2-3 words)
     m = re.search(r'\b([A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)\b', clean_text)
     if m:
         cand = m.group(1).strip()
@@ -345,21 +361,21 @@ def extract_owner_name(text: str) -> Tuple[Optional[str], float]:
 
 
 def extract_mutation_number(text: str) -> Tuple[Optional[str], float]:
-    # Match Marathi ferfar labels: फेरफार क्र. 1532, मागील फेरफार क्र. 1567
+    # Match Marathi ferfar labels: फेरफार क्र. 1532, फेरफार नं. 312/2020, मागील फेरफार क्र. 1567
     matches = re.findall(
-        r'(?:फेरफार\s*क्र[॰\.]?|फेरफार\s*क्रमांक|शेवटचा\s*फेरफार|ferfar|mutation)[\s\:\-\=\n]*([0-9]{3,6})',
+        r'(?:फेरफार\s*(?:क्र[॰\.]?|नं[॰\.]?|क्रमांक|नंबर)?|मागील\s*फेरफार|शेवटचा\s*फेरफार|ferfar|mutation)[\s\:\-\=\n]*([0-9]{1,6}(?:\/[0-9]{2,4})?)',
         text, re.IGNORECASE
     )
     if matches:
-        val = matches[-1].strip()
-        # Devanagari OCR confusion: handwritten ६ (6) in १६३२ is often misread as ५ (5) in 1532
-        if val == "1532":
-            val = "1632"
-        return f"MTR-{val}", 0.98
+        # Filter out 7/12 or bare single digits
+        valid = [m.strip() for m in matches if m.strip() not in ("7/12", "7", "12") and len(m.strip()) >= 2]
+        if valid:
+            val = valid[-1].replace(' ', '')
+            return f"MTR-{val}", 0.95
 
-    m = re.search(r'फे\.फा\.[^\d]*([0-9]{2,6})', text, re.IGNORECASE)
+    m = re.search(r'फे\.फा\.[^\d]*([0-9]{1,6}(?:\/[0-9]{2,4})?)', text, re.IGNORECASE)
     if m:
-        return f"MTR-{m.group(1).strip()}", 0.88
+        return f"MTR-{m.group(1).replace(' ', '').strip()}", 0.88
 
     return None, 0.0
 
@@ -384,9 +400,10 @@ def extract_ownership_type(text: str) -> str:
 
 def extract_sale_deed_entities(text: str, original_name: str) -> Dict:
     """
-    Dedicated entity extractor for Sale Deeds (Deed of Absolute Sale,
+    Dynamic entity extractor for real Sale Deeds (Deed of Absolute Sale,
     Conveyance Deeds, खरेदीखत, बैनामा).
-    Extracts Vendor, Purchaser, Execution Date, Locality, District, and Plot Details.
+    Extracts Vendor, Purchaser, Execution Date, Locality, District, and Plot Details directly from OCR text.
+    No hardcoded dummy names or property numbers.
     """
     flat_text = " ".join(text.split())
     anomalies = []
@@ -396,147 +413,234 @@ def extract_sale_deed_entities(text: str, original_name: str) -> Dict:
         "tehsil": 0.0, "district": 0.0,
     }
 
+    # Helper to clean person names
+    def clean_name(raw: str) -> str:
+        s = raw.strip().strip(',').strip('.')
+        s = re.sub(r'^(?:(?:Sri\.?|Shri\.?|Mr\.?|Mrs\.?|Smt\.?|श्री|श्रीमती|सौ)\s*)+', '', s).strip()
+        s = re.sub(r'\s+(?:S\/o|D\/o|W\/o|aged|residing|hereinafter|वय|रा[\.\s]).*', '', s, flags=re.IGNORECASE)
+        s = re.sub(r'\s*\.\s*', '.', s)
+        s = re.sub(r'\.([A-Za-z])', r'. \1', s)
+        return " ".join(s.split()).strip()
+
     # 1. Vendor Extraction (विक्रेता / लिहून देणारा)
     vendor = ""
-    m_v = re.search(r'\bBY\s+([A-Za-z\.\s\-]+?)(?:,\s*S/o|\s+s/o|\s+aged|\s+residing|\s+hereinafter)', flat_text, re.IGNORECASE)
+    # Pattern A: English "BY ... (vendor/transferor)"
+    m_v = re.search(
+        r'\b(?:BY|VENDOR|TRANSFEROR|EXECUTANT)[\s\:\-\=]+(?:Sri\.?|Shri\.?|Mr\.?|Smt\.?)?\s*([A-Za-z\.\s\-]{3,45}?)(?:,\s*S/o|\s+s/o|\s+aged|\s+residing|\s+hereinafter|\s+PAN|\s+Aadhaar)',
+        flat_text, re.IGNORECASE
+    )
     if m_v:
-        raw_v = m_v.group(1).strip().strip(',')
-        raw_v = re.sub(r'^(?:Sri\.?|Shri\.?|Mr\.?|Smt\.?)\s*', '', raw_v).strip()
-        raw_v = re.sub(r'\s*\.\s*', '.', raw_v)
-        raw_v = re.sub(r'\.([A-Za-z])', r'. \1', raw_v)
-        raw_v = " ".join(raw_v.split())
-        vendor = f"Sri. {raw_v.title()}" if raw_v.isupper() else f"Sri. {raw_v}"
-    else:
-        # Check Marathi vendor patterns
-        m_vm = re.search(r'(?:लिहून\s*देणार|विक्रेता|हस्तांतरक)[\s\:\-\=\.\n]+([^\n,]{3,50})', text)
+        cand = clean_name(m_v.group(1))
+        if len(cand) >= 3 and len(cand.split()) >= 2:
+            vendor = f"Sri. {cand.title()}" if cand.isupper() else f"Sri. {cand}"
+            field_confidence["vendor"] = 0.92
+
+    # Pattern B: Marathi vendor patterns (लिहून देणार / विक्रेता)
+    if not vendor:
+        m_vm = re.search(r'(?:लिहून\s*देणार(?:्या)?|विक्रेता|हस्तांतरक)[\s\:\-\=\.\n]+(?:श्री|श्रीमती|सौ)?[\s\:\.\-]*([A-Za-z\u0900-\u097F\s\.]{3,50})', text)
         if m_vm:
-            vendor = m_vm.group(1).strip()
-        elif "nagendran" in flat_text.lower():
-            vendor = "Sri. G. Nagendran"
+            cand = clean_name(m_vm.group(1))
+            if len(cand) >= 3:
+                vendor = cand
+                field_confidence["vendor"] = 0.90
 
-    if not vendor and ("gururaja" in flat_text.lower() or "58" in flat_text):
-        vendor = "Sri. G. Nagendran"
+    if not vendor:
+        anomalies.append("Vendor name not clearly detected in deed scan — manual verification required")
 
-    # 2. Purchaser Extraction (खरेदीदार / लिहून घेणारा - New Legal Title Owner)
+    # 2. Purchaser Extraction (खरेदीदार / लिहून घेणारा - Legal Title Owner)
     purchaser = ""
-    m_p = re.search(r'IN\s*FAVOUR\s*OF\s+([A-Za-z\.\s\-]+?)(?:,\s*S/o|\s+s/o|\s+aged|\s+residing|\s+hereinafter)', flat_text, re.IGNORECASE)
+    # Pattern A: English "IN FAVOUR OF ...", "PURCHASER ...", "TO ... (purchaser)"
+    m_p = re.search(
+        r'\b(?:IN\s*FAVOUR\s*OF|PURCHASER|TRANSFEREE|CLAIMANT)[\s\:\-\=]+(?:Sri\.?|Shri\.?|Mr\.?|Smt\.?)?\s*([A-Za-z\.\s\-]{3,45}?)(?:,\s*S/o|\s+s/o|\s+aged|\s+residing|\s+hereinafter|\s+PAN|\s+Aadhaar)',
+        flat_text, re.IGNORECASE
+    )
     if m_p:
-        raw_p = m_p.group(1).strip().strip(',')
-        raw_p = re.sub(r'^(?:Sri\.?|Shri\.?|Mr\.?|Smt\.?)\s*', '', raw_p).strip()
-        raw_p = raw_p.replace("V-S.", "V.S.").replace("V.R_", "V.R.")
-        raw_p = re.sub(r'\s*\.\s*', '.', raw_p)
-        raw_p = re.sub(r'\.([A-Za-z])', r'. \1', raw_p)
-        raw_p = " ".join(raw_p.split())
-        purchaser = f"Sri. {raw_p.title()}" if raw_p.isupper() else f"Sri. {raw_p}"
-    else:
-        # Check Marathi purchaser patterns
-        m_pm = re.search(r'(?:लिहून\s*घेणार|खरेदीदार|हस्तांतरीत)[\s\:\-\=\.\n]+([^\n,]{3,50})', text)
+        cand = clean_name(m_p.group(1))
+        if len(cand) >= 3 and len(cand.split()) >= 2:
+            purchaser = f"Sri. {cand.title()}" if cand.isupper() else f"Sri. {cand}"
+            field_confidence["ownerName"] = 0.94
+
+    # Pattern B: Marathi purchaser patterns (लिहून घेणार / खरेदीदार)
+    if not purchaser:
+        m_pm = re.search(r'(?:लिहून\s*घेणार(?:्या)?|खरेदीदार|हस्तांतरीत)[\s\:\-\=\.\n]+(?:श्री|श्रीमती|सौ)?[\s\:\.\-]*([A-Za-z\u0900-\u097F\s\.]{3,50})', text)
         if m_pm:
-            purchaser = m_pm.group(1).strip()
-        elif "sridhara" in flat_text.lower() or "seshachar" in flat_text.lower():
-            purchaser = "Sri. V.S. Sridhara Murthy"
+            cand = clean_name(m_pm.group(1))
+            if len(cand) >= 3:
+                purchaser = cand
+                field_confidence["ownerName"] = 0.92
+
+    # Pattern C: Fallback to general owner name extractor
+    if not purchaser:
+        gen_owner, gen_conf = extract_owner_name(text)
+        if gen_owner:
+            purchaser = gen_owner
+            field_confidence["ownerName"] = gen_conf
 
     if not purchaser:
-        purchaser = "Sri. V.S. Sridhara Murthy"
-
-    owner_name = purchaser
-    field_confidence["ownerName"] = 0.98
+        owner_name = "Not Detected (Manual Review Required)"
+        field_confidence["ownerName"] = 0.20
+        anomalies.append("Purchaser / Owner name not detected in deed scan — manual review required")
+    else:
+        owner_name = purchaser
 
     # 3. Execution Date
-    m_date = re.search(r'(\d{1,2}[\.\/\-]\d{1,2}[\.\/\-]\d{2,4})', text)
-    exec_date = m_date.group(1) if m_date else "25.05.1992"
+    m_date = re.search(r'\b(\d{1,2}[\.\/\-]\d{1,2}[\.\/\-]\d{2,4})\b', text)
+    exec_date = m_date.group(1) if m_date else ""
+    if not exec_date:
+        # Check written date like "25th day of May 1992"
+        m_wdate = re.search(r'(\d{1,2}(?:st|nd|rd|th)?\s+day\s+of\s+[A-Za-z]+\s*,?\s*\d{4})', flat_text, re.IGNORECASE)
+        exec_date = m_wdate.group(1) if m_wdate else ""
 
-    # 4. Consideration Amount & Stamp Duty Valuation
-    consideration_amount = "Rs. 5,000/- (Non-Judicial Stamp Duty)"
-    if any(k in flat_text.lower() for k in ["5000", "5,000", "५०००", "पाँच हज़ार", "five thousand"]):
-        consideration_amount = "Rs. 5,000/- (Non-Judicial Stamp Duty)"
+    # 4. Consideration Amount
+    consideration_amount = ""
+    m_val = re.search(r'(?:consideration\s*(?:of|sum)?|sum\s*of|मोबदला|खरेदी\s*किंमत|किंमत)[\s\:\-\=]*(?:rs\.?|रु\.?|inr)?\s*([0-9,]+(?:\/\-)?)', flat_text, re.IGNORECASE)
+    if m_val:
+        num = m_val.group(1).replace('/-', '').strip()
+        consideration_amount = f"Rs. {num}/-"
     else:
-        m_val = re.search(r'(?:consideration\s*(?:of)?|sum\s*of|मोबदला|खरेदी\s*किंमत)[\s\:\-\=]*(?:rs\.?|रु\.?)?\s*([0-9,]+)', flat_text, re.IGNORECASE)
-        if m_val:
-            consideration_amount = f"Rs. {m_val.group(1)}/-"
+        # Check spelled out amounts
+        m_word_val = re.search(r'(?:sum\s*of\s*Rs\.?\s*)([A-Za-z\s]+only)', flat_text, re.IGNORECASE)
+        if m_word_val:
+            consideration_amount = f"Rs. {m_word_val.group(1).strip()}"
+        else:
+            consideration_amount = "Not Specified"
 
     # 5. District & City
-    district = "Bangalore"
-    if any(k in flat_text.lower() for k in ["bangalore", "bengaluru", "bengalore"]):
-        district = "Bangalore"
-        field_confidence["district"] = 0.98
-    elif "pune" in flat_text.lower() or "पुणे" in text:
-        district = "Pune"
-        field_confidence["district"] = 0.95
-    else:
-        field_confidence["district"] = 0.90
+    district = ""
+    for d in [
+        "Pune", "Bangalore", "Bengaluru", "Mumbai", "Nashik", "Nagpur", "Satara", "Thane",
+        "पुणे", "रायगड", "नाशिक", "नागपूर", "सातारा", "ठाणे", "कोल्हापूर"
+    ]:
+        if re.search(rf'\b{d}\b', flat_text, re.IGNORECASE):
+            district = d.title() if d.isascii() else d
+            field_confidence["district"] = 0.92
+            break
 
-    # 6. Tehsil / Sub-District
-    tehsil = "Bangalore South" if district == "Bangalore" else district
-    field_confidence["tehsil"] = 0.95
+    if not district:
+        m_dist = re.search(r'(?:district|जिल्हा)[\s\:\-\=\.\n]+([A-Za-z\u0900-\u097F]{3,20})', flat_text, re.IGNORECASE)
+        if m_dist:
+            district = m_dist.group(1).strip().title()
+            field_confidence["district"] = 0.85
+        else:
+            district = "Not Detected"
+            field_confidence["district"] = 0.20
+
+    # 6. Tehsil / Sub-District / Taluk
+    tehsil = ""
+    m_teh = re.search(r'(?:taluk|taluka|tehsil|तालुका|sub-district)[\s\:\-\=\.\n]+([A-Za-z\u0900-\u097F]{3,25})', flat_text, re.IGNORECASE)
+    if m_teh:
+        tehsil = m_teh.group(1).strip().title()
+        field_confidence["tehsil"] = 0.90
+    elif district and district != "Not Detected":
+        tehsil = f"{district} (Sub-District)"
+        field_confidence["tehsil"] = 0.70
+    else:
+        tehsil = "Not Detected"
+        field_confidence["tehsil"] = 0.20
 
     # 7. Village / Locality
-    village = "Raghavendra Colony"
-    if "raghavendra" in flat_text.lower() or "reghavendra" in flat_text.lower():
-        village = "Raghavendra Colony"
-        field_confidence["village"] = 0.96
+    village = ""
+    m_col = re.search(r'\b([A-Za-z\u0900-\u097F\s]{3,30}(?:Colony|Layout|Nagar|Extension|Halli|Village|Ward|गाव|मौजे))\b', flat_text, re.IGNORECASE)
+    if m_col:
+        village = m_col.group(1).strip().title() if m_col.group(1).isascii() else m_col.group(1).strip()
+        field_confidence["village"] = 0.90
     else:
-        m_col = re.search(r'([A-Za-z\s]+(?:Colony|Layout|Nagar|Extension|Halli|Village|Ward))', flat_text, re.IGNORECASE)
-        if m_col:
-            village = m_col.group(1).strip()
-            field_confidence["village"] = 0.95
+        village, conf_v = extract_village(text)
+        if village:
+            field_confidence["village"] = conf_v
         else:
-            field_confidence["village"] = 0.92
+            village = "Not Detected"
+            field_confidence["village"] = 0.20
 
-    # 8. Survey / Property Number
-    survey_number = "Site No. 58"
-    if "58" in flat_text:
-        survey_number = "Site No. 58"
-        field_confidence["surveyNumber"] = 0.98
-    elif "52" in flat_text and "cross" in flat_text.lower():
-        survey_number = "Site No. 52 (3rd Cross)"
-        field_confidence["surveyNumber"] = 0.96
+    # 8. Survey / Property / Site / Plot Number
+    survey_number = ""
+    m_prop = re.search(
+        r'\b((?:Site|Plot|Survey|Sy\.?|Gat|CTS|Khata|Property)\s*(?:No\.?|Number|#)?[\s\:\-\.]*[0-9]+(?:\/[0-9]+(?:\/[0-9A-Za-z]+)?)?)\b',
+        flat_text, re.IGNORECASE
+    )
+    if m_prop:
+        survey_number = m_prop.group(1).strip()
+        field_confidence["surveyNumber"] = 0.92
     else:
-        survey_number = "Site No. 58"
-        field_confidence["surveyNumber"] = 0.95
+        s_num, s_conf = extract_survey_number(text)
+        if s_num:
+            survey_number = s_num
+            field_confidence["surveyNumber"] = s_conf
+        else:
+            survey_number = "Not Detected"
+            field_confidence["surveyNumber"] = 0.20
+            anomalies.append("Property / Survey / Plot number not detected in deed scan")
 
     # 9. Khata / PID Number
-    khata_number = "PID-560018-058"
-    if "560" in flat_text and "018" in flat_text:
-        khata_number = "PID-560018-058"
-        field_confidence["khataNumber"] = 0.96
+    khata_number = ""
+    m_pid = re.search(r'\b((?:PID|Khata|Property\s*ID)[\s\:\-\.]*[0-9A-Za-z\-]{4,20})\b', flat_text, re.IGNORECASE)
+    if m_pid:
+        khata_number = m_pid.group(1).strip()
+        field_confidence["khataNumber"] = 0.90
     else:
-        khata_number = "PID-560018"
-        field_confidence["khataNumber"] = 0.92
+        khata_number, k_conf = extract_khata_number(text)
+        if khata_number:
+            field_confidence["khataNumber"] = k_conf
+        else:
+            khata_number = "N/A (Deed)"
+            field_confidence["khataNumber"] = 0.60
 
     # 10. Plot Area
-    plot_area = "111.48 Sq.m (1200 Sq.Ft — Residential Site)"
-    field_confidence["plotArea"] = 0.96
+    plot_area = ""
+    m_area = re.search(
+        r'([0-9]+(?:\.[0-9]+)?\s*(?:Sq\.?\s*ft|Sq\.?\s*m|Sq\.?\s*yards|Acres?|Gunthas?|चौ\.?\s*मी|चौ\.?\s*फूट))',
+        flat_text, re.IGNORECASE
+    )
+    if m_area:
+        plot_area = m_area.group(1).strip()
+        field_confidence["plotArea"] = 0.92
+    else:
+        p_area, p_conf = extract_plot_area(text)
+        if p_area:
+            plot_area = p_area
+            field_confidence["plotArea"] = p_conf
+        else:
+            plot_area = "Not Detected"
+            field_confidence["plotArea"] = 0.20
+            anomalies.append("Plot area not detected in deed scan — manual verification required")
 
-    # 11. Registration & Mutation
-    registration_number = f"DEED-BLR-{exec_date.replace('.', '').replace('/', '')}-5000"
-    mutation_number = f"MTR-CONV-{exec_date[-4:]}-8821"
+    # 11. Registration & Mutation details
+    m_reg = re.search(r'(?:Registration\s*No\.?|Document\s*No\.?|दस्त\s*क्रमांक)[\s\:\-\.]+([0-9A-Za-z\/\-]{3,25})', flat_text, re.IGNORECASE)
+    registration_number = m_reg.group(1).strip() if m_reg else ""
+
+    mutation_number, _ = extract_mutation_number(text)
+    if not mutation_number:
+        mutation_number = ""
 
     # Tenure & Land Classification
     ownership_type = "Freehold / Absolute Ownership (पूर्ण मालकी हक्क)"
-    land_classification = "Residential / Non-Agricultural (Urban Plot)"
+    land_classification = "Residential / Non-Agricultural (Urban Plot)" if any(k in flat_text.lower() for k in ["site", "plot", "residential", "house", "layout"]) else "Agricultural (Jirayat)"
 
-    vendor_info = f" from Vendor {vendor}" if vendor else ""
-    anomalies.append(f"Deed of Absolute Sale verified: Executed on {exec_date} at {district}{vendor_info} to Purchaser {purchaser}. Consideration: {consideration_amount}. Legal title conveyance complete.")
+    vendor_summary = f" from Vendor {vendor}" if vendor else ""
+    date_summary = f" on {exec_date}" if exec_date else ""
+    anomalies.append(f"Deed of Absolute Sale processed: Conveyance to Purchaser {owner_name}{vendor_summary}{date_summary}.")
 
-    # All fields verified with >0.85 confidence -> Set 100% confidence
     scoreable = {k: v for k, v in field_confidence.items() if v > 0}
-    overall_conf = 1.0 if len(scoreable) >= 6 else 0.98
-    if overall_conf >= 0.98:
-        field_confidence = {k: 1.0 for k in field_confidence}
-        overall_conf = 1.0
+    overall_conf = round(sum(scoreable.values()) / len(scoreable), 2) if scoreable else 0.70
 
     entities = {
-        "vendor_name": vendor or "Sri. G. Nagendran",
-        "purchaser_name": purchaser or "Sri. V.S. Sridhara Murthy",
+        "vendor_name": vendor,
+        "purchaser_name": purchaser,
         "consideration_amount": consideration_amount,
         "execution_date": exec_date,
-        "property_address": f"{survey_number}, {village}, {district} - 560018",
-        "stamp_duty": "Rs. 5,000/- Non-Judicial India Stamp Paper (५००० रु. / पाँच हज़ार रुपये)",
-        "sub_registrar": f"Sub-Registrar Office, {tehsil}",
+        "property_address": f"{survey_number}, {village}, {district}",
+        "sub_registrar": f"Sub-Registrar Office, {tehsil}" if tehsil != "Not Detected" else "Not Specified",
     }
 
-    remarks = f"Deed of Absolute Sale | Vendor: {vendor or 'Sri. G. Nagendran'} -> Purchaser: {purchaser or 'Sri. V.S. Sridhara Murthy'} | Consideration: {consideration_amount} | Date: {exec_date}"
+    remarks_parts = ["Deed of Absolute Sale"]
+    if vendor:
+        remarks_parts.append(f"Vendor: {vendor}")
+    if purchaser:
+        remarks_parts.append(f"Purchaser: {purchaser}")
+    if consideration_amount and consideration_amount != "Not Specified":
+        remarks_parts.append(f"Consideration: {consideration_amount}")
+    if exec_date:
+        remarks_parts.append(f"Date: {exec_date}")
 
     return {
         "ownerName": owner_name,
@@ -556,7 +660,7 @@ def extract_sale_deed_entities(text: str, original_name: str) -> Dict:
         "anomalies": anomalies,
         "rawTextSnippet": text[:500],
         "entities": entities,
-        "remarks": remarks,
+        "remarks": " | ".join(remarks_parts),
     }
 
 
@@ -626,12 +730,12 @@ def extract_cadastral_entities(
             if not tehsil or tehsil not in TEHSIL_SYNONYMS:
                 tehsil = mapping["tehsil"]
                 field_confidence["tehsil"] = 0.95
-            if not village or village not in ["खेड", "वाघोली", "बारामती", "खालापूर", "पनवेल", "कल्याण"]:
+            if not village:
                 village = mapping["village"]
-                field_confidence["village"] = 0.95
-            if not district or district not in ["पुणे", "रायगड", "ठाणे", "नाशिक", "नागपूर", "सातारा"]:
+                field_confidence["village"] = 0.75
+            if not district:
                 district = mapping["district"]
-                field_confidence["district"] = 0.95
+                field_confidence["district"] = 0.90
             break
 
     if tehsil and tehsil in TEHSIL_SYNONYMS and not district:
@@ -702,11 +806,7 @@ def extract_cadastral_entities(
     if not mutation_number:
         mutation_number = ""
 
-    import time
-    if doc_registration_number:
-        registration_number = doc_registration_number
-    else:
-        registration_number = f"REG-MH-{str(district)[:3].upper()}-{str(int(time.time()))[-6:]}"
+    registration_number = doc_registration_number or ""
 
     # Anomaly checks
     try:

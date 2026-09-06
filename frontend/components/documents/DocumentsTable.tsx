@@ -136,6 +136,19 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                             {(doc.metadata.aiExtraction.overallConfidence * 100).toFixed(0)}% AI
                           </span>
                         )}
+                        {(doc.isReuploaded ||
+                          doc.metadata?.isReuploaded ||
+                          doc.metadata?.aiExtraction?.anomalies?.some((a: string) =>
+                            a.toLowerCase().includes('duplicate') || a.toLowerCase().includes('already exists')
+                          )) && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded"
+                            title={doc.reuploadedFromId || doc.metadata?.reuploadedFromId ? `Re-uploaded copy of ${doc.reuploadedFromId || doc.metadata?.reuploadedFromId}` : 'Re-uploaded document'}
+                          >
+                            <RefreshCw className="w-2.5 h-2.5 text-amber-600" />
+                            Re-Uploaded
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">

@@ -27,21 +27,22 @@ export const exportCadastralPdfCertificate = ({
   const vendor =
     entities.vendor_name ||
     lr.remarks?.match(/Vendor:\s*([^->|]+)/)?.[1]?.trim() ||
-    (lr.remarks?.includes('Deed of Absolute Sale') ? 'Sri. G. Nagendran' : 'Not Specified');
+    'Not Specified';
   const purchaser =
     entities.purchaser_name ||
     lr.remarks?.match(/Purchaser:\s*([^|]+)/)?.[1]?.trim() ||
-    lr.ownerName;
+    lr.ownerName ||
+    'Not Specified';
   const consideration =
     entities.consideration_amount ||
     lr.remarks?.match(/Consideration:\s*([^|]+)/)?.[1]?.trim() ||
-    'Rs. 5,000/- (Non-Judicial Stamp Duty)';
+    'Not Specified';
   const execDate =
     entities.execution_date ||
     lr.remarks?.match(/(?:Date|Executed):\s*([^|]+)/)?.[1]?.trim() ||
-    '25.05.1992';
+    'Not Specified';
   const stampDuty =
-    entities.stamp_duty || 'Rs. 5,000/- Non-Judicial Stamp Paper (५००० रु. / पाच हजार रुपये)';
+    entities.stamp_duty || 'Non-Judicial Stamp Paper';
   const certNumber = `ILRDVS-${doc.documentId}-${Date.now().toString().slice(-6)}`;
   const verifiedDate = formatDate(doc.updatedAt || doc.createdAt);
 

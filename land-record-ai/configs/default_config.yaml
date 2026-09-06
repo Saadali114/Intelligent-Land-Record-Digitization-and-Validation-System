@@ -1,0 +1,70 @@
+# ==============================================================================
+# Land Record AI - Default Configuration
+# ==============================================================================
+
+system:
+  project_name: "Maharashtra Land Record Digitization AI"
+  version: "1.0.0"
+  device: "auto"                    # auto | cuda | cpu
+  seed: 42
+
+paths:
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  ocr_dir: "data/ocr"
+  annotations_dir: "data/annotations"
+  corrections_dir: "data/corrections"
+  metadata_file: "data/metadata.csv"
+  train_data_dir: "data/train"
+  val_data_dir: "data/validation"
+  test_data_dir: "data/test"
+  models_dir: "models"
+
+preprocessing:
+  target_max_dim: 2200
+  enable_deskew: true
+  enable_denoise: true
+  denoise_h: 10
+  denoise_template_window_size: 7
+  denoise_search_window_size: 21
+  enable_clahe: true
+  clahe_clip_limit: 2.0
+  clahe_grid_size: [8, 8]
+  enable_binarization: true
+  binarization_method: "otsu"       # otsu | adaptive
+  enable_sharpen: true
+
+ocr:
+  engine_priority: ["paddleocr", "easyocr"]
+  languages: ["mr", "hi", "en"]
+  use_gpu: false
+  det_db_thresh: 0.3
+  det_db_box_thresh: 0.5
+  confidence_threshold: 0.20
+
+training:
+  task: "ner"
+  pretrained_model_name: "xlm-roberta-base"
+  max_length: 512
+  epochs: 5
+  batch_size: 8
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  gradient_accumulation_steps: 1
+  save_total_limit: 3
+  evaluation_strategy: "epoch"
+  split_ratios:
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+
+inference:
+  review_threshold: 0.70           # Fields with confidence < 0.70 trigger requiresReview = true
+  max_allowable_area_hectares: 50.0 # Validation rule ceiling
+  model_dir: "models/land-ner-v1"
+
+api:
+  host: "0.0.0.0"
+  port: 8001
+  cors_origins: ["*"]
