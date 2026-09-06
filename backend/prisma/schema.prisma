@@ -1,0 +1,367 @@
+// Prisma Schema for Intelligent Land Record Digitization and Validation System
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  OFFICER
+  VERIFIER
+  VIEWER
+  CITIZEN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum AccountStatus {
+  PENDING_VERIFICATION
+  PENDING_APPROVAL
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum DocumentProcessingStatus {
+  UPLOADED
+  PROCESSING
+  OCR_COMPLETED
+  ANALYSIS_COMPLETED
+  PENDING_OFFICER_REVIEW
+  ACTION_REQUIRED
+  VERIFIED
+  REJECTED
+  PROCESSED
+  FAILED
+  NEEDS_REVIEW
+}
+
+enum LandDocumentType {
+  DOC_7_12  @map("7_12")
+  DOC_8A    @map("8A")
+  FERFAR
+  SALE_DEED
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  NEEDS_REVIEW
+}
+
+enum WorkflowStatus {
+  UPLOADED
+  PROCESSING
+  OCR_COMPLETED
+  ANALYSIS_COMPLETED
+  PENDING_OFFICER_REVIEW
+  ACTION_REQUIRED
+  VERIFIED
+  REJECTED
+}
+
+enum OfficerApplicationStatus {
+  PENDING_EMAIL_VERIFICATION
+  PENDING_APPROVAL
+  UNDER_REVIEW
+  ACTION_REQUIRED
+  APPROVED
+  REJECTED
+}
+
+enum OTPPurpose {
+  REGISTRATION
+  LOGIN
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+  MOBILE_VERIFICATION
+}
+
+enum OTPStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  LOCKED
+}
+
+enum VerificationAction {
+  APPROVED
+  REJECTED
+  CORRECTED
+}
+
+// ----------------------------------------------------
+// MODELS
+// ----------------------------------------------------
+
+model User {
+  id                       String        @id @default(cuid())
+  name                     String
+  email                    String        @unique
+  password                 String?
+  role                     UserRole      @default(CITIZEN)
+  department               String        @default("Citizen Services")
+  district                 String        @default("Maharashtra")
+  status                   UserStatus    @default(ACTIVE)
+  accountStatus            AccountStatus @default(ACTIVE)
+  preferredLanguage        String?       @default("en")
+  emailVerified            Boolean       @default(false)
+  emailVerifiedAt          DateTime?
+  mobile                   String?
+  mobileVerified           Boolean       @default(false)
+  mobileVerifiedAt         DateTime?
+  mobileVerificationMethod String?       @default("SMS")
+  lastLogin                DateTime?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  // Relationships
+  documents                     Document[]
+  createdLandRecords            LandRecord[]           @relation("CreatedLandRecords")
+  verifiedLandRecords           LandRecord[]           @relation("VerifiedLandRecords")
+  verificationRecords           VerificationRecord[]
+  officerApplications           OfficerApplication[]   @relation("UserOfficerApplications")
+  approvedOfficerApplications   OfficerApplication[]   @relation("ApprovedOfficerApplications")
+  rejectedOfficerApplications   OfficerApplication[]   @relation("RejectedOfficerApplications")
+  auditLogs                     AuditLog[]
+  verificationWorkflows         VerificationWorkflow[]
+
+  @@index([role, status])
+  @@index([role, accountStatus])
+  @@index([district, department])
+  @@index([emailVerified])
+  @@index([mobile])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Document {
+  id               String                   @id @default(cuid())
+  documentId       String                   @unique
+  fileName         String
+  originalName     String
+  filePath         String
+  fileType         String
+  fileSize         Int
+  mimeType         String
+  language         String                   @default("Marathi")
+  uploadedById     String
+  uploadedBy       User                     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  processingStatus DocumentProcessingStatus @default(UPLOADED)
+  documentTypeEnum LandDocumentType         @default(DOC_7_12)
+  checksum         String?
+  version          Int                      @default(1)
+  pageCount        Int                      @default(1)
+  isReuploaded     Boolean                  @default(false)
+  reuploadedFromId String?
+  uploadedAt       DateTime                 @default(now())
+  metadata         Json                     @default("{}")
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  // Relationships
+  landRecords           LandRecord[]
+  verificationWorkflows VerificationWorkflow[]
+
+  @@index([uploadedById])
+  @@index([processingStatus, uploadedAt])
+  @@index([language, processingStatus])
+  @@index([checksum])
+  @@index([isReuploaded])
+  @@index([reuploadedFromId])
+  @@map("documents")
+}
+
+model LandRecord {
+  id                 String             @id @default(cuid())
+  recordId           String?
+  ownerName          String
+  surveyNumber       String
+  gatNumber          String?
+  khasraNumber       String
+  khataNumber        String
+  plotArea           String
+  village            String
+  tehsil             String
+  district           String
+  email              String?
+  landClassification String             @default("Agricultural")
+  ownershipType      String             @default("Single Owner")
+  mutationNumber     String?
+  registrationNumber String?
+  sourceDocumentId   String?
+  sourceDocument     Document?          @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  sourceType         String?            @default("DEMO_REFERENCE_RECORD")
+  verificationStatus VerificationStatus @default(PENDING)
+  createdById        String
+  createdBy          User               @relation("CreatedLandRecords", fields: [createdById], references: [id], onDelete: Cascade)
+  verifiedById       String?
+  verifiedBy         User?              @relation("VerifiedLandRecords", fields: [verifiedById], references: [id], onDelete: SetNull)
+  confidenceScore    Float              @default(0.9)
+  remarks            String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  // Relationships
+  verificationRecords VerificationRecord[]
+
+  @@index([recordId])
+  @@index([ownerName])
+  @@index([surveyNumber])
+  @@index([gatNumber])
+  @@index([khasraNumber])
+  @@index([khataNumber])
+  @@index([village])
+  @@index([tehsil])
+  @@index([district])
+  @@index([email])
+  @@index([district, tehsil, village])
+  @@index([district, verificationStatus])
+  @@index([surveyNumber, village])
+  @@index([createdById])
+  @@index([verifiedById])
+  @@index([createdAt])
+  @@map("land_records")
+}
+
+model VerificationWorkflow {
+  id                       String         @id @default(cuid())
+  applicationId            String         @unique
+  userId                   String?
+  user                     User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  documentId               String?
+  document                 Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  status                   WorkflowStatus @default(PENDING_OFFICER_REVIEW)
+  casePreset               String?
+
+  // Pillars & Analytics stored as Structured JSON
+  applicant                Json
+  documentData             Json
+  ocrData                  Json?
+  anomalyAnalysis          Json?
+  clarificationHistory     Json?          @default("[]")
+  officialRecordMatch      Json
+  relationshipVerification Json
+  riskAssessment           Json
+  officerDecision          Json
+  auditTimeline            Json           @default("[]")
+
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([documentId])
+  @@index([status])
+  @@index([casePreset])
+  @@index([createdAt])
+  @@map("verification_workflows")
+}
+
+model VerificationRecord {
+  id           String             @id @default(cuid())
+  recordId     String
+  landRecord   LandRecord         @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  verifiedById String
+  verifiedBy   User               @relation(fields: [verifiedById], references: [id], onDelete: Cascade)
+  previousData Json               @default("{}")
+  updatedData  Json               @default("{}")
+  action       VerificationAction
+  remarks      String
+  verifiedAt   DateTime           @default(now())
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([recordId, verifiedAt])
+  @@index([verifiedById])
+  @@map("verification_records")
+}
+
+model OfficerApplication {
+  id                   String                   @id @default(cuid())
+  userId               String
+  user                 User                     @relation("UserOfficerApplications", fields: [userId], references: [id], onDelete: Cascade)
+  requestedRole        String                   @default("OFFICER")
+  name                 String
+  email                String
+  employeeId           String                   @unique
+  department           String
+  designation          String
+  office               String
+  district             String
+  taluka               String?
+  phone                String?
+  preferredLanguage    String                   @default("en")
+  emailVerified        Boolean                  @default(false)
+  status               OfficerApplicationStatus @default(PENDING_EMAIL_VERIFICATION)
+  rejectionReason      String?
+  clarificationMessage String?
+  approvedById         String?
+  approvedBy           User?                    @relation("ApprovedOfficerApplications", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt           DateTime?
+  rejectedById         String?
+  rejectedBy           User?                    @relation("RejectedOfficerApplications", fields: [rejectedById], references: [id], onDelete: SetNull)
+  rejectedAt           DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  @@index([userId])
+  @@index([email])
+  @@index([district])
+  @@index([status, createdAt])
+  @@index([district, status])
+  @@map("officer_applications")
+}
+
+model OTPVerification {
+  id            String     @id @default(cuid())
+  email         String?
+  mobile        String?
+  otpHash       String?
+  providerReqId String?
+  purpose       OTPPurpose @default(EMAIL_VERIFICATION)
+  status        OTPStatus  @default(PENDING)
+  attempts      Int        @default(0)
+  expiresAt     DateTime
+  lastSentAt    DateTime
+  verifiedAt    DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([email, purpose, status, createdAt])
+  @@index([mobile, purpose, status, createdAt])
+  @@index([expiresAt])
+  @@map("otp_verifications")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action       String
+  resourceType String
+  resourceId   String?
+  description  String
+  ipAddress    String   @default("127.0.0.1")
+  timestamp    DateTime @default(now())
+
+  @@index([userId])
+  @@index([action, timestamp])
+  @@index([timestamp])
+  @@map("audit_logs")
+}

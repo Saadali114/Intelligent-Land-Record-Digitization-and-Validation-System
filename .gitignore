@@ -49,3 +49,4 @@ Thumbs.db
 # Storage / Uploads
 backend/uploads/*
 !backend/uploads/.gitkeep
+ocr_dump_current.txt

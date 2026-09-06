@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { DocumentModel, IDocument } from '../models/Document.js';
@@ -793,11 +792,7 @@ async function checkDuplicatesWithAIService(
   try {
     const query: any = {};
     if (excludeDocumentId) {
-      try {
-        query.sourceDocument = { $ne: new mongoose.Types.ObjectId(excludeDocumentId) };
-      } catch {
-        query.sourceDocument = { $ne: excludeDocumentId };
-      }
+      query.sourceDocument = { $ne: excludeDocumentId };
     }
     const existing = await LandRecord.find(query)
       .limit(100)

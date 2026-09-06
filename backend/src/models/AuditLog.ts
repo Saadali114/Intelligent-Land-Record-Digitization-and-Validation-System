@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document as MongooseDocument } from 'mongoose';
+import { prisma, withMongoId } from '../config/prisma.js';
+import { mongoFilterToPrisma, PrismaQueryBuilder } from '../config/prismaQuery.js';
 
 export type AuditAction =
   | 'USER_LOGIN'
@@ -64,58 +65,84 @@ export type AuditAction =
   | 'DECISION_REJECTED'
   | 'DOCUMENT_REPLACED';
 
-
-export interface IAuditLog extends MongooseDocument {
-  userId?: mongoose.Types.ObjectId;
+export interface IAuditLog {
+  id: string;
+  _id: string;
+  userId?: any;
+  userIdVal?: string | null;
   action: AuditAction;
   resourceType: string;
-  resourceId?: string;
+  resourceId?: string | null;
   description: string;
-  ipAddress?: string;
+  ipAddress?: string | null;
   timestamp: Date;
+  toObject(): any;
+  toJSON(): any;
 }
 
-const AuditLogSchema = new Schema<IAuditLog>(
-  {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      index: true,
-    },
-    action: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    resourceType: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    resourceId: {
-      type: String,
-      index: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    ipAddress: {
-      type: String,
-      default: '127.0.0.1',
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-      index: true,
-    },
-  },
-  {
-    timestamps: false,
+export function enrichAuditLog(raw: any): IAuditLog | null {
+  if (!raw) return null;
+  const log = withMongoId({ ...raw }) as IAuditLog;
+
+  if (raw.user) {
+    log.userId = withMongoId(raw.user);
   }
-);
 
-AuditLogSchema.index({ timestamp: -1 });
-AuditLogSchema.index({ action: 1, timestamp: -1 });
+  log.toObject = function () {
+    return { ...this };
+  };
 
-export const AuditLog = mongoose.model<IAuditLog>('AuditLog', AuditLogSchema);
+  log.toJSON = function () {
+    return { ...this };
+  };
+
+  return log;
+}
+
+export const AuditLog = {
+  find(filter: any = {}) {
+    const where = mongoFilterToPrisma(filter);
+    return new PrismaQueryBuilder<IAuditLog[]>(async ({ skip, take, orderBy }) => {
+      const logs = await prisma.auditLog.findMany({
+        where,
+        skip,
+        take,
+        orderBy: orderBy || { timestamp: 'desc' },
+        include: {
+          user: true,
+        },
+      });
+      return logs.map((l) => enrichAuditLog(l)!);
+    });
+  },
+
+  async create(data: any): Promise<IAuditLog> {
+    const userId = data.userId
+      ? typeof data.userId === 'object' && data.userId.toString
+        ? data.userId.toString()
+        : String(data.userId)
+      : null;
+
+    const created = await prisma.auditLog.create({
+      data: {
+        userId,
+        action: data.action,
+        resourceType: data.resourceType,
+        resourceId: data.resourceId || null,
+        description: data.description || '',
+        ipAddress: data.ipAddress || '127.0.0.1',
+        timestamp: data.timestamp || new Date(),
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return enrichAuditLog(created)!;
+  },
+
+  async countDocuments(filter: any = {}): Promise<number> {
+    const where = mongoFilterToPrisma(filter);
+    return prisma.auditLog.count({ where });
+  },
+};

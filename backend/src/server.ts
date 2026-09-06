@@ -11,15 +11,19 @@ const startServer = async () => {
     await connectDB();
 
     // Automatically seed default dataset if database is empty
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      console.log('No users found in database. Automatically initializing demo data...');
-      try {
-        await seedDatabase(false);
-        console.log('Demo data successfully initialized.');
-      } catch (seedErr) {
-        console.error('Failed to auto-seed demo data:', seedErr);
+    try {
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        console.log('No users found in database. Automatically initializing demo data...');
+        try {
+          await seedDatabase(false);
+          console.log('Demo data successfully initialized.');
+        } catch (seedErr) {
+          console.error('Failed to auto-seed demo data:', seedErr);
+        }
       }
+    } catch (dbErr: any) {
+      console.warn('Database query on startup failed (is PostgreSQL running?). Proceeding with server boot.');
     }
 
     const app = createApp();

@@ -1,166 +1,185 @@
-import mongoose, { Schema, Document as MongooseDocument } from 'mongoose';
+import { prisma, withMongoId } from '../config/prisma.js';
+import { mongoFilterToPrisma, PrismaQueryBuilder, PrismaSingleQueryBuilder } from '../config/prismaQuery.js';
 import bcrypt from 'bcryptjs';
+import { UserRole, UserStatus, AccountStatus, User as PrismaUser } from '@prisma/client';
 
-export type UserRole = 'ADMIN' | 'OFFICER' | 'VERIFIER' | 'VIEWER' | 'CITIZEN';
-export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-export type AccountStatus =
-  | 'PENDING_VERIFICATION'
-  | 'PENDING_APPROVAL'
-  | 'ACTIVE'
-  | 'SUSPENDED'
-  | 'DISABLED';
+export { UserRole, UserStatus, AccountStatus };
 
-export interface IUser extends MongooseDocument {
+export interface IUser {
+  id: string;
+  _id: string;
   name: string;
   email: string;
-  password?: string;
+  password?: string | null;
   role: UserRole;
   department: string;
   district: string;
   status: UserStatus;
   accountStatus?: AccountStatus;
-  preferredLanguage?: string;
+  preferredLanguage?: string | null;
   emailVerified?: boolean;
-  emailVerifiedAt?: Date;
-  mobile?: string;
+  emailVerifiedAt?: Date | null;
+  mobile?: string | null;
   mobileVerified?: boolean;
-  mobileVerifiedAt?: Date;
-  mobileVerificationMethod?: string;
-  lastLogin?: Date;
+  mobileVerifiedAt?: Date | null;
+  mobileVerificationMethod?: string | null;
+  lastLogin?: Date | null;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  toJSON(): any;
+  toObject(): any;
+  save(): Promise<IUser>;
 }
 
-const UserSchema = new Schema<IUser>(
-  {
-    name: {
-      type: String,
-      required: [true, 'User name is required'],
-      trim: true,
-      minlength: 2,
-      maxlength: 100,
-    },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      index: true,
-    },
-    emailVerified: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-    emailVerifiedAt: {
-      type: Date,
-    },
-    mobile: {
-      type: String,
-      trim: true,
-      index: true,
-      sparse: true,
-    },
-    mobileVerified: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-    mobileVerifiedAt: {
-      type: Date,
-    },
-    mobileVerificationMethod: {
-      type: String,
-      default: 'SMS',
-    },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      minlength: 6,
-      select: false,
-    },
-    role: {
-      type: String,
-      enum: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER', 'CITIZEN'],
-      default: 'CITIZEN',
-      index: true,
-    },
-    department: {
-      type: String,
-      default: 'Citizen Services',
-      trim: true,
-      index: true,
-    },
-    district: {
-      type: String,
-      default: 'Maharashtra',
-      trim: true,
-      index: true,
-    },
-    status: {
-      type: String,
-      enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],
-      default: 'ACTIVE',
-      index: true,
-    },
-    accountStatus: {
-      type: String,
-      enum: [
-        'PENDING_VERIFICATION',
-        'PENDING_APPROVAL',
-        'ACTIVE',
-        'SUSPENDED',
-        'DISABLED',
-      ],
-      default: 'ACTIVE',
-      index: true,
-    },
-    preferredLanguage: {
-      type: String,
-      default: 'en',
-    },
-    lastLogin: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
-    toJSON: {
-      transform: (_doc, ret) => {
-        delete ret.password;
-        return ret;
+export function enrichUser(raw: any): IUser | null {
+  if (!raw) return null;
+  const user = withMongoId({ ...raw }) as IUser;
+
+  user.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+    if (!this.password) return false;
+    return bcrypt.compare(candidatePassword, this.password);
+  };
+
+  user.toJSON = function () {
+    const copy = { ...this };
+    delete copy.password;
+    return copy;
+  };
+
+  user.toObject = function () {
+    return { ...this };
+  };
+
+  user.save = async function (): Promise<IUser> {
+    const updated = await prisma.user.update({
+      where: { id: this.id },
+      data: {
+        name: this.name,
+        email: this.email,
+        password: this.password,
+        role: this.role,
+        department: this.department,
+        district: this.district,
+        status: this.status,
+        accountStatus: this.accountStatus,
+        preferredLanguage: this.preferredLanguage,
+        emailVerified: this.emailVerified,
+        emailVerifiedAt: this.emailVerifiedAt,
+        mobile: this.mobile,
+        mobileVerified: this.mobileVerified,
+        mobileVerifiedAt: this.mobileVerifiedAt,
+        mobileVerificationMethod: this.mobileVerificationMethod,
+        lastLogin: this.lastLogin,
       },
-    },
-  }
-);
+    });
+    return enrichUser(updated)!;
+  };
 
-// Compound indexes for fast admin querying & filtering
-UserSchema.index({ role: 1, status: 1 });
-UserSchema.index({ role: 1, accountStatus: 1 });
-UserSchema.index({ district: 1, department: 1 });
-UserSchema.index({ createdAt: -1 });
+  return user;
+}
 
+export const User = {
+  find(filter: any = {}) {
+    const where = mongoFilterToPrisma(filter);
+    return new PrismaQueryBuilder<IUser[]>(async ({ skip, take, orderBy }) => {
+      const users = await prisma.user.findMany({
+        where,
+        skip,
+        take,
+        orderBy: orderBy || { createdAt: 'desc' },
+      });
+      return users.map((u) => enrichUser(u)!);
+    });
+  },
 
-// Password hashing middleware
-UserSchema.pre<IUser>('save', async function (next) {
-  if (!this.isModified('password') || !this.password) {
-    return next();
-  }
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err: any) {
-    next(err);
-  }
-});
+  findOne(filter: any = {}) {
+    const where = mongoFilterToPrisma(filter);
+    return new PrismaSingleQueryBuilder<IUser>(async ({ orderBy }) => {
+      const user = await prisma.user.findFirst({
+        where,
+        orderBy,
+      });
+      return enrichUser(user);
+    });
+  },
 
-// Compare password method
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  if (!this.password) return false;
-  return bcrypt.compare(candidatePassword, this.password);
+  findById(id: string) {
+    return new PrismaSingleQueryBuilder<IUser>(async () => {
+      if (!id) return null;
+      const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
+      const user = await prisma.user.findUnique({
+        where: { id: cleanId },
+      });
+      return enrichUser(user);
+    });
+  },
+
+  async create(data: any): Promise<IUser> {
+    let password = data.password;
+    if (password && !password.startsWith('$2')) {
+      const salt = await bcrypt.genSalt(10);
+      password = await bcrypt.hash(password, salt);
+    }
+
+    const created = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email?.toLowerCase().trim(),
+        password,
+        role: data.role || 'CITIZEN',
+        department: data.department || 'Citizen Services',
+        district: data.district || 'Maharashtra',
+        status: data.status || 'ACTIVE',
+        accountStatus: data.accountStatus || 'ACTIVE',
+        preferredLanguage: data.preferredLanguage || 'en',
+        emailVerified: Boolean(data.emailVerified),
+        emailVerifiedAt: data.emailVerifiedAt,
+        mobile: data.mobile,
+        mobileVerified: Boolean(data.mobileVerified),
+        mobileVerifiedAt: data.mobileVerifiedAt,
+        mobileVerificationMethod: data.mobileVerificationMethod || 'SMS',
+      },
+    });
+    return enrichUser(created)!;
+  },
+
+  async findByIdAndUpdate(id: string, update: any, options: any = {}): Promise<IUser | null> {
+    const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
+    const cleanUpdate = { ...update };
+    if (cleanUpdate.password && !cleanUpdate.password.startsWith('$2')) {
+      const salt = await bcrypt.genSalt(10);
+      cleanUpdate.password = await bcrypt.hash(cleanUpdate.password, salt);
+    }
+    const updated = await prisma.user.update({
+      where: { id: cleanId },
+      data: cleanUpdate,
+    });
+    return enrichUser(updated);
+  },
+
+  async findByIdAndDelete(id: string): Promise<IUser | null> {
+    const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
+    const deleted = await prisma.user.delete({
+      where: { id: cleanId },
+    });
+    return enrichUser(deleted);
+  },
+
+  async countDocuments(filter: any = {}): Promise<number> {
+    const where = mongoFilterToPrisma(filter);
+    return prisma.user.count({ where });
+  },
+
+  async aggregate(pipeline: any[]): Promise<any[]> {
+    // Used in dashboard: group by role
+    const grouped = await prisma.user.groupBy({
+      by: ['role'],
+      _count: { role: true },
+    });
+    return grouped.map((g) => ({
+      role: g.role,
+      count: g._count.role,
+    }));
+  },
 };
-
-export const User = mongoose.model<IUser>('User', UserSchema);

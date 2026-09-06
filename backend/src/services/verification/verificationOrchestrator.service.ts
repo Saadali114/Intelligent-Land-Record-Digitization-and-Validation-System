@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { DocumentModel, LandDocumentType } from '../../models/Document.js';
 import {
   VerificationWorkflow,
@@ -152,7 +151,7 @@ export class VerificationOrchestrator {
       fileSize: preprocessed.fileSize,
       mimeType,
       language: 'Marathi',
-      uploadedBy: new mongoose.Types.ObjectId(user._id),
+      uploadedBy: user._id,
       processingStatus: 'PENDING_OFFICER_REVIEW',
       documentTypeEnum: docModelType,
       checksum: preprocessed.checksum,
@@ -170,7 +169,7 @@ export class VerificationOrchestrator {
     // Step 12: Construct Workflow Document
     const workflow = await VerificationWorkflow.create({
       applicationId,
-      userId: new mongoose.Types.ObjectId(user._id),
+      userId: user._id,
       documentId: docRecord._id,
       status: 'PENDING_OFFICER_REVIEW',
       casePreset,

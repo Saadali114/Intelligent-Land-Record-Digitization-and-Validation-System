@@ -183,8 +183,8 @@ export class DemoLandRecordProvider implements ILandRecordProvider {
       tehsil: doc.tehsil,
       district: doc.district,
       landClassification: doc.landClassification,
-      mutationNumber: doc.mutationNumber,
-      sourceType: doc.sourceType || 'DEMO_REFERENCE_RECORD',
+      mutationNumber: doc.mutationNumber || undefined,
+      sourceType: (doc.sourceType as any) || 'DEMO_REFERENCE_RECORD',
       isOfficialRecord: true,
     };
   }

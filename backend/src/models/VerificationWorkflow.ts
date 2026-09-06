@@ -1,4 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import { prisma, withMongoId } from '../config/prisma.js';
+import { mongoFilterToPrisma, PrismaQueryBuilder } from '../config/prismaQuery.js';
+import { WorkflowStatus } from '@prisma/client';
 
 export type IdentityStatus = 'PENDING' | 'VERIFIED' | 'FAILED';
 export type ConsistencyStatus = 'PASSED' | 'WARNING' | 'FAILED';
@@ -14,6 +16,8 @@ export type RelationshipType =
 export type RelationshipStatus = 'MATCHED' | 'EVIDENCE_REQUIRED' | 'NOT_ESTABLISHED';
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 export type OfficerDecisionType = 'PENDING' | 'APPROVED' | 'CLARIFICATION_REQUESTED' | 'REJECTED';
+
+export { WorkflowStatus };
 
 export interface IAuditTimelineEntry {
   timestamp: string;
@@ -44,24 +48,15 @@ export interface IOfficialRecordMatchField {
   isMatch: boolean;
 }
 
-export type WorkflowStatus =
-  | 'UPLOADED'
-  | 'PROCESSING'
-  | 'OCR_COMPLETED'
-  | 'ANALYSIS_COMPLETED'
-  | 'PENDING_OFFICER_REVIEW'
-  | 'ACTION_REQUIRED'
-  | 'VERIFIED'
-  | 'REJECTED';
-
-export interface IVerificationWorkflowDocument extends Document {
+export interface IVerificationWorkflowDocument {
+  id: string;
+  _id: string;
   applicationId: string;
-  userId?: mongoose.Types.ObjectId;
-  documentId?: mongoose.Types.ObjectId;
+  userId?: any;
+  documentId?: any;
   status: WorkflowStatus;
-  casePreset?: 'CASE_1_GREEN' | 'CASE_2_YELLOW' | 'CASE_3_RED';
-  
-  // 1. Identity Pillar
+  casePreset?: string | null;
+
   applicant: {
     name: string;
     mobile: string;
@@ -72,7 +67,6 @@ export interface IVerificationWorkflowDocument extends Document {
     demoNote?: string;
   };
 
-  // 2. Document & Quality Pillar
   document: {
     documentType: string;
     fileName: string;
@@ -119,7 +113,6 @@ export interface IVerificationWorkflowDocument extends Document {
     replacementDocumentId?: string;
   }>;
 
-  // 3. Official Cadastral Match Pillar
   officialRecordMatch: {
     status: MatchStatus;
     matchedRecordId?: string;
@@ -131,7 +124,6 @@ export interface IVerificationWorkflowDocument extends Document {
     summary: string;
   };
 
-  // 4. User ↔ Land Relationship Pillar
   relationshipVerification: {
     status: RelationshipStatus;
     relationshipType: RelationshipType;
@@ -141,10 +133,9 @@ export interface IVerificationWorkflowDocument extends Document {
     explanation: string;
   };
 
-  // Risk & Discrepancy Engine
   riskAssessment: {
     level: RiskLevel;
-    score: number; // 0 to 100
+    score: number;
     signals: {
       positive: string[];
       negative: string[];
@@ -153,7 +144,6 @@ export interface IVerificationWorkflowDocument extends Document {
     summary: string;
   };
 
-  // Officer Review
   officerDecision: {
     status: OfficerDecisionType;
     officerId?: string;
@@ -165,163 +155,142 @@ export interface IVerificationWorkflowDocument extends Document {
   auditTimeline: IAuditTimelineEntry[];
   createdAt: Date;
   updatedAt: Date;
+
+  toObject(): any;
+  toJSON(): any;
+  save(): Promise<IVerificationWorkflowDocument>;
 }
 
-const VerificationWorkflowSchema = new Schema<IVerificationWorkflowDocument>(
-  {
-    applicationId: { type: String, required: true, unique: true, index: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
-    documentId: { type: Schema.Types.ObjectId, ref: 'Document', index: true },
-    status: {
-      type: String,
-      enum: [
-        'UPLOADED',
-        'PROCESSING',
-        'OCR_COMPLETED',
-        'ANALYSIS_COMPLETED',
-        'PENDING_OFFICER_REVIEW',
-        'ACTION_REQUIRED',
-        'VERIFIED',
-        'REJECTED',
-      ],
-      default: 'PENDING_OFFICER_REVIEW',
-      index: true,
-    },
-    casePreset: { type: String, enum: ['CASE_1_GREEN', 'CASE_2_YELLOW', 'CASE_3_RED'] },
+export function enrichWorkflow(raw: any): IVerificationWorkflowDocument | null {
+  if (!raw) return null;
+  const wf = withMongoId({ ...raw }) as any;
 
-    applicant: {
-      name: { type: String, required: true },
-      mobile: { type: String, required: true },
-      email: { type: String, default: '' },
-      identityStatus: { type: String, enum: ['PENDING', 'VERIFIED', 'FAILED'], default: 'PENDING' },
-      identityMethod: { type: String, default: 'OTP_REGISTERED_MOBILE' },
-      verifiedAt: { type: Date },
-      demoNote: { type: String, default: 'Prototype Verification Environment (Registered Account + OTP)' },
-    },
+  // Unpack documentData to document if stored that way
+  if (raw.documentData && !raw.document) {
+    wf.document = raw.documentData;
+  }
 
-    document: {
-      documentType: { type: String, required: true },
-      fileName: { type: String, required: true },
-      fileSize: { type: String, default: '1.8 MB' },
-      fileUrl: { type: String, default: '/sample-712-extract.png' },
-      uploadedAt: { type: Date, default: Date.now },
-      ocrEngine: { type: String, default: 'Cadastral Tesseract OCR v5.3 + Vision AI' },
-      avgConfidence: { type: Number, default: 0.95 },
-      extractedFields: { type: Schema.Types.Mixed, default: {} },
-      consistency: {
-        status: { type: String, enum: ['PASSED', 'WARNING', 'FAILED'], default: 'PASSED' },
-        summary: { type: String, default: 'No significant document-level discrepancy detected.' },
-        checks: [
-          {
-            id: String,
-            name: String,
-            passed: Boolean,
-            notes: String,
-          },
-        ],
-        visualAnomaliesDetected: { type: Boolean, default: false },
-        anomalyNotes: String,
-      },
-    },
+  wf.toObject = function () {
+    return { ...this };
+  };
 
-    ocrData: {
-      language: { type: String, default: 'mar' },
-      rawText: { type: String, default: '' },
-      confidence: { type: Number, default: 0.95 },
-      pages: [
-        {
-          pageNumber: Number,
-          text: String,
-          confidence: Number,
+  wf.toJSON = function () {
+    return { ...this };
+  };
+
+  wf.save = async function (): Promise<IVerificationWorkflowDocument> {
+    const cleanUserId = this.userId
+      ? typeof this.userId === 'object' && this.userId.toString
+        ? this.userId.toString()
+        : String(this.userId)
+      : null;
+
+    const cleanDocId = this.documentId
+      ? typeof this.documentId === 'object' && this.documentId.toString
+        ? this.documentId.toString()
+        : String(this.documentId)
+      : null;
+
+    let targetStatus: WorkflowStatus = 'PENDING_OFFICER_REVIEW';
+    if (this.status) targetStatus = this.status as WorkflowStatus;
+
+    if (this.id) {
+      const updated = await prisma.verificationWorkflow.update({
+        where: { id: this.id },
+        data: {
+          status: targetStatus,
+          casePreset: this.casePreset || null,
+          applicant: this.applicant,
+          documentData: this.document || {},
+          ocrData: this.ocrData || undefined,
+          anomalyAnalysis: this.anomalyAnalysis || undefined,
+          clarificationHistory: this.clarificationHistory || [],
+          officialRecordMatch: this.officialRecordMatch,
+          relationshipVerification: this.relationshipVerification,
+          riskAssessment: this.riskAssessment,
+          officerDecision: this.officerDecision,
+          auditTimeline: this.auditTimeline || [],
         },
-      ],
-    },
-
-    anomalyAnalysis: {
-      level: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH'], default: 'LOW' },
-      signals: [
-        {
-          type: { type: String, enum: ['VISUAL', 'METADATA', 'STRUCTURAL'] },
-          description: String,
-          severity: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'INFO'] },
+      });
+      return enrichWorkflow(updated)!;
+    } else {
+      const created = await prisma.verificationWorkflow.create({
+        data: {
+          applicationId: this.applicationId,
+          userId: cleanUserId,
+          documentId: cleanDocId,
+          status: targetStatus,
+          casePreset: this.casePreset || null,
+          applicant: this.applicant,
+          documentData: this.document || {},
+          ocrData: this.ocrData || undefined,
+          anomalyAnalysis: this.anomalyAnalysis || undefined,
+          clarificationHistory: this.clarificationHistory || [],
+          officialRecordMatch: this.officialRecordMatch,
+          relationshipVerification: this.relationshipVerification,
+          riskAssessment: this.riskAssessment,
+          officerDecision: this.officerDecision,
+          auditTimeline: this.auditTimeline || [],
         },
-      ],
-    },
+      });
+      return enrichWorkflow(created)!;
+    }
+  };
 
-    clarificationHistory: [
-      {
-        requestedAt: { type: Date, default: Date.now },
-        officerMessage: String,
-        respondedAt: Date,
-        responseText: String,
-        replacementDocumentId: String,
-      },
-    ],
+  return wf;
+}
 
-    officialRecordMatch: {
-      status: { type: String, enum: ['STRONG_MATCH', 'PARTIAL_MATCH', 'MISMATCH', 'NOT_FOUND'], default: 'STRONG_MATCH' },
-      matchedRecordId: String,
-      matchedVillage: String,
-      matchedTaluka: String,
-      matchedDistrict: String,
-      matchedSurveyNumber: String,
-      fieldComparisons: [
-        {
-          fieldName: String,
-          uploadedValue: String,
-          officialValue: String,
-          isMatch: Boolean,
-        },
-      ],
-      summary: { type: String, default: 'Official cadastral record matched.' },
-    },
+export class VerificationWorkflowModel {
+  [key: string]: any;
 
-    relationshipVerification: {
-      status: { type: String, enum: ['MATCHED', 'EVIDENCE_REQUIRED', 'NOT_ESTABLISHED'], default: 'MATCHED' },
-      relationshipType: {
-        type: String,
-        enum: ['OWNER', 'CO_OWNER', 'LEGAL_HEIR', 'AUTHORIZED_REPRESENTATIVE', 'TENANT', 'OTHER', 'NOT_ESTABLISHED'],
-        default: 'OWNER',
-      },
-      landOwnerName: { type: String, required: true },
-      applicantName: { type: String, required: true },
-      evidenceRequired: { type: Boolean, default: false },
-      explanation: { type: String, default: '' },
-    },
+  constructor(data: any = {}) {
+    Object.assign(this, data);
+  }
 
-    riskAssessment: {
-      level: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH'], default: 'LOW' },
-      score: { type: Number, default: 15 },
-      signals: {
-        positive: [String],
-        negative: [String],
-      },
-      reasons: [String],
-      summary: { type: String, default: '' },
-    },
+  async save(): Promise<IVerificationWorkflowDocument> {
+    return enrichWorkflow(this)!.save();
+  }
 
-    officerDecision: {
-      status: { type: String, enum: ['PENDING', 'APPROVED', 'CLARIFICATION_REQUESTED', 'REJECTED'], default: 'PENDING' },
-      officerId: String,
-      officerName: String,
-      remarks: String,
-      decidedAt: Date,
-    },
+  static find(filter: any = {}) {
+    const where = mongoFilterToPrisma(filter);
+    return new PrismaQueryBuilder<IVerificationWorkflowDocument[]>(async ({ skip, take, orderBy }) => {
+      const workflows = await prisma.verificationWorkflow.findMany({
+        where,
+        skip,
+        take,
+        orderBy: orderBy || { createdAt: 'desc' },
+      });
+      return workflows.map((w) => enrichWorkflow(w)!);
+    });
+  }
 
-    auditTimeline: [
-      {
-        timestamp: { type: String, required: true },
-        action: { type: String, required: true },
-        actor: { type: String, required: true },
-        actorRole: { type: String, default: 'SYSTEM' },
-        description: { type: String, required: true },
-      },
-    ],
-  },
-  { timestamps: true }
-);
+  static async findOne(filter: any = {}): Promise<IVerificationWorkflowDocument | null> {
+    const where = mongoFilterToPrisma(filter);
+    const workflow = await prisma.verificationWorkflow.findFirst({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+    return enrichWorkflow(workflow);
+  }
 
-export const VerificationWorkflow = mongoose.model<IVerificationWorkflowDocument>(
-  'VerificationWorkflow',
-  VerificationWorkflowSchema
-);
+  static async findById(id: string): Promise<IVerificationWorkflowDocument | null> {
+    if (!id) return null;
+    const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
+    const workflow = await prisma.verificationWorkflow.findUnique({
+      where: { id: cleanId },
+    });
+    return enrichWorkflow(workflow);
+  }
+
+  static async create(data: any): Promise<IVerificationWorkflowDocument> {
+    const instance = new VerificationWorkflowModel(data);
+    return instance.save();
+  }
+
+  static async countDocuments(filter: any = {}): Promise<number> {
+    const where = mongoFilterToPrisma(filter);
+    return prisma.verificationWorkflow.count({ where });
+  }
+}
+
+export const VerificationWorkflow = VerificationWorkflowModel;

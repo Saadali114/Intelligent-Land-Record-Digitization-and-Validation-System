@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
+import { prisma } from '../config/prisma.js';
 import { User, IUser } from '../models/User.js';
 import { DocumentModel, IDocument } from '../models/Document.js';
 import { LandRecord } from '../models/LandRecord.js';
@@ -95,17 +95,22 @@ const ensureSampleFiles = (uploadDir: string) => {
 
 export const seedDatabase = async (dropExisting: boolean = true) => {
   try {
-    if (mongoose.connection.readyState < 1) {
-      console.log('Connecting to database for seeding...');
-      await connectDB();
-    }
+    console.log('Connecting to database for seeding...');
+    await connectDB();
 
     if (dropExisting) {
-      console.log('Clearing existing collections and indexes...');
+      console.log('Clearing existing database tables...');
       try {
-        await mongoose.connection.dropDatabase();
+        await prisma.verificationRecord.deleteMany();
+        await prisma.verificationWorkflow.deleteMany();
+        await prisma.landRecord.deleteMany();
+        await prisma.document.deleteMany();
+        await prisma.officerApplication.deleteMany();
+        await prisma.oTPVerification.deleteMany();
+        await prisma.auditLog.deleteMany();
+        await prisma.user.deleteMany();
       } catch (e) {
-        console.log('Database drop not needed or already empty');
+        console.log('Database tables already empty or not yet created');
       }
     }
 

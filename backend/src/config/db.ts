@@ -1,27 +1,28 @@
-import mongoose from 'mongoose';
+import { prisma } from './prisma';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    if (mongoose.connection.readyState >= 1) {
-      return;
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      console.warn('DATABASE_URL is not set in environment variables. Falling back to default PostgreSQL connection.');
     }
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/land_record_db';
-    
-    mongoose.connection.on('connected', () => {
-      console.log('MongoDB connected successfully');
-    });
 
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      console.warn('MongoDB disconnected');
-    });
-
-    await mongoose.connect(mongoUri);
+    await prisma.$connect();
+    console.log('PostgreSQL (Prisma) connected successfully');
   } catch (error) {
-    console.error('Failed to connect to MongoDB:', error);
-    process.exit(1);
+    console.error('Failed to connect to PostgreSQL via Prisma:', error);
+    // Don't exit immediately in local dev if DB isn't running yet, but log clear error
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  }
+};
+
+export const disconnectDB = async (): Promise<void> => {
+  try {
+    await prisma.$disconnect();
+    console.log('PostgreSQL (Prisma) disconnected');
+  } catch (error) {
+    console.error('Error disconnecting from PostgreSQL:', error);
   }
 };

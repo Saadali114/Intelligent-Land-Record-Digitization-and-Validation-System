@@ -1,8 +1,7 @@
 import { AuditLog, AuditAction } from '../models/AuditLog.js';
-import mongoose from 'mongoose';
 
 interface CreateAuditParams {
-  userId?: mongoose.Types.ObjectId | string;
+  userId?: string;
   action: AuditAction;
   resourceType: string;
   resourceId?: string;

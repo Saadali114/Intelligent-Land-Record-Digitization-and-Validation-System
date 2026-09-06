@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { User, IUser } from '../models/User.js';
 import { OfficerApplication, IOfficerApplication, OfficerApplicationStatus } from '../models/OfficerApplication.js';
 import {
@@ -320,7 +319,7 @@ export class RegistrationService {
    * Get single Officer Application Details
    */
   public static async getOfficerApplicationById(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || typeof id !== 'string' || !id.trim()) {
       throw new Error('Invalid application identifier.');
     }
 

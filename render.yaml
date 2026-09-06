@@ -1,3 +1,12 @@
+databases:
+  # ─────────────────────────────────────────────────────
+  #  Render Managed PostgreSQL Database (Free Tier)
+  # ─────────────────────────────────────────────────────
+  - name: land-record-db
+    databaseName: land_record_db
+    user: postgres
+    plan: free
+
 services:
   # ─────────────────────────────────────────────────────
   #  Express Backend — Render Web Service (Node.js)
@@ -7,7 +16,7 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: npm install --include=dev && npx prisma generate && npx prisma db push && npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -15,10 +24,12 @@ services:
         value: 10000          # Render assigns 10000 internally; Express reads this
       - key: NODE_ENV
         value: production
-      - key: MONGODB_URI
-        sync: false           # Set this in Render Dashboard → Environment
+      - key: DATABASE_URL
+        fromDatabase:
+          name: land-record-db
+          property: connectionString
       - key: JWT_SECRET
-        sync: false           # Set this in Render Dashboard → Environment
+        generateValue: true   # Render automatically generates a secure random 32-char secret
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
