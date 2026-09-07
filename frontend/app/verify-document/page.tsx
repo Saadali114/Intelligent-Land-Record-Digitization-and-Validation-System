@@ -21,6 +21,11 @@ import {
   Sparkles,
   AlertCircle,
   Hash,
+  Lock,
+  ShieldAlert,
+  KeyRound,
+  Stamp,
+  Camera,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,6 +37,11 @@ interface VerifiedPayload {
   processingStatus: string;
   checksum: string;
   uploadedAt: string;
+  verificationTier?: 'PHYSICAL_STICKER_AUTHENTICATED' | 'DIGITAL_RECORD_ONLY' | 'TAMPER_ALERT_MISMATCH';
+  secretCodeVerified?: boolean | null;
+  tamperWarning?: string | null;
+  secretSecurityCode?: string;
+  physicalStickerInstructions?: string;
   landRecord: {
     ownerName: string;
     surveyNumber: string;
@@ -52,20 +62,24 @@ interface VerifiedPayload {
     verifiedAt: string;
     certificateNo: string;
     securityHash: string;
+    stickerPinVerified?: boolean;
   };
 }
 
 function VerifyDocumentContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get('id') || '';
+  const initialSec = searchParams.get('sec') || '';
 
   const [searchQuery, setSearchQuery] = useState(initialId);
+  const [secretPinQuery, setSecretPinQuery] = useState(initialSec);
+  const [showPinInput, setShowPinInput] = useState(Boolean(initialSec));
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const fetchVerification = async (docId: string) => {
+  const fetchVerification = async (docId: string, secPin?: string) => {
     if (!docId || !docId.trim()) return;
     setLoading(true);
     setError(null);
@@ -74,8 +88,9 @@ function VerifyDocumentContent() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       const cleanBase = apiUrl.replace(/\/api\/?$/, '');
+      const pinParam = secPin && secPin.trim() ? `?sec=${encodeURIComponent(secPin.trim())}` : '';
       const response = await axios.get(
-        `${cleanBase}/api/documents/public-verify/${encodeURIComponent(docId.trim())}`
+        `${cleanBase}/api/documents/public-verify/${encodeURIComponent(docId.trim())}${pinParam}`
       );
 
       if (response.data?.success && response.data?.data) {
@@ -96,22 +111,31 @@ function VerifyDocumentContent() {
   useEffect(() => {
     if (initialId) {
       setSearchQuery(initialId);
-      fetchVerification(initialId);
+      if (initialSec) {
+        setSecretPinQuery(initialSec);
+        setShowPinInput(true);
+      }
+      fetchVerification(initialId, initialSec);
     }
-  }, [initialId]);
+  }, [initialId, initialSec]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      fetchVerification(searchQuery.trim());
+      fetchVerification(searchQuery.trim(), secretPinQuery.trim());
     }
   };
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
+      const pinPart = result?.secretSecurityCode && !result.secretSecurityCode.includes('*') && result.secretSecurityCode !== 'INVALID'
+        ? `&sec=${encodeURIComponent(result.secretSecurityCode)}`
+        : secretPinQuery.trim()
+        ? `&sec=${encodeURIComponent(secretPinQuery.trim())}`
+        : '';
       const url = `${window.location.origin}/verify-document?id=${encodeURIComponent(
         result?.documentId || searchQuery
-      )}`;
+      )}${pinPart}`;
       navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
@@ -172,32 +196,65 @@ function VerifyDocumentContent() {
           {/* Search Bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="max-w-xl mx-auto flex items-center gap-2 pt-3"
+            className="max-w-xl mx-auto space-y-2 pt-3 text-left"
           >
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Enter Document ID (e.g. DOC-MTREJTUP-IF8M)"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 shadow-inner"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Enter Document ID or Secret PIN (e.g. DOC-MH-2026-1001 or SEC-DA2C-7DA3)"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 shadow-inner"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading || !searchQuery.trim()}
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center gap-1.5 shrink-0"
+              >
+                {loading ? (
+                  <span>Verifying...</span>
+                ) : (
+                  <>
+                    <QrCode className="w-4 h-4" />
+                    <span>Verify</span>
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              type="submit"
-              disabled={loading || !searchQuery.trim()}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center gap-1.5 shrink-0"
-            >
-              {loading ? (
-                <span>Verifying...</span>
-              ) : (
-                <>
-                  <QrCode className="w-4 h-4" />
-                  <span>Verify Record</span>
-                </>
-              )}
-            </button>
+
+            {/* Secret Security PIN Toggle */}
+            <div className="flex items-center justify-between px-1">
+              <button
+                type="button"
+                onClick={() => setShowPinInput(!showPinInput)}
+                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 transition-colors"
+              >
+                <KeyRound className="w-3 h-3" />
+                {showPinInput
+                  ? 'Hide physical sticker secret PIN'
+                  : '+ Enter physical document sticker Secret PIN for deed verification'}
+              </button>
+              <span className="text-[10px] text-slate-500">Dual-factor paper verification</span>
+            </div>
+
+            {showPinInput && (
+              <div className="p-2.5 bg-slate-900/90 border border-emerald-500/30 rounded-xl flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-amber-400 ml-1 shrink-0" />
+                <input
+                  type="text"
+                  value={secretPinQuery}
+                  onChange={(e) => setSecretPinQuery(e.target.value.toUpperCase())}
+                  placeholder="Secret Security PIN (e.g. SEC-DA2C-7DA3)"
+                  className="w-full bg-transparent border-none text-xs font-mono text-amber-300 placeholder-slate-500 focus:outline-none uppercase"
+                />
+                <span className="text-[10px] text-slate-400 shrink-0 pr-1">
+                  Printed on physical sticker
+                </span>
+              </div>
+            )}
           </form>
         </div>
 
@@ -259,7 +316,7 @@ function VerifyDocumentContent() {
                   className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? 'Link Copied!' : 'Share Verification'}
+                  {copied ? 'Link Copied' : 'Share Link'}
                 </button>
                 <button
                   type="button"
@@ -271,6 +328,80 @@ function VerifyDocumentContent() {
                 </button>
               </div>
             </div>
+
+            {/* PHYSICAL STICKER AUTHENTICITY STATUS BANNER */}
+            {result.verificationTier === 'PHYSICAL_STICKER_AUTHENTICATED' && (
+              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/90 via-emerald-900/60 to-teal-950/90 border-2 border-emerald-400 text-emerald-100 flex items-start gap-3.5 shadow-xl">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 font-bold shadow-md">
+                  <Stamp className="w-6 h-6" />
+                </div>
+                <div className="space-y-1 text-xs sm:text-sm flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-black text-emerald-300 uppercase tracking-wider text-xs">
+                      ✓ Physical Document Sticker Authenticated
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400/50 text-[11px] font-mono font-bold">
+                      {result.secretSecurityCode}
+                    </span>
+                  </div>
+                  <p className="text-emerald-200/90 text-xs leading-relaxed">
+                    The Secret Security PIN on this physical sticker matches the government cryptographic registry. This physical paper deed is verified genuine, legally registered, and authentic.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {result.verificationTier === 'TAMPER_ALERT_MISMATCH' && (
+              <div className="p-4 rounded-xl bg-gradient-to-r from-rose-950/90 via-red-900/70 to-rose-950/90 border-2 border-rose-500 text-rose-100 flex items-start gap-3.5 shadow-xl animate-pulse">
+                <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 font-bold shadow-md">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
+                <div className="space-y-1 text-xs sm:text-sm flex-1">
+                  <div className="font-black text-rose-200 uppercase tracking-wider text-xs">
+                    ⚠️ CRITICAL TAMPER ALERT: Physical Sticker PIN Mismatch
+                  </div>
+                  <p className="text-rose-200 text-xs leading-relaxed">
+                    {result.tamperWarning ||
+                      'The Secret Security PIN entered does not match the official registry record for this document. The physical sticker may be forged, duplicated, or affixed to an unverified document.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {result.verificationTier === 'DIGITAL_RECORD_ONLY' && (
+              <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <KeyRound className="w-4 h-4 text-amber-400" />
+                    Verify Physical Paper Document Authenticity
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Holding the physical deed? Enter the 8-character Secret PIN printed on the sticker to verify physical authenticity:
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 w-full sm:w-auto shrink-0">
+                  <input
+                    type="text"
+                    value={secretPinQuery}
+                    onChange={(e) => setSecretPinQuery(e.target.value.toUpperCase())}
+                    placeholder="e.g. SEC-DA2C-7DA3"
+                    className="px-2.5 py-1.5 bg-slate-900 border border-slate-600 rounded-lg text-xs font-mono text-amber-300 placeholder-slate-500 focus:outline-none focus:border-amber-400 uppercase w-36"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (secretPinQuery.trim()) {
+                        fetchVerification(result.documentId, secretPinQuery.trim());
+                      }
+                    }}
+                    disabled={loading || !secretPinQuery.trim()}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shrink-0"
+                  >
+                    Verify PIN
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Cadastral Primary Parcel Strip */}
             {result.landRecord && (

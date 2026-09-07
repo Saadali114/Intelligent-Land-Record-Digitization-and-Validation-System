@@ -3,13 +3,40 @@ import JsBarcode from 'jsbarcode';
 import { DocumentRecord, LandRecord } from '../types';
 
 /**
- * Construct the public verification URL for a given document ID.
+ * Deterministically compute the tamper-evident secret security code for physical document stickers.
  */
-export function buildVerificationUrl(documentId: string, customOrigin?: string): string {
+export function computeDocumentSecretCode(documentId: string, metadataCode?: string): string {
+  if (metadataCode && typeof metadataCode === 'string' && metadataCode.trim()) {
+    return metadataCode.trim().toUpperCase();
+  }
+  const str = `${(documentId || '').toUpperCase().trim()}:ILRDVS-MAHA-SEAL-2026`;
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c64e6d;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const part1 = (h1 >>> 0).toString(16).toUpperCase().padStart(8, '0').slice(0, 4);
+  const part2 = (h2 >>> 0).toString(16).toUpperCase().padStart(8, '0').slice(0, 4);
+  return `SEC-${part1}-${part2}`;
+}
+
+/**
+ * Construct the public verification URL for a given document ID, optionally including the secret code for physical sticker verification.
+ */
+export function buildVerificationUrl(
+  documentId: string,
+  customOrigin?: string,
+  secretCode?: string
+): string {
   const origin =
     customOrigin ||
     (typeof window !== 'undefined' ? window.location.origin : 'https://ilrd-frontend.onrender.com');
-  return `${origin}/verify-document?id=${encodeURIComponent(documentId)}`;
+  const base = `${origin}/verify-document?id=${encodeURIComponent(documentId)}`;
+  return secretCode ? `${base}&sec=${encodeURIComponent(secretCode)}` : base;
 }
 
 /**
@@ -60,22 +87,28 @@ export function generateBarcodeDataUrl(barcodeText: string): string {
 }
 
 /**
- * Create a standardized verification payload for cadastral records.
+ * Create a standardized verification payload for cadastral records including physical sticker security PIN.
  */
 export function createCadastralVerificationPayload(
   doc: DocumentRecord,
   lr?: LandRecord | null
 ): {
+  secretCode: string;
   verificationUrl: string;
   qrPayloadJson: string;
   barcodeValue: string;
   summaryText: string;
 } {
-  const verificationUrl = buildVerificationUrl(doc.documentId);
+  const secretCode = computeDocumentSecretCode(
+    doc.documentId,
+    doc.metadata?.securityCode
+  );
+  const verificationUrl = buildVerificationUrl(doc.documentId, undefined, secretCode);
   const barcodeValue = doc.documentId;
 
   const payloadObj = {
     docId: doc.documentId,
+    sec: secretCode,
     type: doc.fileType || '7/12 Satbara',
     survey: lr?.surveyNumber || 'N/A',
     gat: lr?.gatNumber || undefined,
@@ -90,6 +123,7 @@ export function createCadastralVerificationPayload(
 
   const summaryText = `GOVT OF MAHARASHTRA • CADASTRAL RECORD
 Doc ID: ${doc.documentId}
+Secret Security PIN: ${secretCode}
 Survey/Gat: ${lr?.surveyNumber || '—'}
 Khata: ${lr?.khataNumber || '—'}
 Owner: ${lr?.ownerName || '—'}
@@ -98,6 +132,7 @@ Location: ${lr?.village || '—'}, ${lr?.district || '—'}
 Verify: ${verificationUrl}`;
 
   return {
+    secretCode,
     verificationUrl,
     qrPayloadJson: JSON.stringify(payloadObj),
     barcodeValue,
