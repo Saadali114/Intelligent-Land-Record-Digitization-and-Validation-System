@@ -61,16 +61,20 @@ def diagnose_extraction_errors(
 
 def _preprocess_clahe_boost(image_bytes: bytes) -> Tuple[bytes, List[str]]:
     """
-    Applies aggressive CLAHE contrast stretching and sharpening to rescue faint stamp ink.
+    Applies upscale, aggressive CLAHE contrast stretching and sharpening to rescue faint stamp ink.
     """
     try:
         # pyrefly: ignore [missing-import]
         import cv2  # type: ignore
         import numpy as np  # type: ignore
+        from services.preprocessing import upscale_if_needed
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
         if img is None:
             return image_bytes, ["clahe_boost_failed: null img"]
+
+        # Ensure high resolution
+        img, scale = upscale_if_needed(img, target_width=2000)
 
         # CLAHE with clipLimit 3.5 and 8x8 tile grid
         clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
@@ -81,7 +85,7 @@ def _preprocess_clahe_boost(image_bytes: bytes) -> Tuple[bytes, List[str]]:
         sharpened = cv2.addWeighted(boosted, 1.5, blurred, -0.5, 0)
 
         _, enc = cv2.imencode(".png", sharpened)
-        return enc.tobytes(), ["adaptive_strategy_applied: CLAHE 3.5 local contrast boost + unsharp mask"]
+        return enc.tobytes(), [f"adaptive_strategy_applied: CLAHE 3.5 boost (scale {scale:.1f}x) + unsharp mask"]
     except Exception as e:
         return image_bytes, [f"clahe_boost_error: {str(e)}"]
 
@@ -161,10 +165,10 @@ async def run_adaptive_pipeline(
         except Exception as e:
             steps_applied.append(f"pdf_fallback_to_bytes: {str(e)}")
 
-    # 2. PASS 1: Dual-Mode Primary Pass (Otsu Binarization / Image Cleaning)
-    # When clean_background=True, for_neural_ocr=False runs Otsu thresholding + Devanagari morphological closing
-    # to eliminate dark stamps, dirty paper backgrounds, and scanner shadows.
-    p1_for_neural = not clean_background
+    # 2. PASS 1: Dual-Mode Primary Pass (Neural Gradient Preservation)
+    # Modern deep neural OCR (EasyOCR CRAFT + CRNN) achieves highest accuracy when edge gradients
+    # and subtle cursive strokes are preserved via CLAHE rather than destroyed by hard Otsu binarization.
+    p1_for_neural = True
     p1_prep, p1_steps = preprocess_image(image_bytes, for_neural_ocr=p1_for_neural)
     steps_applied.extend(p1_steps)
     p1_raw_text, p1_ocr_conf, p1_char_count = run_easyocr(p1_prep, language=language)
@@ -191,13 +195,9 @@ async def run_adaptive_pipeline(
         error_recovery_logs.append(f"Pass 1 Diagnosed Errors: {'; '.join(diagnosed_errors)}")
 
         # Strategy A: Dual-mode alternate representation
-        # If Pass 1 ran Otsu binarization, Pass 2 evaluates CLAHE contrast boost.
-        # If Pass 1 ran neural gradient, Pass 2 evaluates Otsu binarization to clear background noise.
+        # If Pass 1 missed core fields, try aggressive CLAHE contrast boost or Otsu thresholding
         if any(e in diagnosed_errors for e in ["low_char_yield", "potential_faint_ink_or_table_distortion", "low_ocr_confidence", "missing_core_fields"]):
-            if clean_background:
-                p2_prep, p2_steps = _preprocess_clahe_boost(image_bytes)
-            else:
-                p2_prep, p2_steps = preprocess_image(image_bytes, for_neural_ocr=False)
+            p2_prep, p2_steps = _preprocess_clahe_boost(image_bytes)
             steps_applied.extend(p2_steps)
             p2_raw_text, p2_ocr_conf, p2_char_count = run_easyocr(p2_prep, language=language)
 

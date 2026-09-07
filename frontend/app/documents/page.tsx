@@ -68,13 +68,33 @@ export default function DocumentsPage() {
   const handleRunExtraction = async (id: string) => {
     try {
       setExtractingId(id);
-      await extractMutation.mutateAsync(id);
+      const res = await extractMutation.mutateAsync(id);
+      if (res && res.document) {
+        setSelectedDoc((prev) => {
+          if (!prev) return res.document;
+          return {
+            ...prev,
+            ...res.document,
+            landRecord: res.landRecord || res.document.landRecord || prev.landRecord,
+          };
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['documents', 'detail', id] });
     } catch (err: any) {
       alert(err.message || 'AI extraction failed');
     } finally {
       setExtractingId(null);
     }
   };
+
+  useEffect(() => {
+    if (selectedDoc && data?.documents) {
+      const updated = data.documents.find((d) => d._id === selectedDoc._id);
+      if (updated && updated.landRecord && !selectedDoc.landRecord) {
+        setSelectedDoc(updated);
+      }
+    }
+  }, [data?.documents, selectedDoc]);
 
   const handleUpload = async (formData: FormData) => {
     try {

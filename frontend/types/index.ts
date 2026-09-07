@@ -101,6 +101,7 @@ export interface LandRecord {
   _id: string;
   ownerName: string;
   surveyNumber: string;
+  gatNumber?: string;
   khasraNumber: string;
   khataNumber: string;
   plotArea: string;

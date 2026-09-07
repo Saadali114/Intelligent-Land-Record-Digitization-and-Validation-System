@@ -4,10 +4,19 @@ export type FormCategory = '7_12_SATBARA' | 'SALE_DEED' | 'MUTATION_REGISTER' | 
 
 export const getBackendFileUrl = (doc: DocumentRecord | null): string => {
   if (!doc) return '';
+  if (doc.fileUrl && (doc.fileUrl.startsWith('http://') || doc.fileUrl.startsWith('https://'))) {
+    return doc.fileUrl;
+  }
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const backendBase = apiUrl.replace(/\/api\/?$/, '');
-  if (doc.fileUrl) return `${backendBase}${doc.fileUrl}`;
-  return `${backendBase}/uploads/${doc.fileName}`;
+  if (doc.fileUrl) {
+    const cleanUrl = doc.fileUrl.startsWith('/') ? doc.fileUrl : `/${doc.fileUrl}`;
+    return `${backendBase}${cleanUrl}`;
+  }
+  if (doc.fileName) {
+    return `${backendBase}/uploads/${encodeURIComponent(doc.fileName)}`;
+  }
+  return '';
 };
 
 export const getDocumentFormCategory = (doc: DocumentRecord | null): FormCategory => {

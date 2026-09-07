@@ -19,8 +19,13 @@ export const SatbaraExtractView: React.FC<SatbaraExtractViewProps> = ({
           <div className="text-[10px] text-blue-700 uppercase font-semibold">
             भूमापन / गट क्रमांक (Survey & Sub-Division)
           </div>
-          <div className="text-xl font-black text-blue-950 font-mono">
-            {lr.surveyNumber}
+          <div className="text-xl font-black text-blue-950 font-mono flex items-baseline gap-2 flex-wrap">
+            <span>{lr.surveyNumber}</span>
+            {lr.gatNumber && !lr.surveyNumber?.includes(lr.gatNumber) && (
+              <span className="text-xs font-semibold text-blue-800 bg-blue-100/90 border border-blue-300 px-2 py-0.5 rounded font-sans">
+                गट क्र. {lr.gatNumber}
+              </span>
+            )}
           </div>
         </div>
         <div className="text-right">

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { DocumentRecord } from '../../types';
+import { documentsService } from '../../services/documents.service';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -18,7 +20,7 @@ interface DocumentInspectionModalProps {
 }
 
 export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = ({
-  document: doc,
+  document: initialDoc,
   isOpen,
   onClose,
   onRunExtraction,
@@ -26,6 +28,22 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
 }) => {
   const { t } = useTranslation();
   const [imageZoom, setImageZoom] = useState(1);
+
+  // Live query for the document to keep inspection modal automatically updated
+  const { data: freshDoc } = useQuery({
+    queryKey: ['documents', 'detail', initialDoc?._id],
+    queryFn: () => documentsService.getDocumentById(initialDoc!._id),
+    enabled: isOpen && !!initialDoc?._id,
+    refetchInterval: (query) => {
+      // Auto-poll if landRecord not yet available or extraction in progress
+      if (isExtracting) return 1500;
+      if (query.state.data?.landRecord) return false;
+      return 2000;
+    },
+    initialData: initialDoc || undefined,
+  });
+
+  const doc = freshDoc || initialDoc;
 
   if (!doc) return null;
 
