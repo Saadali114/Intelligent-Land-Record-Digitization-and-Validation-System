@@ -197,11 +197,10 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Panel Header with Form Badge and PDF Export */}
+      {/* Streamlined Header with Badges, Inline Translation and PDF Export */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-emerald-600" />
             Digitized Cadastral Record
           </span>
@@ -233,7 +232,31 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {/* Compact Inline Translation Selector */}
+          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-xs">
+            <Globe className="w-3.5 h-3.5 text-slate-500 ml-1.5" />
+            <select
+              value={targetLanguage}
+              onChange={(e) => setTargetLanguage(e.target.value as any)}
+              className="text-[11px] bg-transparent border-none py-1 pr-1 text-slate-700 font-medium focus:ring-0 cursor-pointer"
+            >
+              <option value="en">English (इंग्रजी)</option>
+              <option value="mr">मराठी (Original)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="gu">ગુજરાતી (Gujarati)</option>
+            </select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleTranslateRecord}
+              isLoading={isTranslating}
+              className="h-6 px-2 text-[10px] font-bold bg-white text-blue-700 border-slate-200 hover:bg-slate-50 shadow-none"
+            >
+              Translate
+            </Button>
+          </div>
+
           {doc.landRecord && (
             <Button
               variant="outline"
@@ -247,7 +270,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
                   targetLanguage,
                 })
               }
-              className="text-xs h-7 px-2.5 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
+              className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
               title="Download official digital certificate as PDF"
             >
               <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
@@ -257,72 +280,36 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
         </div>
       </div>
 
+      {/* Translation Compare Strip (Only visible when translated) */}
+      {isTranslated && (
+        <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-900 flex items-center justify-between">
+          <span className="font-medium">✓ {translationNotice || 'Translated record'}</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowSideBySide(!showSideBySide)}
+              className={`px-2 py-0.5 text-[10px] font-bold rounded border transition-colors flex items-center gap-1 ${
+                showSideBySide
+                  ? 'bg-blue-100 text-blue-900 border-blue-300'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <ArrowRightLeft className="w-3 h-3" />
+              {showSideBySide ? 'Side-by-Side: ON' : 'Compare View'}
+            </button>
+            <button
+              type="button"
+              onClick={handleResetTranslation}
+              className="px-2 py-0.5 text-[10px] font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200 transition-colors"
+            >
+              Show Original
+            </button>
+          </div>
+        </div>
+      )}
+
       {doc.landRecord ? (
         <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          {/* Multilingual Cadastral Translator Toolbar */}
-          <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-blue-900 shrink-0" />
-              <span className="text-[11px] font-bold text-slate-700">Digital Translator:</span>
-              <select
-                value={targetLanguage}
-                onChange={(e) => setTargetLanguage(e.target.value as any)}
-                className="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-900"
-              >
-                <option value="en">English (इंग्रजी)</option>
-                <option value="mr">मराठी (Marathi)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-                <option value="gu">ગુજરાતી (Gujarati)</option>
-                <option value="kn">ಕನ್ನಡ (Kannada)</option>
-                <option value="te">తెలుగు (Telugu)</option>
-                <option value="ta">தமிழ் (Tamil)</option>
-                <option value="bn">বাংলা (Bengali)</option>
-              </select>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleTranslateRecord}
-                isLoading={isTranslating}
-                className="h-7 px-2.5 text-xs bg-white text-slate-800 border-slate-300 hover:bg-slate-100"
-              >
-                <Languages className="w-3 h-3 mr-1 text-blue-700" />
-                Translate Record
-              </Button>
-            </div>
-
-            {isTranslated && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setShowSideBySide(!showSideBySide)}
-                  className={`px-2 py-1 text-[10px] font-bold rounded border transition-colors flex items-center gap-1 ${
-                    showSideBySide
-                      ? 'bg-blue-100 text-blue-900 border-blue-300'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  <ArrowRightLeft className="w-3 h-3" />
-                  {showSideBySide ? 'Side-by-Side: ON' : 'Compare View'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResetTranslation}
-                  className="px-2 py-1 text-[10px] font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200 transition-colors"
-                >
-                  Show Original
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Translation Active Notice */}
-          {translationNotice && (
-            <div className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded text-[11px] text-emerald-800 font-medium flex items-center justify-between">
-              <span>✓ {translationNotice}</span>
-              <span className="text-[10px] text-emerald-600 font-mono">Bilingual Cadastral Display</span>
-            </div>
-          )}
-
           {/* OCR Quality Warning Banner */}
           {doc.metadata?.aiExtraction?.anomalies?.some((a: string) => a.includes('Low OCR')) && (
             <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-xs flex items-start gap-2">
@@ -371,77 +358,36 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
             />
           )}
 
-          {/* AI Confidence & Quality Indicators */}
+          {/* Clean AI Extraction Status Footer */}
           {doc.metadata?.aiExtraction && (
-            <div className="p-3 bg-emerald-50/50 rounded-lg border border-emerald-200 text-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-emerald-950 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  AI OCR Confidence: {((doc.metadata.aiExtraction.overallConfidence || 0.95) * 100).toFixed(0)}%
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold text-slate-800">
+                  AI Confidence: {((doc.metadata.aiExtraction.overallConfidence || 0.95) * 100).toFixed(0)}%
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">
-                  Engine: {doc.metadata.aiExtraction.ocrEngine || 'tesseract.js'}
-                  {doc.metadata.aiExtraction.ocrCharsExtracted !== undefined && (
-                    <> &middot; {doc.metadata.aiExtraction.ocrCharsExtracted} chars</>
-                  )}
+                <span className="text-slate-300">•</span>
+                <span className="text-[11px] font-mono text-slate-500">
+                  Engine: {doc.metadata.aiExtraction.ocrEngine || 'Gemini-1.5-Flash'}
                 </span>
               </div>
-
-              {doc.metadata.aiExtraction.preprocessingSteps &&
-                doc.metadata.aiExtraction.preprocessingSteps.length > 0 && (
-                  <div className="pt-1">
-                    <div className="text-[10px] font-semibold text-slate-600 mb-1">
-                      OpenCV Preprocessing Pipeline:
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {doc.metadata.aiExtraction.preprocessingSteps.map((step: string, idx: number) => (
-                        <span
-                          key={idx}
-                          className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-900 text-[9px] font-mono border border-blue-200"
-                        >
-                          ✓ {step}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              {doc.metadata.aiExtraction.anomalies &&
-                doc.metadata.aiExtraction.anomalies.filter((a: string) => !a.includes('Low OCR')).length > 0 && (
-                  <div className="p-2 bg-amber-50 rounded border border-amber-200 text-amber-900 text-[10px] space-y-0.5">
-                    <div className="font-semibold flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3 text-amber-600" />
-                      Inspection Notes:
-                    </div>
-                    {doc.metadata.aiExtraction.anomalies
-                      .filter((a: string) => !a.includes('Low OCR'))
-                      .map((anom: string, i: number) => (
-                        <div key={i} className="pl-2.5 text-slate-700">
-                          • {anom}
-                        </div>
-                      ))}
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/verification"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded border border-blue-200 transition-colors"
+                >
+                  Verification Workstation
+                  <ExternalLink className="w-3 h-3 ml-0.5" />
+                </Link>
+                <Link
+                  href="/land-records"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-2.5 py-1 rounded border border-slate-200 transition-colors"
+                >
+                  Land Records
+                </Link>
+              </div>
             </div>
           )}
-
-          {/* Action Links */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-            <Link
-              href="/verification"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors"
-            >
-              Inspect in Verification Workstation
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-
-            <Link
-              href="/land-records"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              View in Land Records
-            </Link>
-          </div>
         </div>
       ) : (
         <AwaitingExtractionPlaceholder

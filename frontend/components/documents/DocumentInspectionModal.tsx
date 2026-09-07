@@ -58,42 +58,20 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
       onClose={handleClose}
       title={t('officerDocuments.inspectionModalTitle', { defaultValue: 'Cadastral Dual-Pane Inspection' })}
       description={`Record ID: ${doc.documentId} • ${doc.originalName}`}
-      maxWidth="4xl"
+      maxWidth="6xl"
     >
       <div className="space-y-4">
-        {/* Top Quick Stats Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-          <div>
-            <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              {t('officerDocuments.chooseType', { defaultValue: 'File Type' })}
-            </span>
-            <div className="font-semibold text-slate-800 truncate">{doc.fileType}</div>
+        {/* Subtle Top Metadata Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs">
+          <div className="flex items-center gap-3 text-slate-600 font-medium">
+            <span><strong className="text-slate-800">Format:</strong> {doc.fileType} ({formatFileSize(doc.fileSize)})</span>
+            <span className="text-slate-300">•</span>
+            <span><strong className="text-slate-800">Script:</strong> {doc.language}</span>
+            <span className="text-slate-300">•</span>
+            <span><strong className="text-slate-800">Uploaded:</strong> {formatDate(doc.uploadedAt)}</span>
           </div>
-          <div>
-            <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              {t('officerDocuments.chooseLanguage', { defaultValue: 'Language' })}
-            </span>
-            <div className="font-semibold text-slate-800">{doc.language}</div>
-          </div>
-          <div>
-            <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              {t('common.size', { defaultValue: 'File Size' })}
-            </span>
-            <div className="font-semibold text-slate-800">{formatFileSize(doc.fileSize)}</div>
-          </div>
-          <div>
-            <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              {t('status.uploaded', { defaultValue: 'Uploaded' })}
-            </span>
-            <div className="font-semibold text-slate-800">{formatDate(doc.uploadedAt)}</div>
-          </div>
-          <div>
-            <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              {t('officerProfile.accountStatus', { defaultValue: 'Status' })}
-            </span>
-            <div className="mt-0.5">
-              <Badge status={doc.processingStatus} />
-            </div>
+          <div className="flex items-center gap-2">
+            <Badge status={doc.processingStatus} />
           </div>
         </div>
 
