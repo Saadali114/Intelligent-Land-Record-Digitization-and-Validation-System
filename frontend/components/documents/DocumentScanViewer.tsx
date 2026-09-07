@@ -90,7 +90,7 @@ export const DocumentScanViewer: React.FC<DocumentScanViewerProps> = ({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-300 bg-slate-900/95 min-h-[460px] max-h-[560px] overflow-auto p-3 flex items-center justify-center relative shadow-inner">
+      <div className="rounded-xl border border-slate-300 bg-slate-900/95 min-h-[520px] lg:h-[calc(90vh-130px)] overflow-auto p-3 flex items-center justify-center relative shadow-inner">
         {/* Loading Spinner */}
         {isLoading && !hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/70 backdrop-blur-xs z-10 text-slate-300 gap-2">
