@@ -213,7 +213,18 @@
     "usernameLabel": "Official Email or Employee ID",
     "passwordLabel": "Password",
     "loginButton": "Sign In to Officer Console",
-    "forgotPassword": "Forgot Password?"
+    "forgotPassword": "Forgot Password?",
+    "emailLabel": "Email Address",
+    "emailHelp": "A genuine 6-digit verification code will be dispatched to your inbox via Resend.",
+    "sendEmailOtp": "Send Verification Code",
+    "invalidEmailError": "Please enter a valid email address (e.g. name@domain.com).",
+    "sendEmailOtpFailed": "Unable to dispatch Email OTP. Please verify email address or try again.",
+    "verifyEmail": "Verify Email Address",
+    "resendOtpFailed": "Unable to resend code at this time.",
+    "changeEmail": "Use another email address",
+    "emailDisclaimer": "Email verification confirms applicant inbox control. Official cadastral rights and land ownership are validated separately via revenue records.",
+    "citizenEmailLoginTitle": "Citizen Email Authentication",
+    "citizenEmailLoginSubtitle": "Real 6-digit email OTP verification code delivered directly to your inbox."
   },
   "dashboard": {
     "welcome": "Namaste",
@@ -599,27 +610,17 @@
     "stageOfficerReview": "Officer Review",
     "stageFinalDecision": "Final Decision",
     "registeredEmail": "Registered Email Address",
-    "sendEmailOtp": "Send Email Verification OTP"
-  },
-  "auth": {
-    "citizenLoginTitle": "Citizen Email Authentication",
-    "citizenLoginSubtitle": "Real 6-digit email OTP verification code delivered directly to your inbox.",
-    "emailLabel": "Email Address",
-    "emailHelp": "A genuine 6-digit verification code will be dispatched to your inbox via Resend.",
-    "sendEmailOtp": "Send Verification Code",
-    "invalidEmailError": "Please enter a valid email address (e.g. name@domain.com).",
-    "sendEmailOtpFailed": "Unable to dispatch Email OTP. Please verify email address or try again.",
-    "verifyEmail": "Verify Email Address",
-    "verifyMobile": "Verify Mobile Number",
-    "otpSent": "We sent a 6-digit verification code to",
-    "invalidOtp": "Please enter the full 6-digit OTP code.",
-    "codeExpiresIn": "Code expires in",
-    "otpExpired": "OTP expired. Please request a new code.",
-    "resendOtp": "Resend Code",
-    "sendingOtp": "Sending Code...",
-    "resendOtpFailed": "Unable to resend code at this time.",
-    "changeEmail": "Use another email address",
-    "emailDisclaimer": "Email verification confirms applicant inbox control. Official cadastral rights and land ownership are validated separately via revenue records."
+    "sendEmailOtp": "Send Email Verification OTP",
+    "dualPaneOcrTitle": "Original Document & OCR Entity Review",
+    "consistencyTitle": "Document Consistency & Integrity Analysis",
+    "cadastralMatchTitle": "Cadastral Cross-Check Against Official Register",
+    "auditTimelineTitle": "Statutory Audit Timeline",
+    "approveAction": "Approve Document Title",
+    "clarificationAction": "Request Citizen Clarification",
+    "rejectAction": "Reject Application",
+    "mandatoryRemarks": "Official Statutory Remarks / Rejection Grounds",
+    "mandatoryClarification": "Clarification Instructions for Applicant",
+    "prototypeNotice": "Prototype Verification Environment: AI signals provide decision support only. Final determinations rest with the authorized Revenue Officer."
   },
   "registration": {
     "title": "Create Your ILRDVS Account",
@@ -663,23 +664,6 @@
     "registrationComplete": "Registration Complete",
     "goToCitizenPortal": "Go to Citizen Portal",
     "viewApplicationStatus": "View Application Status Tracker"
-  },
-  "verificationWorkflow": {
-    "officerWorkspaceTitle": "Officer Cadastral Verification Workspace",
-    "officerWorkspaceSubtitle": "Authoritative Section 149 MLRC Review and Statutory Verdict",
-    "decisionRecorded": "Officer decision recorded in immutable audit log.",
-    "dualPaneOcrTitle": "Original Document & OCR Entity Review",
-    "consistencyTitle": "Document Consistency & Integrity Analysis",
-    "cadastralMatchTitle": "Cadastral Cross-Check Against Official Register",
-    "relationshipTitle": "Applicant to Land Title Relationship",
-    "riskAnalysisTitle": "AI Risk Score & Discrepancy Assessment",
-    "auditTimelineTitle": "Statutory Audit Timeline",
-    "approveAction": "Approve Document Title",
-    "clarificationAction": "Request Citizen Clarification",
-    "rejectAction": "Reject Application",
-    "mandatoryRemarks": "Official Statutory Remarks / Rejection Grounds",
-    "mandatoryClarification": "Clarification Instructions for Applicant",
-    "prototypeNotice": "Prototype Verification Environment: AI signals provide decision support only. Final determinations rest with the authorized Revenue Officer."
   }
 }
 
