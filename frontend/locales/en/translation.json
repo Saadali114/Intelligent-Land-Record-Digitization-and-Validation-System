@@ -55,7 +55,10 @@
     "error": "Error",
     "notice": "Notice",
     "backToHome": "Back to Home",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "govtOfIndiaEmblem": "🏛️ Government of India",
+    "newBadge": "NEW",
+    "downloadPdf": "Download PDF"
   },
   "navbar": {
     "districts": "Districts",
@@ -84,7 +87,31 @@
     "screenReader": "Screen Reader Access",
     "decreaseText": "Decrease text size",
     "standardText": "Standard text size",
-    "increaseText": "Increase text size"
+    "increaseText": "Increase text size",
+    "textLabel": "Text:",
+    "maharashtraDistricts": "Maharashtra Districts",
+    "selectDistrict": "Select District",
+    "rtiTitle": "Right to Information Act portal",
+    "rtsTitle": "Right to Services Act",
+    "eodbTitle": "Ease of Doing Business",
+    "singleWindowPortal": "Single window digital portal",
+    "stepByStepManuals": "Step-by-step portal manuals",
+    "officialCadastralGuidelines": "Official cadastral guidelines",
+    "gazetteCircularsGuidelines": "Gazette circulars & guidelines",
+    "importantLinks": "Important Links",
+    "stateCentralPortals": "State & Central Land Portals",
+    "dilrmpSubtitle": "DILRMP, NLRMP, SVAMITVA",
+    "droneMappingSubtitle": "High-Resolution Drone Cadastral Mapping",
+    "computerizedReposSubtitle": "100% Computerized Repositories",
+    "titleSearchSubtitle": "Title Search & Digital Extract Copy",
+    "trackRequestSubtitle": "Track Mutation or Verification Request",
+    "grievanceSubtitle": "Register Land Record Discrepancy",
+    "feedbackSubtitle": "Portal Experience & Suggestions",
+    "register": "Register",
+    "toggleMenu": "Toggle Menu",
+    "landRecords": "Land Records",
+    "mutationServices": "Mutation Services (Ferfar)",
+    "docVerification": "Document Verification"
   },
   "home": {
     "bannerBadge": "National Land Records Modernization Programme (NLRMP)",
@@ -102,14 +129,99 @@
     "statsTime": "< 48 Hrs",
     "statsTimeLabel": "Avg. Verification Turnaround",
     "featuresTitle": "Key Capabilities of ILRDVS",
-    "featuresSubtitle": "End-to-end automated pipeline integrating multilingual OCR, cadastral shape verification, and revenue officer validation."
+    "featuresSubtitle": "End-to-end automated pipeline integrating multilingual OCR, cadastral shape verification, and revenue officer validation.",
+    "slider": {
+      "liveGazette": "LIVE GAZETTE",
+      "tickerText": "Mahabhumi & DILRMP: Computerized Satbara extracts with automated cryptographic digital verification are now legally recognized across all Maharashtra Sub-Registrar offices.",
+      "trust1": "100% Legally Validated",
+      "trust2": "256-Bit Cryptographic Seal",
+      "trust3": "36 Revenue Districts Active",
+      "slide0Tag": "Secure Land Records Repository",
+      "slide0Badge": "100% Authenticated Cadastral Database",
+      "slide0Title": "Your Land Records Are",
+      "slide0Highlight": "Safe, Verified & Protected Here",
+      "slide0Desc": "Powered by state-of-the-art AI Multilingual OCR, spatial cadastral parsing, and cryptographic audit security. Never lose a land title to physical degradation, forgery, or record manipulation.",
+      "slide0CardTitle": "Cadastral Record Protection",
+      "slide0CardStatus": "Status: Active & Protected",
+      "slide0HashVerified": "HASH VERIFIED",
+      "slide0Item1Label": "Village Form 7/12 (Satbara)",
+      "slide0Item1Value": "Secured & Digitized",
+      "slide0Item2Label": "Form 6 Mutation Register (Ferfar)",
+      "slide0Item2Value": "Real-time Sync",
+      "slide0Item3Label": "Urban Property Card (CTS)",
+      "slide0Item3Value": "Encumbrance Clear",
+      "slide0GuaranteeTitle": "Your Peace of Mind Guarantee:",
+      "slide0GuaranteeText": "Physical revenue extracts are scanned and linked to national unique parcel IDs with complete ownership provenance.",
+      "slide1Tag": "Land Related Services",
+      "slide1Badge": "Citizen Friendly & Paperless Delivery",
+      "slide1Title": "Instant Citizen Services for",
+      "slide1Highlight": "7/12 Satbara, Property Cards & Mutation",
+      "slide1Desc": "Obtain certified digital extracts of Village Form 7/12, City Survey Property Cards, and Form 6 Mutation (Ferfar) records with official QR validation seals in under 60 seconds.",
+      "slide1PrimaryBtn": "Explore All Services",
+      "slide1SecondaryBtn": "Track Mutation Status",
+      "slide1CardTitle": "Popular Land Services",
+      "slide1CardSubtitle": "Instant Citizen Portal",
+      "slide1SearchSurvey": "Search by Survey No.",
+      "slide1UrbanCts": "Urban CTS Records",
+      "slide1InspectorWorkstation": "Inspector Workstation",
+      "slide1FerfarTracking": "Form 6 Ferfar Tracking",
+      "slide1FullCatalog": "Launch Full Services Catalog",
+      "slide2Tag": "Official News & Gazette Notices",
+      "slide2Badge": "Revenue Department Gazetted Feed",
+      "slide2Title": "Latest Gazette Updates &",
+      "slide2Highlight": "Digital Land Modernization Directives",
+      "slide2Desc": "Real-time notifications on the National Land Records Modernization Programme (NLRMP), GIS drone surveys across 36 districts, and expedited time-bound mutation clearances.",
+      "slide2PrimaryBtn": "Read All Notices",
+      "slide2SecondaryBtn": "Citizen Guidelines",
+      "slide2CardTitle": "Recent Gazette & Notices",
+      "slide2UpdatedToday": "UPDATED TODAY",
+      "slide2Notice1Date": "March 2026",
+      "slide2Notice1Text": "Mandatory Integration of AI OCR for Satbara digitization in Pune & Thane divisions.",
+      "slide2Notice2Date": "February 2026",
+      "slide2Notice2Text": "Standard Operating Procedure for Online Ferfar Mutation Application clearances.",
+      "slide2ViewAll": "View All Gazette Circulars",
+      "slide3Tag": "AI-Powered Spatial Verification",
+      "slide3Badge": "EasyOCR & Named Entity Recognition",
+      "slide3Title": "Next-Gen Cadastral Engine with",
+      "slide3Highlight": "Automated Fraud & Duplicate Detection",
+      "slide3Desc": "Multi-stage neural pipeline detects duplicate parcel registrations, spelling discrepancies across handwritten Marathi/Hindi extracts, and protects rightful landowners.",
+      "slide3PrimaryBtn": "Launch Verification Workstation",
+      "slide3SecondaryBtn": "Learn About Our AI",
+      "slide3CardTitle": "AI Engine Live Telemetry",
+      "slide3Accuracy": "98.4% ACCURACY",
+      "slide3DistrictsCovered": "Districts Covered",
+      "slide3VillagesDigitized": "Villages Digitized",
+      "slide3ParcelsAuthenticated": "Parcels Authenticated",
+      "slide3InferenceSla": "AI OCR Inference SLA",
+      "slide3DevanagariSupport": "Devanagari, Hindi, Marathi & English Multilingual Support enabled.",
+      "pauseSlideshow": "Pause slideshow",
+      "playSlideshow": "Play slideshow",
+      "prevSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "goToSlide": "Go to slide {{num}}"
+    }
   },
   "about": {
     "badge": "Digital Governance",
     "title": "Modernizing Historical Land Records with Cadastral AI",
     "description": "ILRDVS is designed to bridge historical paper records (Modi script, archaic Marathi, and revenue formats) with modern digital land registries, ensuring every land parcel is securely geo-referenced and tamper-proof.",
     "mission": "Our Mission: 100% digital transparency, zero boundary disputes, and instant citizen access to certified 7/12 extracts.",
-    "vision": "A unified cadastral spatial registry powering citizen empowerment and ease of governance."
+    "vision": "A unified cadastral spatial registry powering citizen empowerment and ease of governance.",
+    "challengeTitle": "The Challenge of Archival Land Records",
+    "challengeP1": "For decades, land records—including Records of Rights (RoR), mutation registers, and registered sale deeds—have been maintained on physical paper, making them vulnerable to yellowing, ink bleeding, tear damage, and manual transcription errors.",
+    "challengeP2": "These vulnerabilities can contribute to duplicate or conflicting land records, ownership disputes, lengthy civil litigation, and delays in land verification. ILRDVS addresses these challenges through an end-to-end AI-powered workflow for digitizing, validating, and verifying land records.",
+    "auditTrailTitle": "Audit Trail Provenance",
+    "auditTrailDesc": "Every edit and action is cryptographically tracked",
+    "accuracyTitle": "OCR Extraction Accuracy",
+    "accuracyDesc": "Validated across Marathi, Hindi, and English",
+    "pillar1Title": "OpenCV & EasyOCR",
+    "pillar1Desc": "Adaptive thresholding, deskewing, and multilingual neural recognition of cursive and handwritten Devanagari script.",
+    "pillar2Title": "Spatial NER Extraction",
+    "pillar2Desc": "Heuristic cadastral parsing isolates Survey No, Khasra, Khata, Plot Area, Owner Name, and Mutation references.",
+    "pillar3Title": "Inspector Workstation",
+    "pillar3Desc": "Dual-pane zoomable review interface enabling revenue officers to verify AI predictions before sanctioning.",
+    "pillar4Title": "Tamper-Proof Certificates",
+    "pillar4Desc": "Automated generation of official bilingual certificates with digital seal watermarks and instant print capability."
   },
   "services": {
     "title": "Government Land Record Services",
@@ -121,7 +233,51 @@
     "service3Title": "Cadastral Map (Bhu-Naksha)",
     "service3Desc": "GIS-linked survey parcel boundaries mapped with satellite imagery and drone surveys.",
     "service4Title": "Document Verification",
-    "service4Desc": "Cryptographic authenticity verification using digital QR codes and revenue hashes."
+    "service4Desc": "Cryptographic authenticity verification using digital QR codes and revenue hashes.",
+    "items": {
+      "satbara": {
+        "title": "Village Form 7/12 (Satbara Extract)",
+        "titleAlt": "गाव नमुना ७/१२ अधिकार अभिलेख",
+        "description": "Digitized records of rights, potkharaba land classification, occupant class, and agricultural land assessment with official seals.",
+        "badge": "Instant Digital Copy",
+        "actionText": "Search 7/12 Record"
+      },
+      "propertyCard": {
+        "title": "Urban Property Card (Milkat Patra)",
+        "titleAlt": "नगर भूमापन मिळकत पत्रिका (CTS)",
+        "description": "Authentic municipal and city survey registry records detailing carpet area, plot boundaries, and freehold tenure for urban parcels.",
+        "badge": "City Survey CTS",
+        "actionText": "View Property Cards"
+      },
+      "mutation": {
+        "title": "Mutation Services (Form 6 Ferfar)",
+        "titleAlt": "गाव नमुना ६ फेरफार नोंदवही",
+        "description": "End-to-end processing and tracking of inheritance, sale conveyance, gift deed, and partition transfers sanctioned by Circle Officers.",
+        "badge": "Real-time Tracking",
+        "actionText": "Track Ferfar Status"
+      },
+      "verification": {
+        "title": "Document Authenticity & Verification",
+        "titleAlt": "दस्त नोंदणी व सत्यता पडताळणी",
+        "description": "AI-driven dual-pane verification workstation enabling inspectors to compare physical archival scans directly with digital extractions.",
+        "badge": "Inspector Workstation",
+        "actionText": "Launch Workstation"
+      },
+      "gisMaps": {
+        "title": "Cadastral GIS & Tippan Survey Maps",
+        "titleAlt": "भूमापन नकाशा व टिप्पण रेखांकन",
+        "description": "High-resolution spatial parcel overlays, Gat survey boundaries, village road alignments, and drone aerial orthophoto maps.",
+        "badge": "Spatial GIS Mapping",
+        "actionText": "Explore Cadastral GIS"
+      },
+      "titleSearch": {
+        "title": "Online Title Search & Encumbrance Check",
+        "titleAlt": "ऑनलाइन दस्त शोध व बोजा पडताळणी",
+        "description": "Check bank mortgages, court litigation injunctions, and prior legal liabilities registered against any survey or Gat number.",
+        "badge": "Public Title Search",
+        "actionText": "Search Document Registry"
+      }
+    }
   },
   "resources": {
     "title": "Resources & Documentation",
@@ -142,7 +298,26 @@
     "title": "News & Official Notices",
     "subtitle": "Stay updated with the latest revenue circulars, mutation guidelines, and system announcements.",
     "badge": "Official Gazette",
-    "readMore": "Read Full Gazette Notice"
+    "readMore": "Read Full Gazette Notice",
+    "tabs": {
+      "all": "All Updates",
+      "gazette": "Gazette",
+      "circular": "Circular",
+      "order": "Order",
+      "project": "Project"
+    },
+    "notices": {
+      "notice1Title": "Implementation of AI-Driven Cadastral Validation for All Historical 7/12 Satbara Extracts",
+      "notice1Dept": "Revenue & Forest Department, Mantralaya",
+      "notice2Title": "Time-Bound 15-Day Clearance Directive for Online Form 6 Mutation (Ferfar) Applications",
+      "notice2Dept": "Office of the Settlement Commissioner & Director of Land Records",
+      "notice3Title": "Notification on Mandatory Digital Watermark & QR Code Verification on Certified Extracts",
+      "notice3Dept": "State Land Governance & E-Mahabhumi Mission",
+      "notice4Title": "SVAMITVA Drone Cadastral Mapping Phase-IV Commencement across 12,000 Rural Gaothans",
+      "notice4Dept": "Survey of India & Ministry of Panchayati Raj Joint Cell",
+      "notice5Title": "Standard Operating Procedures for Online Land Classification Change and Non-Agricultural (NA) Permissions",
+      "notice5Dept": "Urban Development & Revenue Joint Secretariat"
+    }
   },
   "gallery": {
     "title": "Photo & Media Gallery",
@@ -156,7 +331,31 @@
     "q2": "What should I do if a discrepancy is detected?",
     "a2": "You will receive an alert on your Citizen Portal. Simply review the flagged variance and submit your clarification or supporting tax receipt directly to the officer.",
     "q3": "Are digitized extracts legally valid?",
-    "a3": "Yes. Approved records carry digital government signatures and QR codes compliant with the Information Technology Act."
+    "a3": "Yes. Approved records carry digital government signatures and QR codes compliant with the Information Technology Act.",
+    "categories": {
+      "landRecords": "Land Records",
+      "aiTechnology": "AI Technology",
+      "verification": "Verification",
+      "mutation": "Mutation",
+      "security": "Security",
+      "grievance": "Grievance"
+    },
+    "items": {
+      "q1": "What is Village Form 7/12 (Satbara Extract) and how is it used?",
+      "a1": "Village Form 7/12 (Satbara Extract) is an official register of rights maintained by the state revenue department. Form 7 contains ownership details, survey and Gat numbers, and land tenancy classifications. Form 12 details crops grown, irrigated areas, and potkharaba (uncultivable land). It is the legal title proof required for land sales, bank agricultural loans, and succession claims.",
+      "q2": "How does the AI OCR Pipeline recognize aged, handwritten Marathi records?",
+      "a2": "ILRDVS employs a specialized multi-stage pipeline: (1) OpenCV adaptive binarization, noise removal, and deskewing; (2) EasyOCR deep convolutional neural networks with language models trained on cursive Devanagari script; and (3) Spatial Named Entity Recognition (NER) that automatically categorizes fields into owner names, survey numbers, khata numbers, and plot areas with confidence scoring.",
+      "q3": "How do I verify the authenticity of a land document on this portal?",
+      "a3": "Citizens and legal practitioners can upload any scanned land document or PDF into the Document Registry or Verification Workstation. The system calculates an SHA-256 cryptographic fingerprint, compares extracted attributes with our verified repository, and validates whether the document holds an active Circle Officer sanction seal.",
+      "q4": "What is Village Form 6 Mutation (Ferfar) and what is the clearance SLA?",
+      "a4": "Form 6 Mutation Register (फेरफार नोंदवही) records any legal title alteration—such as sale deed conveyance, inheritance (वारस नोंद), partition, or mortgage release. Under the Right to Services (RTS) Act, uncontested mutations are mandated to be inspected and certified within 15 working days by the local Talathi and Circle Officer.",
+      "q5": "What is the difference between rural 7/12 Satbara and urban Property Cards?",
+      "a5": "Village Form 7/12 applies to revenue villages and agricultural land governed under the Maharashtra Land Revenue Code 1966. Urban Property Cards (नगर भूमापन मिळकत पत्रिका) are maintained by the City Survey Office (CTSO) for non-agricultural plots and municipal areas, referencing City Survey (CTS) numbers and carpet plot dimensions.",
+      "q6": "How does ILRDVS prevent fraudulent double registration and title disputes?",
+      "a6": "Every parcel is indexed by unique geospatial Survey/Khasra/Khata tuples. When a new deed or mutation is ingested, the system executes real-time duplicate similarity checks across active records, immediately flagging any overlapping deed allocations, seller impersonation, or unreleased bank encumbrances.",
+      "q7": "How do I submit a grievance if my land record contains typographical errors?",
+      "a7": "You can register an online grievance through our Citizen Corner or Contact section below. Revenue inspectors review original physical settlement records, correct typographical spelling errors in the Verification Workstation, and issue an updated, certified digital extract with complete audit logging."
+    }
   },
   "citizenCorner": {
     "title": "Citizen Corner",
@@ -180,7 +379,30 @@
     "formPhone": "Mobile Number",
     "formSubject": "Subject",
     "formMessage": "Message / Grievance Details",
-    "sendButton": "Submit Inquiry"
+    "sendButton": "Submit Inquiry",
+    "directorateTitle": "State Land Records Directorate",
+    "directorateDesc": "Centralized monitoring authority for computerized revenue records, survey maps, and dispute settlement.",
+    "headOfficeLabel": "Head Office:",
+    "headOfficeValue": "Office of the Settlement Commissioner & Director of Land Records, Central Building, Agarkar Nagar, Pune – 411001, Maharashtra, India.",
+    "tollFreeLabel": "Toll-Free Helpline:",
+    "tollFreeValue": "1800-120-8040 (24x7 Citizen Support)",
+    "emailLabel": "Official Email:",
+    "workingHoursLabel": "Administrative Working Hours:",
+    "workingHoursValue": "Monday to Friday, 09:30 AM – 06:00 PM IST",
+    "rtsGuaranteeTitle": "Right to Services (RTS) Guarantee:",
+    "rtsGuaranteeDesc": "Under the Maharashtra Right to Public Services Act, certified digital extracts are delivered in real time, and grievance petitions are addressed within 7 working days.",
+    "ticketSuccessTitle": "Grievance Ticket Registered!",
+    "ticketSuccessDesc": "Your inquiry has been logged under reference ID ILRD-GRV-{{ref}}. A revenue nodal officer will contact you within 48 hours.",
+    "formNamePlaceholder": "e.g. Ramesh Shankar Patil",
+    "formEmailPlaceholder": "citizen@example.com",
+    "formPhonePlaceholder": "+91 98765 43210",
+    "formMessagePlaceholder": "Provide your Survey Number, Village, and a detailed description of the issue...",
+    "categories": {
+      "satbaraDiscrepancy": "7/12 Extract Discrepancy",
+      "mutationPending": "Mutation Pending (Ferfar)",
+      "surveyBoundary": "Survey Boundary Dispute",
+      "technicalIssue": "Portal Technical Support"
+    }
   },
   "auth": {
     "citizenLoginTitle": "Citizen Sign In",
@@ -664,7 +886,42 @@
     "registrationComplete": "Registration Complete",
     "goToCitizenPortal": "Go to Citizen Portal",
     "viewApplicationStatus": "View Application Status Tracker"
+  },
+  "districts": {
+    "pune": "Pune",
+    "mumbaiCity": "Mumbai City",
+    "mumbaiSuburban": "Mumbai Suburban",
+    "nagpur": "Nagpur",
+    "nashik": "Nashik",
+    "thane": "Thane",
+    "chhatrapatiSambhajinagar": "Chhatrapati Sambhajinagar",
+    "kolhapur": "Kolhapur",
+    "solapur": "Solapur",
+    "amravati": "Amravati",
+    "nanded": "Nanded",
+    "satara": "Satara"
+  },
+  "footer": {
+    "portalSubtitle": "Government of India & Maharashtra Revenue Initiative",
+    "missionText": "An intelligent, AI-powered Cadastral Digitization & Validation System designed to safeguard, digitize, and authenticate historical land titles under the National Land Records Modernization Programme (NLRMP).",
+    "sslEncrypted": "256-Bit SSL Encrypted",
+    "compliance": "W3C & STQC Compliant",
+    "cadastralServices": "Cadastral Services",
+    "urbanPropertyCards": "Urban Property Cards (CTS)",
+    "inspectorWorkstation": "Inspector Workstation",
+    "relatedPortals": "Related Portals",
+    "mahabhumiPortal": "MahaBhumi Portal",
+    "digitalIndia": "Digital India",
+    "nationalPortal": "National Portal of India",
+    "nic": "National Informatics Centre",
+    "policiesAndHelp": "Policies & Help",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy & Data Policy",
+    "hyperlinkPolicy": "Hyperlink & Copyright Policy",
+    "grievancePolicy": "Citizen Grievance Policy",
+    "copyrightText": "© {{year}} Intelligent Land Record Digitization & Validation System (ILRDVS). All Rights Reserved.",
+    "builtWith": "Built with precision for",
+    "sih": "Smart India Hackathon (SIH)",
+    "digitalGovernance": "Digital Land Governance"
   }
 }
-
-

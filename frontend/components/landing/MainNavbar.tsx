@@ -15,25 +15,30 @@ import {
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
-const DISTRICTS_LIST = [
-  'Pune',
-  'Mumbai City',
-  'Mumbai Suburban',
-  'Nagpur',
-  'Nashik',
-  'Thane',
-  'Chhatrapati Sambhajinagar',
-  'Kolhapur',
-  'Solapur',
-  'Amravati',
-  'Nanded',
-  'Satara',
+interface DistrictOption {
+  key: string;
+  defaultName: string;
+}
+
+const DISTRICTS_LIST: DistrictOption[] = [
+  { key: 'pune', defaultName: 'Pune' },
+  { key: 'mumbaiCity', defaultName: 'Mumbai City' },
+  { key: 'mumbaiSuburban', defaultName: 'Mumbai Suburban' },
+  { key: 'nagpur', defaultName: 'Nagpur' },
+  { key: 'nashik', defaultName: 'Nashik' },
+  { key: 'thane', defaultName: 'Thane' },
+  { key: 'chhatrapatiSambhajinagar', defaultName: 'Chhatrapati Sambhajinagar' },
+  { key: 'kolhapur', defaultName: 'Kolhapur' },
+  { key: 'solapur', defaultName: 'Solapur' },
+  { key: 'amravati', defaultName: 'Amravati' },
+  { key: 'nanded', defaultName: 'Nanded' },
+  { key: 'satara', defaultName: 'Satara' },
 ];
 
 export const MainNavbar: React.FC = () => {
   const { t } = useTranslation();
   const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('Select District');
+  const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'small'>('normal');
 
   return (
@@ -43,7 +48,9 @@ export const MainNavbar: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           {/* Government Identification */}
           <div className="flex items-center gap-2.5 font-medium text-slate-300">
-            <span className="text-amber-400 font-bold tracking-wider">🏛️ भारत सरकार</span>
+            <span className="text-amber-400 font-bold tracking-wider">
+              {t('common.govtOfIndiaEmblem', '🏛️ भारत सरकार')}
+            </span>
             <span className="text-slate-600">|</span>
             <span className="hidden sm:inline text-slate-300 font-semibold uppercase">
               {t('common.govtOfIndia')}
@@ -62,7 +69,7 @@ export const MainNavbar: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
-              <span className="text-slate-400">Text:</span>
+              <span className="text-slate-400">{t('navbar.textLabel', 'Text:')}</span>
               <button
                 onClick={() => setFontSize('small')}
                 className={`hover:text-white px-1 font-bold ${fontSize === 'small' ? 'text-amber-400' : ''}`}
@@ -108,7 +115,11 @@ export const MainNavbar: React.FC = () => {
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400" />
             <span>
-              {t('navbar.districts')} ({selectedDistrict === 'Select District' ? t('common.all') : selectedDistrict})
+              {t('navbar.districts')} (
+              {selectedDistrictKey
+                ? t(`districts.${selectedDistrictKey}`, selectedDistrictKey)
+                : t('common.all')}
+              )
             </span>
             <ChevronDown
               className={`w-3 h-3 text-slate-400 transition-transform ${
@@ -119,24 +130,36 @@ export const MainNavbar: React.FC = () => {
 
           {districtDropdownOpen && (
             <div className="absolute top-full left-0 mt-1.5 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 max-h-64 overflow-y-auto">
-              <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 border-b border-slate-800">
-                Maharashtra Districts
+              <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 border-b border-slate-800 flex items-center justify-between">
+                <span>{t('navbar.maharashtraDistricts', 'Maharashtra Districts')}</span>
+                {selectedDistrictKey && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDistrictKey(null);
+                      setDistrictDropdownOpen(false);
+                    }}
+                    className="text-[9px] text-amber-400 hover:underline"
+                  >
+                    {t('common.all')}
+                  </button>
+                )}
               </div>
               {DISTRICTS_LIST.map((dist) => (
                 <button
-                  key={dist}
+                  key={dist.key}
                   type="button"
                   onClick={() => {
-                    setSelectedDistrict(dist);
+                    setSelectedDistrictKey(dist.key);
                     setDistrictDropdownOpen(false);
                   }}
                   className={`text-left px-2 py-1.5 rounded hover:bg-blue-900/60 transition-colors truncate text-[11px] ${
-                    selectedDistrict === dist
+                    selectedDistrictKey === dist.key
                       ? 'bg-blue-950 text-amber-300 font-bold'
                       : 'text-slate-300'
                   }`}
                 >
-                  {dist}
+                  {t(`districts.${dist.key}`, dist.defaultName)}
                 </button>
               ))}
             </div>
@@ -149,7 +172,7 @@ export const MainNavbar: React.FC = () => {
           <Link
             href="#faq"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
-            title="Right to Information Act portal"
+            title={t('navbar.rtiTitle', 'Right to Information Act portal')}
           >
             <Shield className="w-3.5 h-3.5 text-blue-400" />
             <span>{t('navbar.rti')}</span>
@@ -159,7 +182,7 @@ export const MainNavbar: React.FC = () => {
           <Link
             href="#services"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
-            title="Right to Services Act"
+            title={t('navbar.rtsTitle', 'Right to Services Act')}
           >
             <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>{t('navbar.rts')}</span>
@@ -169,7 +192,7 @@ export const MainNavbar: React.FC = () => {
           <Link
             href="#services"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
-            title="Ease of Doing Business"
+            title={t('navbar.eodbTitle', 'Ease of Doing Business')}
           >
             <Briefcase className="w-3.5 h-3.5 text-purple-400" />
             <span>{t('navbar.eodb')}</span>
