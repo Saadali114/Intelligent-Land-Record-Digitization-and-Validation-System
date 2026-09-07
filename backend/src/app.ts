@@ -27,17 +27,33 @@ export const createApp = (): Express => {
   app.use(express.urlencoded({ extended: true, limit: '20mb' }));
   app.use(cookieParser());
 
-  // Static directory for uploaded document files
+  // Static directory for uploaded document files with CORS headers
   const uploadDir = path.join(process.cwd(), 'uploads');
-  app.use('/uploads', express.static(uploadDir));
+  const assetsDir = path.join(process.cwd(), 'assets');
+  app.use(
+    '/uploads',
+    (_req, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      next();
+    },
+    express.static(uploadDir)
+  );
 
-  // Fallback for missing archival scan files (e.g. ephemeral storage restarts or cross-env DB records)
+  // Fallback for missing archival scan files (e.g. Render ephemeral container restarts or cross-env testing)
   app.get('/uploads/:fileName', (req: Request, res: Response) => {
     const { fileName } = req.params;
     const ext = path.extname(fileName).toLowerCase();
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
     // Check if it's an image file
     if (['.png', '.jpg', '.jpeg', '.webp', '.tiff'].includes(ext)) {
+      const permanentFallback = path.join(assetsDir, 'fallback-cadastral-scan.jpg');
+      if (fs.existsSync(permanentFallback)) {
+        res.setHeader('Content-Type', 'image/jpeg');
+        return res.sendFile(permanentFallback);
+      }
       const sampleImg = path.join(uploadDir, 'file-1788689957557-414671962.png');
       if (fs.existsSync(sampleImg)) {
         res.setHeader('Content-Type', ext === '.png' ? 'image/png' : 'image/jpeg');
