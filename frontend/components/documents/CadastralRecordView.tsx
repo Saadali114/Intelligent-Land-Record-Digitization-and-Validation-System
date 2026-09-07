@@ -309,7 +309,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
       )}
 
       {doc.landRecord ? (
-        <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+        <div className="space-y-3">
           {/* OCR Quality Warning Banner */}
           {doc.metadata?.aiExtraction?.anomalies?.some((a: string) => a.includes('Low OCR')) && (
             <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-xs flex items-start gap-2">

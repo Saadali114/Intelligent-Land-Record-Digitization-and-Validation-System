@@ -57,24 +57,10 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
       isOpen={isOpen}
       onClose={handleClose}
       title={t('officerDocuments.inspectionModalTitle', { defaultValue: 'Cadastral Dual-Pane Inspection' })}
-      description={`Record ID: ${doc.documentId} • ${doc.originalName}`}
+      description={`${doc.documentId} • ${doc.language || 'Marathi'} (${doc.fileType}) • Uploaded ${formatDate(doc.uploadedAt)}`}
       maxWidth="6xl"
     >
       <div className="space-y-4">
-        {/* Subtle Top Metadata Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs">
-          <div className="flex items-center gap-3 text-slate-600 font-medium">
-            <span><strong className="text-slate-800">Format:</strong> {doc.fileType} ({formatFileSize(doc.fileSize)})</span>
-            <span className="text-slate-300">•</span>
-            <span><strong className="text-slate-800">Script:</strong> {doc.language}</span>
-            <span className="text-slate-300">•</span>
-            <span><strong className="text-slate-800">Uploaded:</strong> {formatDate(doc.uploadedAt)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge status={doc.processingStatus} />
-          </div>
-        </div>
-
         {/* Main Dual-Pane Section: Scan Viewer (Left) + Digital Record (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <DocumentScanViewer
