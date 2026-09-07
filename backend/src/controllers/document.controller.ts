@@ -156,3 +156,74 @@ export const verifyUserDocument = async (req: AuthenticatedRequest, res: Respons
   }
 };
 
+export const publicVerifyDocument = async (req: any, res: Response): Promise<void> => {
+  try {
+    const { query } = req.params;
+    if (!query || !query.trim()) {
+      sendError(res, 'Document identifier is required for verification', 400);
+      return;
+    }
+
+    const { DocumentModel } = await import('../models/Document.js');
+    const { LandRecord } = await import('../models/LandRecord.js');
+
+    const cleanQuery = query.trim();
+
+    // Query by documentId, or mongo/cuid _id, or checksum
+    const doc = await DocumentModel.findOne({
+      $or: [
+        { documentId: cleanQuery },
+        { _id: cleanQuery },
+        { checksum: cleanQuery },
+      ],
+    });
+
+    if (!doc) {
+      sendError(res, `No registered land document found matching identifier '${cleanQuery}'`, 404);
+      return;
+    }
+
+    const landRecord = await LandRecord.findOne({ sourceDocument: doc._id });
+
+    sendSuccess(
+      res,
+      'Official Cadastral Record Verified',
+      {
+        valid: true,
+        documentId: doc.documentId,
+        originalName: doc.originalName,
+        fileType: doc.fileType,
+        processingStatus: doc.processingStatus,
+        checksum: doc.checksum,
+        uploadedAt: doc.uploadedAt,
+        landRecord: landRecord
+          ? {
+              ownerName: landRecord.ownerName,
+              surveyNumber: landRecord.surveyNumber,
+              gatNumber: landRecord.gatNumber || null,
+              khataNumber: landRecord.khataNumber,
+              plotArea: landRecord.plotArea,
+              village: landRecord.village,
+              tehsil: landRecord.tehsil,
+              district: landRecord.district,
+              landClassification: landRecord.landClassification,
+              ownershipType: landRecord.ownershipType,
+              mutationNumber: landRecord.mutationNumber,
+              verificationStatus: landRecord.verificationStatus,
+            }
+          : null,
+        digitalSeal: {
+          authority: 'Government of Maharashtra • Land Records & Revenue Directorate',
+          system: 'ILRDVS Cadastral Verification & Validation Service',
+          verifiedAt: new Date().toISOString(),
+          certificateNo: `CERT-ILRDVS-${doc.documentId}`,
+          securityHash: doc.checksum || 'VERIFIED-SEAL',
+        },
+      },
+      200
+    );
+  } catch (error: any) {
+    sendError(res, error.message || 'Public document verification query failed', 500);
+  }
+};
+

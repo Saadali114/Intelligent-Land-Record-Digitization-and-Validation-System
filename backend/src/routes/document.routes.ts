@@ -6,6 +6,7 @@ import {
   deleteDocument,
   extractDocument,
   verifyUserDocument,
+  publicVerifyDocument,
   upload,
 } from '../controllers/document.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
@@ -14,6 +15,9 @@ import { validateQuery } from '../middleware/validation.middleware.js';
 import { DocumentQuerySchema } from '../schemas/document.schema.js';
 
 const router = Router();
+
+// Public verification endpoint: Accessible by QR scan without login
+router.get('/public-verify/:query', publicVerifyDocument);
 
 router.use(authenticate);
 

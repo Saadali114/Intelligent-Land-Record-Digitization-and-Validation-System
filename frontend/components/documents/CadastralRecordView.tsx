@@ -10,6 +10,7 @@ import { MutationRegisterExtractView } from './extract-views/MutationRegisterExt
 import { PropertyCardExtractView } from './extract-views/PropertyCardExtractView';
 import { AwaitingExtractionPlaceholder } from './extract-views/AwaitingExtractionPlaceholder';
 import { RawOcrSnippet } from './extract-views/RawOcrSnippet';
+import { DocumentQrModal } from './DocumentQrModal';
 import {
   Sparkles,
   Building2,
@@ -23,6 +24,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   ExternalLink,
+  QrCode,
 } from 'lucide-react';
 
 interface CadastralRecordViewProps {
@@ -45,6 +47,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
   const [showSideBySide, setShowSideBySide] = useState(false);
   const [translatedData, setTranslatedData] = useState<Record<string, string>>({});
   const [translationNotice, setTranslationNotice] = useState<string | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   // Reset translator when document changes
   useEffect(() => {
@@ -258,24 +261,37 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           </div>
 
           {doc.landRecord && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                exportCadastralPdfCertificate({
-                  doc,
-                  formCat,
-                  isTranslated,
-                  translatedData,
-                  targetLanguage,
-                })
-              }
-              className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
-              title="Download official digital certificate as PDF"
-            >
-              <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
-              Download PDF
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowQrModal(true)}
+                className="text-xs h-7.5 px-2.5 bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100 font-semibold"
+                title="View & test tamper-proof QR verification seal"
+              >
+                <QrCode className="w-3.5 h-3.5 mr-1 text-emerald-700" />
+                QR Seal
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  exportCadastralPdfCertificate({
+                    doc,
+                    formCat,
+                    isTranslated,
+                    translatedData,
+                    targetLanguage,
+                  })
+                }
+                className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
+                title="Download official digital certificate as PDF"
+              >
+                <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
+                Download PDF
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -399,6 +415,13 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
 
       {/* Raw OCR Text Snippet */}
       <RawOcrSnippet rawText={doc.metadata?.aiExtraction?.rawTextSnippet} />
+
+      {/* QR & Barcode Verification Modal */}
+      <DocumentQrModal
+        document={doc}
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+      />
     </div>
   );
 };

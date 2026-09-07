@@ -86,6 +86,7 @@ export interface DocumentRecord {
   uploadedBy: User | string;
   processingStatus: DocumentProcessingStatus;
   uploadedAt?: string;
+  checksum?: string;
   isReuploaded?: boolean;
   reuploadedFromId?: string;
   metadata?: Record<string, any>;

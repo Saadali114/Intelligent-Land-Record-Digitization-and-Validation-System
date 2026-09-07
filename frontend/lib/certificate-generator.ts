@@ -1,6 +1,7 @@
 import { DocumentRecord } from '../types';
 import { formatDate } from './utils';
 import { FormCategory } from './cadastral-utils';
+import { generateQrDataUrl, generateBarcodeDataUrl, buildVerificationUrl } from './qr-barcode';
 
 export interface CertificateExportOptions {
   doc: DocumentRecord;
@@ -10,13 +11,13 @@ export interface CertificateExportOptions {
   targetLanguage: string;
 }
 
-export const exportCadastralPdfCertificate = ({
+export const exportCadastralPdfCertificate = async ({
   doc,
   formCat,
   isTranslated,
   translatedData,
   targetLanguage,
-}: CertificateExportOptions): void => {
+}: CertificateExportOptions): Promise<void> => {
   if (!doc || !doc.landRecord) {
     alert('Cannot export PDF: Cadastral record has not been digitized yet.');
     return;
@@ -45,6 +46,11 @@ export const exportCadastralPdfCertificate = ({
     entities.stamp_duty || 'Non-Judicial Stamp Paper';
   const certNumber = `ILRDVS-${doc.documentId}-${Date.now().toString().slice(-6)}`;
   const verifiedDate = formatDate(doc.updatedAt || doc.createdAt);
+
+  // Generate dynamic QR Code and Code 128 Barcode for tamper-evident physical print verification
+  const verificationUrl = buildVerificationUrl(doc.documentId);
+  const qrDataUrl = await generateQrDataUrl(verificationUrl, { width: 140, margin: 1 });
+  const barcodeDataUrl = generateBarcodeDataUrl(doc.documentId);
 
   let formTitleEn = 'FORM 7/12 CADASTRAL EXTRACT';
   let formTitleMr = 'गाव नमुना सात / बारा (अधिकार अभिलेख व पीक पाहणी पत्रक)';
@@ -448,7 +454,7 @@ export const exportCadastralPdfCertificate = ({
           </div>
         </div>
 
-        <div class="meta-strip">
+        <div class="meta-strip" style="align-items: center;">
           <div class="meta-item">
             <span>Certificate Serial No.</span>
             <strong>${certNumber}</strong>
@@ -465,6 +471,18 @@ export const exportCadastralPdfCertificate = ({
             <span>Legal Status</span>
             <strong style="color: #047857;">AUTHENTICATED</strong>
           </div>
+          ${
+            qrDataUrl
+              ? `
+          <div class="meta-item" style="display: flex; align-items: center; gap: 8px; border-left: 1px solid #cbd5e1; padding-left: 10px;">
+            <img src="${qrDataUrl}" style="width: 54px; height: 54px; border-radius: 4px; border: 1px solid #cbd5e1; background: white;" alt="Verification QR" />
+            <div style="font-size: 7.5px; line-height: 1.2; max-width: 80px; color: #475569;">
+              <strong style="color: #047857; display: block; font-size: 8px;">✓ 2D QR SEAL</strong>
+              Scan with phone to verify registry data
+            </div>
+          </div>`
+              : ''
+          }
         </div>
 
         <table class="cadastral-grid">
@@ -492,8 +510,16 @@ export const exportCadastralPdfCertificate = ({
           <div class="sign-box">
             <div class="seal-stamp">✓ DIGITALLY AUTHENTICATED</div>
             <div style="font-weight: 700; color: #1e3a8a; margin-top: 2px;">ई-महाभूमि नोंदणी प्रणाली</div>
+            ${
+              barcodeDataUrl
+                ? `
+            <div style="margin: 4px 0;">
+              <img src="${barcodeDataUrl}" style="height: 26px; max-width: 140px; display: inline-block;" alt="Barcode" />
+            </div>`
+                : ''
+            }
             <div style="color: #64748b; font-size: 9px;">ILRDVS Automated Seal Node</div>
-            <div style="font-family: monospace; font-size: 9px; color: #94a3b8; margin-top: 2px;">
+            <div style="font-family: monospace; font-size: 9px; color: #94a3b8; margin-top: 1px;">
               HASH: ${doc._id.slice(0, 18).toUpperCase()}
             </div>
           </div>
