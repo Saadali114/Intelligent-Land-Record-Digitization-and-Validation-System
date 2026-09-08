@@ -21,6 +21,8 @@ import {
 import { PortalLayout } from '../../components/portal/PortalLayout';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { formatDocType, formatStatus } from '../../lib/translationHelpers';
 import { citizenService } from '../../services/citizen.service';
 import {
   CitizenApplication,
@@ -240,52 +242,64 @@ export default function CitizenDashboardPage() {
           </div>
 
           <div className="divide-y divide-slate-100 overflow-x-auto">
-            {applications.slice(0, 4).map((app) => (
-              <div
-                key={app.id}
-                className="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900">
-                      {app.id}
-                    </span>
-                    <Badge status={app.status}>
-                      {app.status === 'UNDER_REVIEW'
-                        ? t('common.underReview')
-                        : app.status === 'VERIFIED'
-                        ? t('common.verified')
-                        : app.status === 'ACTION_REQUIRED'
-                        ? t('common.actionRequired')
-                        : app.status === 'PROCESSING'
-                        ? t('common.processing')
-                        : app.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  <div className="text-xs font-semibold text-slate-800">
-                    {app.documentType} &bull; {t('common.surveyNumber')}: <span className="font-mono">{app.surveyNumber}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500">
-                    <span>{t('common.village')}: {app.village}</span>
-                    <span>&bull;</span>
-                    <span>{app.submittedDate}</span>
-                    <span>&bull;</span>
-                    <span className="text-emerald-700 font-medium">
-                      OCR: {Math.round(app.ocrConfidence * 100)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 sm:self-center">
-                  <Link href={`/portal/applications/${app.id}`}>
-                    <Button variant="outline" size="sm" className="text-xs gap-1">
-                      <span>{t('common.track')}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
-                </div>
+            {applications.length === 0 ? (
+              <div className="p-6">
+                <EmptyState
+                  title={t('dashboard.noRecentApplications', {
+                    defaultValue: 'No recent land record applications found',
+                  })}
+                  description={t('dashboard.noRecentApplicationsDesc', {
+                    defaultValue: 'Upload your 7/12 extract, 8A, or Ferfar document to start digitization.',
+                  })}
+                  action={
+                    <Link href="/portal/upload">
+                      <Button variant="primary" size="sm">
+                        {t('dashboard.uploadCta')}
+                      </Button>
+                    </Link>
+                  }
+                />
               </div>
-            ))}
+            ) : (
+              applications.slice(0, 4).map((app) => (
+                <div
+                  key={app.id}
+                  className="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-slate-900">
+                        {app.id}
+                      </span>
+                      <Badge status={app.status}>
+                        {formatStatus(app.status, t)}
+                      </Badge>
+                    </div>
+                    <div className="text-xs font-semibold text-slate-800">
+                      {formatDocType(app.documentType, t)} &bull; {t('common.surveyNumber')}: <span className="font-mono">{app.surveyNumber}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                      <span>{t('common.village')}: {app.village}</span>
+                      <span>&bull;</span>
+                      <span>{app.submittedDate}</span>
+                      <span>&bull;</span>
+                      <span className="text-emerald-700 font-medium">
+                        OCR: {Math.round(app.ocrConfidence * 100)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:self-center">
+                    <Link href={`/portal/applications/${app.id}`}>
+                      <Button variant="outline" size="sm" className="text-xs gap-1">
+                        <span>{t('common.track')}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -309,34 +323,36 @@ export default function CitizenDashboardPage() {
             </div>
 
             <div className="mt-3 space-y-3">
-              {landRecords.slice(0, 2).map((record) => (
-                <div
-                  key={record.id}
-                  className="p-3 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-slate-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">
-                      {t('common.surveyNumber')} {record.surveyNumber}
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                      {record.recordStatus === 'VERIFIED'
-                        ? t('common.verified')
-                        : record.recordStatus === 'UNDER_REVIEW'
-                        ? t('common.underReview')
-                        : record.status || 'VERIFIED'}
-                    </span>
+              {landRecords.length === 0 ? (
+                <p className="text-xs text-slate-500 text-center py-4">
+                  {t('dashboard.noParcelsFound', { defaultValue: 'No verified land parcels found' })}
+                </p>
+              ) : (
+                landRecords.slice(0, 2).map((record) => (
+                  <div
+                    key={record.id}
+                    className="p-3 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900">
+                        {t('common.surveyNumber')} {record.surveyNumber}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                        {formatStatus(record.recordStatus || record.status || 'VERIFIED', t)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-1">
+                      {record.village}, {t('common.taluka')} {record.taluka}
+                    </p>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
+                      <span>{t('common.landArea')}: {record.area}</span>
+                      <span className="font-mono text-[10px] text-slate-400">
+                        ULPIN: {record.ulpin ? record.ulpin.slice(0, 10) + '...' : record.id}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-600 mt-1">
-                    {record.village}, {t('common.taluka')} {record.taluka}
-                  </p>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
-                    <span>{t('common.landArea')}: {record.area}</span>
-                    <span className="font-mono text-[10px] text-slate-400">
-                      ULPIN: {record.ulpin ? record.ulpin.slice(0, 10) + '...' : record.id}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 

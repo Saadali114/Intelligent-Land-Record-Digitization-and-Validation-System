@@ -77,10 +77,14 @@ export const Badge: React.FC<BadgeProps> = ({
       />
       {children
         ? typeof children === 'string'
-          ? t(`status.${children.toLowerCase()}`, { defaultValue: children })
+          ? t(`roles.${children.toLowerCase()}`, {
+              defaultValue: t(`status.${children.toLowerCase()}`, { defaultValue: children }),
+            })
           : children
         : status
-        ? t(`status.${status.toLowerCase()}`, { defaultValue: status.replace(/_/g, ' ') })
+        ? t(`roles.${status.toLowerCase()}`, {
+            defaultValue: t(`status.${status.toLowerCase()}`, { defaultValue: status.replace(/_/g, ' ') }),
+          })
         : null}
     </span>
   );

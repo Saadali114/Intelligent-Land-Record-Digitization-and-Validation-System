@@ -60,7 +60,9 @@
     "newBadge": "NEW",
     "downloadPdf": "Download PDF",
     "alreadyRegistered": "Already registered? Sign in →",
-    "portalGovNotice": "ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal"
+    "portalGovNotice": "ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal",
+    "helpdeskHours": "Mon–Sat: 9:00 AM to 6:00 PM",
+    "signOutCitizen": "Sign out of Citizen Portal"
   },
   "navbar": {
     "districts": "Districts",
@@ -486,7 +488,29 @@
     "recentSubtitle": "Track status of your uploaded records and AI verification pipeline",
     "myVerifiedParcels": "My Verified Land Parcels",
     "aiTransparencyTitle": "How ILRDVS AI Works for You",
-    "aiTransparencyDesc": "When you upload a Marathi/English land document, our vision model automatically transcribes survey numbers, khata details, and owner names. You review every extracted field before official Talathi verification."
+    "aiTransparencyDesc": "When you upload a Marathi/English land document, our vision model automatically transcribes survey numbers, khata details, and owner names. You review every extracted field before official Talathi verification.",
+    "acrossRoles": "Across 4 roles",
+    "scannedFiles": "Scanned files",
+    "digitizedEntries": "Digitized entries",
+    "awaitingReview": "Awaiting review",
+    "officiallyCertified": "Officially certified",
+    "issuesFound": "Issues found",
+    "inPipeline": "In pipeline",
+    "failedFetchMetrics": "Failed to fetch dashboard metrics",
+    "dbConnectionError": "Database connection error",
+    "recordsLabel": "Records",
+    "usersLabel": "Users",
+    "actor": "Actor",
+    "systemGuest": "System / Guest",
+    "monthlyIngestionRate": "Monthly Ingestion Rate",
+    "flaggedForDiscrepancy": "Flagged for Discrepancy",
+    "districtDistribution": "District Distribution",
+    "approved": "Approved",
+    "pendingReview": "Pending Review",
+    "noRecentApplications": "No recent land record applications found",
+    "noRecentApplicationsDesc": "Upload your 7/12 extract, 8A, or Ferfar document to start digitization.",
+    "noParcelsFound": "No verified land parcels found",
+    "noParcelsDesc": "Once your land records are verified, they will appear here."
   },
   "upload": {
     "wizardTitle": "Land Document Digitization Wizard",
@@ -592,7 +616,8 @@
     "markAllRead": "Mark All as Read",
     "all": "All",
     "unread": "Unread",
-    "empty": "No notifications in this view."
+    "empty": "No notifications in this view.",
+    "viewNotifications": "View notifications"
   },
   "profile": {
     "title": "Profile & Communication Preferences",
@@ -632,7 +657,15 @@
     "corrected": "Corrected",
     "failed": "Failed",
     "disputed": "Disputed",
-    "completed": "Completed"
+    "completed": "Completed",
+    "citizen": "Citizen",
+    "ocr_completed": "OCR Completed",
+    "analysis_completed": "Analysis Completed",
+    "pending_officer_review": "Pending Officer Review",
+    "pending_verification": "Pending Verification",
+    "pending_approval": "Pending Approval",
+    "processed": "Processed",
+    "flagged": "Flagged for Discrepancy"
   },
   "officerDashboard": {
     "title": "Operations & Validation Dashboard",
@@ -1065,5 +1098,47 @@
     "nameMinLength": "Name must be at least 2 characters",
     "departmentRequired": "Department is required",
     "districtRequired": "District is required"
+  },
+  "pagination": {
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "records": "records",
+    "previous": "Previous",
+    "pageOf": "Page {{current}} of {{total}}",
+    "next": "Next"
+  },
+  "emptyState": {
+    "title": "No records found",
+    "description": "There are no items to display at this moment."
+  },
+  "roles": {
+    "admin": "Admin",
+    "officer": "Officer",
+    "verifier": "Verifier",
+    "viewer": "Viewer",
+    "citizen": "Citizen"
+  },
+  "documentTypes": {
+    "doc_7_12": "7/12 Extract",
+    "doc_8a": "8A Extract",
+    "ferfar": "Ferfar (Mutation)",
+    "sale_deed": "Sale Deed",
+    "other": "Other Document"
+  },
+  "sidebar": {
+    "officerWorklist": "Officer Worklist (AI Review)",
+    "cadastralReferenceRecords": "Cadastral Reference Records",
+    "nationalLandRegistry": "National Land Registry",
+    "navigation": "Navigation",
+    "systemOnline": "System Online",
+    "systemOnlineDesc": "AI & Multilingual OCR pipeline ready for Phase 2 integration.",
+    "verifyLandRecord": "Verify Land Record",
+    "aiVerifications": "AI Verifications"
+  },
+  "topbar": {
+    "officerPortalTitle": "{{portalName}} Officer Portal",
+    "officerPortal": "Officer Portal",
+    "toggleNavigation": "Toggle Navigation"
   }
 }

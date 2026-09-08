@@ -54,13 +54,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
-      label: 'Officer Worklist (AI Review)',
+      label: t('sidebar.officerWorklist', { defaultValue: 'Officer Worklist (AI Review)' }),
       href: '/officer/verifications',
       icon: CheckCheck,
       roles: ['ADMIN', 'OFFICER'],
     },
     {
-      label: 'Cadastral Reference Records',
+      label: t('sidebar.cadastralReferenceRecords', { defaultValue: 'Cadastral Reference Records' }),
       href: '/admin/land-records',
       icon: FileSpreadsheet,
       roles: ['ADMIN'],
@@ -93,12 +93,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white tracking-wide">ILRD PORTAL</h2>
-              <p className="text-[10px] text-slate-400">National Land Registry</p>
+              <p className="text-[10px] text-slate-400">
+                {t('sidebar.nationalLandRegistry', { defaultValue: 'National Land Registry' })}
+              </p>
             </div>
           </div>
           {onClose && (
             <button
               onClick={onClose}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className="md:hidden p-1.5 rounded-lg text-slate-400 hover:bg-slate-800"
             >
               <X className="w-5 h-5" />
@@ -107,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Navigation
+          {t('sidebar.navigation', { defaultValue: 'Navigation' })}
         </div>
 
         <nav className="space-y-1.5">
@@ -139,10 +142,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <div className="px-3 py-3 rounded-lg bg-slate-800/80 border border-slate-700/60 text-[11px] text-slate-400">
         <div className="font-semibold text-slate-200 mb-1 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          System Online
+          {t('sidebar.systemOnline', { defaultValue: 'System Online' })}
         </div>
         <p className="text-[10px] leading-relaxed">
-          AI & Multilingual OCR pipeline ready for Phase 2 integration.
+          {t('sidebar.systemOnlineDesc', {
+            defaultValue: 'AI & Multilingual OCR pipeline ready for Phase 2 integration.',
+          })}
         </p>
       </div>
     </div>

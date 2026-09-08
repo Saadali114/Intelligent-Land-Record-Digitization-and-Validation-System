@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../..
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { formatDate, formatDateTime } from '../../lib/utils';
+import { formatRole, formatStatus, formatDistrict } from '../../lib/translationHelpers';
 import {
   Users,
   Files,
@@ -84,8 +85,13 @@ export default function DashboardPage() {
           <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
             <div>
-              <h4 className="text-sm font-semibold">Failed to fetch dashboard metrics</h4>
-              <p className="text-xs text-rose-700">{(error as Error)?.message || 'Database connection error'}</p>
+              <h4 className="text-sm font-semibold">
+                {t('dashboard.failedFetchMetrics', { defaultValue: 'Failed to fetch dashboard metrics' })}
+              </h4>
+              <p className="text-xs text-rose-700">
+                {(error as Error)?.message ||
+                  t('dashboard.dbConnectionError', { defaultValue: 'Database connection error' })}
+              </p>
             </div>
           </div>
         )}
@@ -97,84 +103,112 @@ export default function DashboardPage() {
               {/* Total Users */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.totalUsers', { defaultValue: 'Total Users' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('officerDashboard.totalUsers', { defaultValue: 'Total Users' })}
+                  </span>
                   <Users className="w-4 h-4 text-blue-900" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-slate-900">{stats.overview.totalUsers}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Across 4 roles</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {t('dashboard.acrossRoles', { defaultValue: 'Across 4 roles' })}
+                  </div>
                 </div>
               </div>
 
               {/* Total Documents */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.registeredDocuments', { defaultValue: 'Documents' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('officerDashboard.registeredDocuments', { defaultValue: 'Documents' })}
+                  </span>
                   <Files className="w-4 h-4 text-slate-700" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-slate-900">{stats.overview.totalDocuments}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Scanned files</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {t('dashboard.scannedFiles', { defaultValue: 'Scanned files' })}
+                  </div>
                 </div>
               </div>
 
               {/* Total Land Records */}
               <div className="gov-card p-4 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-500">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.activeLandRecords', { defaultValue: 'Land Records' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('officerDashboard.activeLandRecords', { defaultValue: 'Land Records' })}
+                  </span>
                   <FileSpreadsheet className="w-4 h-4 text-indigo-700" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-slate-900">{stats.overview.totalLandRecords}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Digitized entries</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {t('dashboard.digitizedEntries', { defaultValue: 'Digitized entries' })}
+                  </div>
                 </div>
               </div>
 
               {/* Pending Verification */}
               <div className="gov-card p-4 flex flex-col justify-between bg-amber-50/40 border-amber-200">
                 <div className="flex items-center justify-between text-amber-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('officerDashboard.pendingVerification', { defaultValue: 'Pending' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('officerDashboard.pendingVerification', { defaultValue: 'Pending' })}
+                  </span>
                   <Clock className="w-4 h-4 text-amber-600" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-amber-900">{stats.overview.pendingVerification}</div>
-                  <div className="text-[10px] text-amber-700 mt-0.5">Awaiting review</div>
+                  <div className="text-[10px] text-amber-700 mt-0.5">
+                    {t('dashboard.awaitingReview', { defaultValue: 'Awaiting review' })}
+                  </div>
                 </div>
               </div>
 
               {/* Verified Records */}
               <div className="gov-card p-4 flex flex-col justify-between bg-emerald-50/40 border-emerald-200">
                 <div className="flex items-center justify-between text-emerald-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.verified', { defaultValue: 'Verified' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('status.verified', { defaultValue: 'Verified' })}
+                  </span>
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-emerald-900">{stats.overview.verifiedRecords}</div>
-                  <div className="text-[10px] text-emerald-700 mt-0.5">Officially certified</div>
+                  <div className="text-[10px] text-emerald-700 mt-0.5">
+                    {t('dashboard.officiallyCertified', { defaultValue: 'Officially certified' })}
+                  </div>
                 </div>
               </div>
 
               {/* Rejected Records */}
               <div className="gov-card p-4 flex flex-col justify-between bg-rose-50/40 border-rose-200">
                 <div className="flex items-center justify-between text-rose-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.rejected', { defaultValue: 'Rejected' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('status.rejected', { defaultValue: 'Rejected' })}
+                  </span>
                   <XCircle className="w-4 h-4 text-rose-600" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-rose-900">{stats.overview.rejectedRecords}</div>
-                  <div className="text-[10px] text-rose-700 mt-0.5">Issues found</div>
+                  <div className="text-[10px] text-rose-700 mt-0.5">
+                    {t('dashboard.issuesFound', { defaultValue: 'Issues found' })}
+                  </div>
                 </div>
               </div>
 
               {/* Documents Processing */}
               <div className="gov-card p-4 flex flex-col justify-between bg-sky-50/40 border-sky-200">
                 <div className="flex items-center justify-between text-sky-900">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('status.processing', { defaultValue: 'Processing' })}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">
+                    {t('status.processing', { defaultValue: 'Processing' })}
+                  </span>
                   <Cpu className="w-4 h-4 text-sky-600 animate-pulse" />
                 </div>
                 <div className="mt-2">
                   <div className="text-2xl font-black text-sky-900">{stats.overview.documentsProcessing}</div>
-                  <div className="text-[10px] text-sky-700 mt-0.5">In pipeline</div>
+                  <div className="text-[10px] text-sky-700 mt-0.5">
+                    {t('dashboard.inPipeline', { defaultValue: 'In pipeline' })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -204,7 +238,7 @@ export default function DashboardPage() {
                         innerRadius={60}
                         outerRadius={90}
                         paddingAngle={4}
-                        label={({ name, percent }) => `${t('status.' + String(name).toLowerCase(), { defaultValue: String(name) })} (${(percent * 100).toFixed(0)}%)`}
+                        label={({ name, percent }) => `${formatStatus(String(name), t)} (${(percent * 100).toFixed(0)}%)`}
                       >
                         {stats.charts.documentStatus.map((entry, index) => (
                           <Cell
@@ -213,7 +247,7 @@ export default function DashboardPage() {
                           />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip formatter={(value: any, name: any) => [value, formatStatus(String(name), t)]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -234,10 +268,18 @@ export default function DashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.charts.verificationStatus}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="status" fontSize={11} stroke="#64748b" />
+                      <XAxis dataKey="status" fontSize={11} stroke="#64748b" tickFormatter={(val) => formatStatus(val, t)} />
                       <YAxis allowDecimals={false} fontSize={11} stroke="#64748b" />
-                      <Tooltip />
-                      <Bar dataKey="count" name="Records" fill="#1e3a8a" radius={[6, 6, 0, 0]} />
+                      <Tooltip
+                        formatter={(value: any) => [value, t('dashboard.recordsLabel', { defaultValue: 'Records' })]}
+                        labelFormatter={(label: any) => formatStatus(label, t)}
+                      />
+                      <Bar
+                        dataKey="count"
+                        name={t('dashboard.recordsLabel', { defaultValue: 'Records' })}
+                        fill="#1e3a8a"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -263,9 +305,24 @@ export default function DashboardPage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                       <XAxis type="number" allowDecimals={false} fontSize={11} stroke="#64748b" />
-                      <YAxis dataKey="district" type="category" fontSize={11} stroke="#64748b" width={80} />
-                      <Tooltip />
-                      <Bar dataKey="count" name="Records" fill="#059669" radius={[0, 6, 6, 0]} />
+                      <YAxis
+                        dataKey="district"
+                        type="category"
+                        fontSize={11}
+                        stroke="#64748b"
+                        width={80}
+                        tickFormatter={(val) => formatDistrict(val, t)}
+                      />
+                      <Tooltip
+                        formatter={(value: any) => [value, t('dashboard.recordsLabel', { defaultValue: 'Records' })]}
+                        labelFormatter={(label: any) => formatDistrict(label, t)}
+                      />
+                      <Bar
+                        dataKey="count"
+                        name={t('dashboard.recordsLabel', { defaultValue: 'Records' })}
+                        fill="#059669"
+                        radius={[0, 6, 6, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -286,10 +343,18 @@ export default function DashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.charts.userRoles}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="role" fontSize={11} stroke="#64748b" />
+                      <XAxis dataKey="role" fontSize={11} stroke="#64748b" tickFormatter={(val) => formatRole(val, t)} />
                       <YAxis allowDecimals={false} fontSize={11} stroke="#64748b" />
-                      <Tooltip />
-                      <Bar dataKey="count" name="Users" fill="#d97706" radius={[6, 6, 0, 0]} />
+                      <Tooltip
+                        formatter={(value: any) => [value, t('dashboard.usersLabel', { defaultValue: 'Users' })]}
+                        labelFormatter={(label: any) => formatRole(label, t)}
+                      />
+                      <Bar
+                        dataKey="count"
+                        name={t('dashboard.usersLabel', { defaultValue: 'Users' })}
+                        fill="#d97706"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -326,7 +391,9 @@ export default function DashboardPage() {
                         </div>
                         <p className="text-xs text-slate-600 mt-1">{log.description}</p>
                         <div className="text-[10px] text-slate-400 mt-0.5">
-                          Actor: {log.userId?.name || 'System / Guest'} ({log.userId?.role || 'N/A'}) &bull; IP: {log.ipAddress}
+                          {t('dashboard.actor', { defaultValue: 'Actor' })}:{' '}
+                          {log.userId?.name || t('dashboard.systemGuest', { defaultValue: 'System / Guest' })}{' '}
+                          ({log.userId?.role ? formatRole(log.userId.role, t) : 'N/A'}) &bull; IP: {log.ipAddress}
                         </div>
                       </div>
                       <div className="text-right text-[11px] text-slate-500 whitespace-nowrap">
