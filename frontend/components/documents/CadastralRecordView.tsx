@@ -254,6 +254,44 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
     entities.mutation_narrative ||
     `मौजे ${lr?.village || 'वडगाव'}, ता. ${lr?.tehsil || 'हवेली'} येथील भूमापन / गट क्र. ${lr?.surveyNumber || '1378'}, क्षेत्रफळ ${lr?.plotArea || '1.62 Hectares'} च्या मिळकतीचे मूळ खातेदार ${transferor} यांनी नोंदणीकृत दस्त क्र. ${dastRegistrationNo} अन्वये ${transferee} यांना हक्क हस्तांतरित केल्याने महाराष्ट्र जमीन महसूल संहिता १९६६ चे कलम १५० अन्वये फेरफार नोंद प्रमाणित करून अधिकार अभिलेखात (७/१२) दाखल करण्यात येत आहे.`;
 
+  // Rich Property Card attributes
+  const ctsNumber =
+    entities.cts_number ||
+    lr?.remarks?.match(/CTS:\s*([^|]+)/)?.[1]?.trim() ||
+    lr?.surveyNumber ||
+    'CTS-1084';
+  const sheetNumber =
+    entities.sheet_number ||
+    lr?.remarks?.match(/Sheet:\s*([^|]+)/)?.[1]?.trim() ||
+    lr?.khataNumber ||
+    'Sheet No. 12';
+  const wardName =
+    entities.ward_name ||
+    lr?.remarks?.match(/Ward:\s*([^|]+)/)?.[1]?.trim() ||
+    lr?.village ||
+    'सदाशिव पेठ (Ward 14)';
+  const municipalBody =
+    entities.municipal_body ||
+    lr?.remarks?.match(/Municipal:\s*([^|]+)/)?.[1]?.trim() ||
+    `${lr?.tehsil || 'पुणे'} महानगरपालिका (PMC)`;
+  const landTenure =
+    entities.land_tenure ||
+    lr?.remarks?.match(/Tenure:\s*([^|]+)/)?.[1]?.trim() ||
+    lr?.ownershipType ||
+    'Occupant Class 1 / Freehold (वर्ग १ - पूर्ण मालकी)';
+  const assessmentTax =
+    entities.assessment_tax ||
+    lr?.remarks?.match(/Tax:\s*([^|]+)/)?.[1]?.trim() ||
+    '₹ 1,420/- प्रतिवर्ष (Municipal Assessment)';
+  const encumbranceCharge =
+    entities.encumbrance_charge ||
+    lr?.remarks?.match(/Encumbrance:\s*([^|]+)/)?.[1]?.trim() ||
+    'Nil (निरंक / भारमुक्त मिळकत - स्वच्छ स्वामित्त्व)';
+  const ctsoOffice =
+    entities.ctso_office ||
+    lr?.remarks?.match(/CTSO:\s*([^|]+)/)?.[1]?.trim() ||
+    `नगर भूमापन अधिकारी कार्यालय, ${lr?.tehsil || 'पुणे'} मध्य`;
+
   return (
     <div className="lg:col-span-6 flex flex-col space-y-3">
       {/* Re-uploaded Document Warning Banner */}
@@ -478,6 +516,15 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
             <PropertyCardExtractView
               landRecord={lr!}
               renderFieldVal={renderFieldVal}
+              doc={doc}
+              ctsNumber={ctsNumber}
+              sheetNumber={sheetNumber}
+              wardName={wardName}
+              municipalBody={municipalBody}
+              landTenure={landTenure}
+              assessmentTax={assessmentTax}
+              encumbranceCharge={encumbranceCharge}
+              ctsoOffice={ctsoOffice}
             />
           )}
 

@@ -127,13 +127,38 @@ export const getDocumentFormCategory = (doc: DocumentRecord | null): FormCategor
     return 'MUTATION_REGISTER';
   }
 
-  // 4. Property Card check
+  // 4. Property Card check (Urban Cadastral / नगर भूमापन मिळकत पत्रिका / City Survey / Akhiv Patrika)
   if (
     ft.includes('property') ||
     ft.includes('milkat') ||
     ft.includes('cts') ||
+    ft.includes('akhiv') ||
+    ft.includes('आखीव') ||
+    ft.includes('मिळकत') ||
+    dt.includes('property') ||
+    dt.includes('milkat') ||
+    dt.includes('cts') ||
+    dt.includes('akhiv') ||
+    metaDt.includes('property') ||
+    metaDt.includes('milkat') ||
+    metaDt.includes('cts') ||
+    metaDt.includes('akhiv') ||
+    on.includes('property') ||
     on.includes('card') ||
-    on.includes('milkat')
+    on.includes('milkat') ||
+    on.includes('cts') ||
+    on.includes('akhiv') ||
+    on.includes('आखीव') ||
+    on.includes('पत्रिका') ||
+    on.includes('मिळकत') ||
+    remarks.includes('property card') ||
+    remarks.includes('मिळकत पत्रिका') ||
+    remarks.includes('city survey') ||
+    remarks.includes('cts') ||
+    rawSnippet.includes('नगर भूमापन') ||
+    rawSnippet.includes('मिळकत पत्रिका') ||
+    rawSnippet.includes('city survey') ||
+    sn.includes('cts')
   ) {
     return 'PROPERTY_CARD';
   }

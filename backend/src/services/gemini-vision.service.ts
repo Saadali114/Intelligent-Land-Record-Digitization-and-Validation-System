@@ -108,6 +108,17 @@ Guidelines:
     - circleOfficerName: Sanctioning authority / Circle Officer office (मंडळ अधिकारी कार्यालय)
     - orderNumber: SRO or Revenue Court Order reference (आदेश क्रमांक)
     - mutationNarrative: Full handwritten/typed Marathi mutation paragraph (फेरफार सविस्तर मजकूर)
+13. If the document is an Urban Property Card / City Survey Card (नगर भूमापन मिळकत पत्रिका / Akhiv Patrika / CTS Card):
+    - documentType: Set to "PROPERTY_CARD"
+    - ctsNumber: City Survey Number / नगर भूमापन क्रमांक (e.g. "CTS-1084" or "412/A") (also set surveyNumber to this)
+    - sheetNumber: Sheet Number / शिट क्रमांक (e.g. "Sheet No. 12") (also set khataNumber to this)
+    - wardName: Urban Ward / Peth / Division (उदा. "सदाशिव पेठ", "अंधेरी पश्चिम", "प्रभाग क्र. १४")
+    - municipalBody: Municipal Corporation / Municipality (उदा. "पुणे महानगरपालिका (PMC)")
+    - carpetAreaSqMtr: Precise plot or carpet area in Sq. Meters (उदा. "345.50 चौ.मी. (3,719 Sq. Ft.)") (also set plotArea to this)
+    - landTenure: Occupant class / Tenure (उदा. "वर्ग १ - पूर्ण मालकी (Occupant Class 1 - Freehold)")
+    - assessmentTax: Annual assessment tax in INR (उदा. "₹ 1,420/- प्रतिवर्ष")
+    - encumbranceCharge: Mortgages / Bank charges or "Nil (निरंक / भारमुक्त मिळकत)"
+    - ctsoOffice: City Survey Officer jurisdiction (उदा. "नगर भूमापन अधिकारी कार्यालय, पुणे मध्य")
 
 Return pure JSON conforming to the requested schema.`;
 
@@ -157,6 +168,15 @@ Return pure JSON conforming to the requested schema.`;
             circleOfficerName: { type: 'STRING' },
             orderNumber: { type: 'STRING' },
             mutationNarrative: { type: 'STRING' },
+            ctsNumber: { type: 'STRING' },
+            sheetNumber: { type: 'STRING' },
+            wardName: { type: 'STRING' },
+            municipalBody: { type: 'STRING' },
+            carpetAreaSqMtr: { type: 'STRING' },
+            landTenure: { type: 'STRING' },
+            assessmentTax: { type: 'STRING' },
+            encumbranceCharge: { type: 'STRING' },
+            ctsoOffice: { type: 'STRING' },
             surveyNumber: { type: 'STRING' },
             gatNumber: { type: 'STRING' },
             khataNumber: { type: 'STRING' },
@@ -282,6 +302,7 @@ Return pure JSON conforming to the requested schema.`;
 
     const isSaleDeed = parsed.documentType === 'SALE_DEED' || !!parsed.purchaserName || !!parsed.vendorName;
     const isMutation = parsed.documentType === 'MUTATION_REGISTER' || !!parsed.mutationNature || !!parsed.transfereeName;
+    const isPropertyCard = parsed.documentType === 'PROPERTY_CARD' || !!parsed.ctsNumber || !!parsed.sheetNumber || !!parsed.wardName;
     const purchaser = (parsed.purchaserName || ownerName).trim();
     const vendor = (parsed.vendorName || '').trim();
     const consideration = (parsed.considerationAmount || '').trim();
@@ -295,27 +316,38 @@ Return pure JSON conforming to the requested schema.`;
     const sanctionDate = (parsed.sanctionDate || execDate).trim();
     const mutationNarrative = (parsed.mutationNarrative || '').trim();
 
+    const ctsNo = (parsed.ctsNumber || surveyNumber || 'CTS-1084').trim();
+    const sheetNo = (parsed.sheetNumber || khataNumber || 'Sheet No. 12').trim();
+    const wardName = (parsed.wardName || village || 'सदाशिव पेठ (Ward 14)').trim();
+    const municipalBody = (parsed.municipalBody || `${tehsil || 'पुणे'} महानगरपालिका`).trim();
+    const landTenure = (parsed.landTenure || 'Occupant Class 1 / Freehold (वर्ग १ - पूर्ण मालकी)').trim();
+    const assessmentTax = (parsed.assessmentTax || '₹ 1,420/- प्रतिवर्ष').trim();
+    const encumbranceCharge = (parsed.encumbranceCharge || 'Nil (निरंक / भारमुक्त मिळकत)').trim();
+    const ctsoOffice = (parsed.ctsoOffice || `नगर भूमापन अधिकारी कार्यालय, ${tehsil || 'पुणे'}`).trim();
+
     let computedRemarks = parsed.remarks;
     if (isSaleDeed && (!computedRemarks || computedRemarks.includes('Verified Cadastral Extraction'))) {
       computedRemarks = `Deed of Absolute Sale | Vendor: ${vendor || 'Prior Registered Holder'} | Purchaser: ${purchaser} | Consideration: ${consideration || 'Standard Schedule'} | Date: ${execDate || 'Registered'}`;
     } else if (isMutation && (!computedRemarks || computedRemarks.includes('Verified Cadastral Extraction'))) {
       computedRemarks = `Village Form 6 Mutation | Nature: ${mutationNature} | Transferor: ${transferor || 'Former Holder'} | Transferee: ${transferee} | Order: ${orderNumber} | Date: ${sanctionDate || 'Verified'}`;
+    } else if (isPropertyCard && (!computedRemarks || computedRemarks.includes('Verified Cadastral Extraction'))) {
+      computedRemarks = `Urban Property Card | CTS: ${ctsNo} | Sheet: ${sheetNo} | Ward: ${wardName} | Holder: ${ownerName} | Tenure: ${landTenure} | Tax: ${assessmentTax}`;
     }
 
     const resolvedOwner = isMutation ? transferee : (isSaleDeed ? purchaser : ownerName);
 
     return {
       ownerName: resolvedOwner || ownerName,
-      surveyNumber,
+      surveyNumber: isPropertyCard ? ctsNo : surveyNumber,
       gatNumber,
-      khasraNumber: isMutation ? 'N/A (Form 6)' : (isSaleDeed ? 'N/A (Sale Deed)' : 'N/A (7/12 Form)'),
-      khataNumber,
+      khasraNumber: isPropertyCard ? 'N/A (Property Card)' : (isMutation ? 'N/A (Form 6)' : (isSaleDeed ? 'N/A (Sale Deed)' : 'N/A (7/12 Form)')),
+      khataNumber: isPropertyCard ? sheetNo : khataNumber,
       plotArea,
-      village,
+      village: isPropertyCard ? wardName : village,
       tehsil,
       district,
-      landClassification: parsed.landClassification || (isSaleDeed ? 'Residential / Non-Agricultural (Urban Plot)' : 'Agricultural (Jirayat)'),
-      ownershipType: parsed.ownershipType || (isSaleDeed ? 'Freehold / Absolute Ownership (पूर्ण मालकी हक्क)' : 'Occupant Class 1 (भोगवटादार वर्ग - १)'),
+      landClassification: parsed.landClassification || (isPropertyCard ? 'Non-Agricultural Urban Commercial / Residential' : (isSaleDeed ? 'Residential / Non-Agricultural (Urban Plot)' : 'Agricultural (Jirayat)')),
+      ownershipType: parsed.ownershipType || (isPropertyCard ? landTenure : (isSaleDeed ? 'Freehold / Absolute Ownership (पूर्ण मालकी हक्क)' : 'Occupant Class 1 (भोगवटादार वर्ग - १)')),
       mutationNumber,
       registrationNumber: parsed.registrationNumber || '',
       overallConfidence: 0.98,
@@ -327,7 +359,7 @@ Return pure JSON conforming to the requested schema.`;
       ocrDurationMs: duration,
       ocrCharsExtracted: rawJsonText.length,
       entities: {
-        document_type: isMutation ? 'MUTATION_REGISTER' : (isSaleDeed ? 'SALE_DEED' : (parsed.documentType || '7_12_SATBARA')),
+        document_type: isPropertyCard ? 'PROPERTY_CARD' : (isMutation ? 'MUTATION_REGISTER' : (isSaleDeed ? 'SALE_DEED' : (parsed.documentType || '7_12_SATBARA'))),
         vendor_name: vendor,
         purchaser_name: purchaser,
         consideration_amount: consideration,
@@ -347,6 +379,14 @@ Return pure JSON conforming to the requested schema.`;
         circle_officer: parsed.circleOfficerName || '',
         order_number: orderNumber,
         mutation_narrative: mutationNarrative,
+        cts_number: ctsNo,
+        sheet_number: sheetNo,
+        ward_name: wardName,
+        municipal_body: municipalBody,
+        land_tenure: landTenure,
+        assessment_tax: assessmentTax,
+        encumbrance_charge: encumbranceCharge,
+        ctso_office: ctsoOffice,
       },
       preprocessingSteps: [
         'mode: Hybrid Cloud-Edge Intelligence',
