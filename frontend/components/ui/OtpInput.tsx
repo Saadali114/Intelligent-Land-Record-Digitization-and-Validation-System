@@ -193,7 +193,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
               onChange={(e) => handleChange(idx, e.target.value)}
               onKeyDown={(e) => handleKeyDown(idx, e)}
               onPaste={handlePaste}
-              aria-label={`Digit ${idx + 1}`}
+              aria-label={t('auth.digitAriaLabel', { number: idx + 1, defaultValue: `Digit ${idx + 1}` })}
               className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-lg border border-slate-300 bg-white text-slate-900 shadow-xs transition-all focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
             />
           ))}

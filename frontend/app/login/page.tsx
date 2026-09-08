@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { LoginSchema, LoginFormData } from '../../schemas/auth.schema';
+import { getLoginSchema, LoginFormData } from '../../schemas/auth.schema';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -18,13 +18,15 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const loginSchema = useMemo(() => getLoginSchema(t), [t]);
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'admin@landrecord.gov.in',
       password: 'Password123!',
@@ -37,7 +39,12 @@ export default function LoginPage() {
       setErrorMessage(null);
       await login(data);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Invalid credentials. Please verify your email and password.');
+      setErrorMessage(
+        err.message ||
+          t('auth.invalidCredentials', {
+            defaultValue: 'Invalid credentials. Please verify your email and password.',
+          })
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +87,7 @@ export default function LoginPage() {
             <Input
               label={t('auth.usernameLabel')}
               type="email"
-              placeholder="officer@landrecord.gov.in"
+              placeholder={t('auth.usernamePlaceholder', { defaultValue: 'officer@landrecord.gov.in' })}
               error={errors.email?.message}
               {...register('email')}
             />
@@ -104,7 +111,7 @@ export default function LoginPage() {
           <div className="mt-6 pt-6 border-t border-slate-100">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-3">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Demo Account Quick Fill:</span>
+              <span>{t('auth.demoQuickFill', { defaultValue: 'Demo Account Quick Fill:' })}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -112,36 +119,37 @@ export default function LoginPage() {
                 onClick={() => handleQuickFill('admin@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
-                <div className="font-bold text-slate-900">Admin</div>
-                <div className="text-slate-500 text-[10px]">Super administrator</div>
+                <div className="font-bold text-slate-900">{t('auth.roles.admin', { defaultValue: 'Admin' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.adminDesc', { defaultValue: 'Super administrator' })}</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill('officer1@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
-                <div className="font-bold text-slate-900">Officer</div>
-                <div className="text-slate-500 text-[10px]">Upload & record entry</div>
+                <div className="font-bold text-slate-900">{t('auth.roles.officer', { defaultValue: 'Officer' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.officerDesc', { defaultValue: 'Upload & record entry' })}</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill('verifier1@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
-                <div className="font-bold text-slate-900">Verifier</div>
-                <div className="text-slate-500 text-[10px]">Review & approval</div>
+                <div className="font-bold text-slate-900">{t('auth.roles.verifier', { defaultValue: 'Verifier' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.verifierDesc', { defaultValue: 'Review & approval' })}</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill('viewer1@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
-                <div className="font-bold text-slate-900">Viewer</div>
-                <div className="text-slate-500 text-[10px]">Read-only access</div>
+                <div className="font-bold text-slate-900">{t('auth.roles.viewer', { defaultValue: 'Viewer' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.viewerDesc', { defaultValue: 'Read-only access' })}</div>
               </button>
             </div>
             <p className="text-[10px] text-slate-400 mt-2 text-center">
-              Standard seed password: <span className="font-mono text-slate-600 font-semibold">Password123!</span>
+              {t('auth.seedPasswordPrefix', { defaultValue: 'Standard seed password:' })}{' '}
+              <span className="font-mono text-slate-600 font-semibold">Password123!</span>
             </p>
           </div>
         </div>

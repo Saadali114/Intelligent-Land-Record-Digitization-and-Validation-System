@@ -52,7 +52,7 @@ export default function OfficerRegisterPage() {
   // Password strength calculation
   const passwordStrength = useMemo(() => {
     const pwd = formData.password;
-    if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-200' };
+    if (!pwd) return { score: 0, label: t('registration.strengthNone', { defaultValue: 'None' }), color: 'bg-slate-200' };
 
     let score = 0;
     if (pwd.length >= 8) score += 1;
@@ -60,11 +60,11 @@ export default function OfficerRegisterPage() {
     if (/\d/.test(pwd)) score += 1;
     if (/[@$!%*?&]/.test(pwd)) score += 1;
 
-    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500' };
-    if (score === 2) return { score: 2, label: 'Fair', color: 'bg-amber-500' };
-    if (score === 3) return { score: 3, label: 'Good', color: 'bg-blue-600' };
-    return { score: 4, label: 'Strong', color: 'bg-emerald-600' };
-  }, [formData.password]);
+    if (score <= 1) return { score: 1, label: t('registration.strengthWeak', { defaultValue: 'Weak' }), color: 'bg-rose-500' };
+    if (score === 2) return { score: 2, label: t('registration.strengthFair', { defaultValue: 'Fair' }), color: 'bg-amber-500' };
+    if (score === 3) return { score: 3, label: t('registration.strengthGood', { defaultValue: 'Good' }), color: 'bg-blue-600' };
+    return { score: 4, label: t('registration.strengthStrong', { defaultValue: 'Strong' }), color: 'bg-emerald-600' };
+  }, [formData.password, t]);
 
   const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
@@ -262,7 +262,7 @@ export default function OfficerRegisterPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Smt. Priya Ramesh Deshmukh"
+                    placeholder={t('registration.officerNamePlaceholder', { defaultValue: 'e.g. Smt. Priya Ramesh Deshmukh' })}
                     className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   />
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -279,7 +279,7 @@ export default function OfficerRegisterPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="priya.deshmukh@maharashtra.gov.in"
+                    placeholder={t('registration.officerEmailPlaceholder', { defaultValue: 'priya.deshmukh@maharashtra.gov.in' })}
                     className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -301,7 +301,7 @@ export default function OfficerRegisterPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
-                      placeholder="9822012345"
+                      placeholder={t('registration.phonePlaceholder', { defaultValue: '9822012345' })}
                       maxLength={10}
                       className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors font-mono"
                     />
@@ -352,7 +352,7 @@ export default function OfficerRegisterPage() {
                       required
                       value={formData.employeeId}
                       onChange={(e) => setFormData({ ...formData, employeeId: e.target.value.toUpperCase() })}
-                      placeholder="e.g. REV-MH-2026-489"
+                      placeholder={t('registration.employeeIdPlaceholder', { defaultValue: 'e.g. REV-MH-2026-489' })}
                       className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors font-mono"
                     />
                     <Briefcase className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -368,11 +368,11 @@ export default function OfficerRegisterPage() {
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
                     className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   >
-                    <option value="Revenue Officer">Revenue Officer</option>
-                    <option value="Circle Officer">Circle Officer</option>
-                    <option value="Talathi (Village Accountant)">Talathi (Village Accountant)</option>
-                    <option value="Tahsildar / Naib Tahsildar">Tahsildar / Naib Tahsildar</option>
-                    <option value="Inspector of Land Records">Inspector of Land Records</option>
+                    <option value="Revenue Officer">{t('registration.designations.revenueOfficer', { defaultValue: 'Revenue Officer' })}</option>
+                    <option value="Circle Officer">{t('registration.designations.circleOfficer', { defaultValue: 'Circle Officer' })}</option>
+                    <option value="Talathi (Village Accountant)">{t('registration.designations.talathi', { defaultValue: 'Talathi (Village Accountant)' })}</option>
+                    <option value="Tahsildar / Naib Tahsildar">{t('registration.designations.tahsildar', { defaultValue: 'Tahsildar / Naib Tahsildar' })}</option>
+                    <option value="Inspector of Land Records">{t('registration.designations.inspectorOfLandRecords', { defaultValue: 'Inspector of Land Records' })}</option>
                   </select>
                 </div>
               </div>
@@ -387,7 +387,7 @@ export default function OfficerRegisterPage() {
                     required
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    placeholder="Revenue & Forest Department"
+                    placeholder={t('registration.departmentPlaceholder', { defaultValue: 'Revenue & Forest Department' })}
                     className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   />
                 </div>
@@ -401,7 +401,7 @@ export default function OfficerRegisterPage() {
                     required
                     value={formData.office}
                     onChange={(e) => setFormData({ ...formData, office: e.target.value })}
-                    placeholder="e.g. Haveli Tahsil Office, Pune"
+                    placeholder={t('registration.officePlaceholder', { defaultValue: 'e.g. Haveli Tahsil Office, Pune' })}
                     className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   />
                 </div>
@@ -418,14 +418,14 @@ export default function OfficerRegisterPage() {
                       onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                       className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                     >
-                      <option value="Pune">Pune</option>
-                      <option value="Nashik">Nashik</option>
-                      <option value="Nagpur">Nagpur</option>
-                      <option value="Mumbai City">Mumbai City</option>
-                      <option value="Mumbai Suburban">Mumbai Suburban</option>
-                      <option value="Thane">Thane</option>
-                      <option value="Aurangabad">Chhatrapati Sambhajinagar (Aurangabad)</option>
-                      <option value="Kolhapur">Kolhapur</option>
+                      <option value="Pune">{t('districts.pune', { defaultValue: 'Pune' })}</option>
+                      <option value="Nashik">{t('districts.nashik', { defaultValue: 'Nashik' })}</option>
+                      <option value="Nagpur">{t('districts.nagpur', { defaultValue: 'Nagpur' })}</option>
+                      <option value="Mumbai City">{t('districts.mumbaiCity', { defaultValue: 'Mumbai City' })}</option>
+                      <option value="Mumbai Suburban">{t('districts.mumbaiSuburban', { defaultValue: 'Mumbai Suburban' })}</option>
+                      <option value="Thane">{t('districts.thane', { defaultValue: 'Thane' })}</option>
+                      <option value="Aurangabad">{t('districts.chhatrapatiSambhajinagar', { defaultValue: 'Chhatrapati Sambhajinagar (Aurangabad)' })}</option>
+                      <option value="Kolhapur">{t('districts.kolhapur', { defaultValue: 'Kolhapur' })}</option>
                     </select>
                     <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                   </div>
@@ -439,7 +439,7 @@ export default function OfficerRegisterPage() {
                     type="text"
                     value={formData.taluka}
                     onChange={(e) => setFormData({ ...formData, taluka: e.target.value })}
-                    placeholder="e.g. Haveli"
+                    placeholder={t('registration.talukaPlaceholder', { defaultValue: 'e.g. Haveli' })}
                     className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-800 focus:border-amber-800 transition-colors"
                   />
                 </div>
@@ -613,7 +613,9 @@ export default function OfficerRegisterPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>

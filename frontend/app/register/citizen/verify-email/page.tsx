@@ -36,7 +36,11 @@ function CitizenVerifyEmailContent() {
 
   const handleVerifyOtp = async (otpCode: string) => {
     if (!email) {
-      setErrorMessage('Missing registration email address. Please restart registration.');
+      setErrorMessage(
+        t('registration.missingRegistrationEmail', {
+          defaultValue: 'Missing registration email address. Please restart registration.',
+        })
+      );
       return;
     }
     setIsVerifying(true);
@@ -70,7 +74,12 @@ function CitizenVerifyEmailContent() {
 
       setIsSuccess(true);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Verification failed. Please check the code and try again.');
+      setErrorMessage(
+        err.message ||
+          t('registration.verificationFailed', {
+            defaultValue: 'Verification failed. Please check the code and try again.',
+          })
+      );
     } finally {
       setIsVerifying(false);
     }
@@ -82,7 +91,12 @@ function CitizenVerifyEmailContent() {
     try {
       await authService.resendEmailOtp(email, 'REGISTRATION');
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to resend verification code.');
+      setErrorMessage(
+        err.message ||
+          t('registration.resendCodeFailed', {
+            defaultValue: 'Failed to resend verification code.',
+          })
+      );
       throw err;
     }
   };
@@ -171,7 +185,9 @@ function CitizenVerifyEmailContent() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>

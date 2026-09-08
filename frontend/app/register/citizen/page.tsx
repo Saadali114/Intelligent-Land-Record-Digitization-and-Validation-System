@@ -43,7 +43,7 @@ export default function CitizenRegisterPage() {
   // Password strength calculation
   const passwordStrength = useMemo(() => {
     const pwd = formData.password;
-    if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-200' };
+    if (!pwd) return { score: 0, label: t('registration.strengthNone', { defaultValue: 'None' }), color: 'bg-slate-200' };
 
     let score = 0;
     if (pwd.length >= 8) score += 1;
@@ -51,11 +51,11 @@ export default function CitizenRegisterPage() {
     if (/\d/.test(pwd)) score += 1;
     if (/[@$!%*?&]/.test(pwd)) score += 1;
 
-    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500' };
-    if (score === 2) return { score: 2, label: 'Fair', color: 'bg-amber-500' };
-    if (score === 3) return { score: 3, label: 'Good', color: 'bg-blue-600' };
-    return { score: 4, label: 'Strong', color: 'bg-emerald-600' };
-  }, [formData.password]);
+    if (score <= 1) return { score: 1, label: t('registration.strengthWeak', { defaultValue: 'Weak' }), color: 'bg-rose-500' };
+    if (score === 2) return { score: 2, label: t('registration.strengthFair', { defaultValue: 'Fair' }), color: 'bg-amber-500' };
+    if (score === 3) return { score: 3, label: t('registration.strengthGood', { defaultValue: 'Good' }), color: 'bg-blue-600' };
+    return { score: 4, label: t('registration.strengthStrong', { defaultValue: 'Strong' }), color: 'bg-emerald-600' };
+  }, [formData.password, t]);
 
   const handleStep1Next = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,7 +219,7 @@ export default function CitizenRegisterPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Shankar Ganpat Patil"
+                    placeholder={t('registration.namePlaceholderCitizen', { defaultValue: 'e.g. Shankar Ganpat Patil' })}
                     className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -236,7 +236,7 @@ export default function CitizenRegisterPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="citizen@example.com"
+                    placeholder={t('registration.emailPlaceholderCitizen', { defaultValue: 'citizen@example.com' })}
                     className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -258,7 +258,7 @@ export default function CitizenRegisterPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
-                      placeholder="9822012345"
+                      placeholder={t('registration.phonePlaceholder', { defaultValue: '9822012345' })}
                       maxLength={10}
                       className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors font-mono"
                     />
@@ -425,7 +425,9 @@ export default function CitizenRegisterPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>

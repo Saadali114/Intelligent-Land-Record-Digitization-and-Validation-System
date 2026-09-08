@@ -50,10 +50,16 @@ export default function OfficerApplicationStatusPage() {
             createdAt: u.createdAt || new Date().toISOString(),
           });
         } catch {
-          setError(err.message || 'Unable to load application status.');
+          setError(
+            err.message ||
+              t('registration.unableToLoadStatus', { defaultValue: 'Unable to load application status.' })
+          );
         }
       } else {
-        setError(err.message || 'Please log in to check your application status.');
+        setError(
+          err.message ||
+            t('registration.loginToCheckStatus', { defaultValue: 'Please log in to check your application status.' })
+        );
       }
     } finally {
       setLoading(false);
@@ -76,25 +82,25 @@ export default function OfficerApplicationStatusPage() {
       case 'APPROVED':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-            ✓ APPROVED • ACTIVE OFFICER
+            ✓ {t('registration.statusApprovedActive', { defaultValue: 'APPROVED • ACTIVE OFFICER' })}
           </span>
         );
       case 'REJECTED':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
-            ✕ APPLICATION REJECTED
+            ✕ {t('registration.statusRejectedBadge', { defaultValue: 'APPLICATION REJECTED' })}
           </span>
         );
       case 'ACTION_REQUIRED':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
-            ⚠ CLARIFICATION REQUESTED
+            ⚠ {t('registration.statusClarificationRequested', { defaultValue: 'CLARIFICATION REQUESTED' })}
           </span>
         );
       default:
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200">
-            ● PENDING ADMINISTRATIVE APPROVAL
+            ● {t('registration.statusPendingApproval', { defaultValue: 'PENDING ADMINISTRATIVE APPROVAL' })}
           </span>
         );
     }
@@ -144,10 +150,10 @@ export default function OfficerApplicationStatusPage() {
                   {t('registration.applicationStatusHeading', { defaultValue: 'Officer Access Dossier' })}
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold">
-                  {application?.name || 'Revenue Officer Applicant'}
+                  {application?.name || t('registration.defaultOfficerApplicantName', { defaultValue: 'Revenue Officer Applicant' })}
                 </h1>
                 <p className="text-xs text-slate-300 mt-1">
-                  {application?.designation || 'Revenue Officer'} • {application?.department || 'Revenue & Forest Department'}
+                  {application?.designation || t('registration.designations.revenueOfficer', { defaultValue: 'Revenue Officer' })} • {application?.department || t('registration.defaultDepartment', { defaultValue: 'Revenue & Forest Department' })}
                 </p>
               </div>
 
@@ -210,12 +216,12 @@ export default function OfficerApplicationStatusPage() {
                 </div>
                 <div className="text-[11px]">
                   {application?.status === 'APPROVED'
-                    ? 'Approved by Admin'
+                    ? t('registration.stageApprovedByAdmin', { defaultValue: 'Approved by Admin' })
                     : application?.status === 'REJECTED'
-                    ? 'Rejected by Admin'
+                    ? t('registration.stageRejectedByAdmin', { defaultValue: 'Rejected by Admin' })
                     : application?.status === 'ACTION_REQUIRED'
-                    ? 'Action Required'
-                    : 'Review in progress'}
+                    ? t('registration.stageActionRequired', { defaultValue: 'Action Required' })
+                    : t('registration.stageReviewInProgress', { defaultValue: 'Review in progress' })}
                 </div>
               </div>
 
@@ -232,7 +238,9 @@ export default function OfficerApplicationStatusPage() {
                   <span>4. {t('registration.stageActivation', { defaultValue: 'Activation' })}</span>
                 </div>
                 <div className="text-[11px]">
-                  {application?.status === 'APPROVED' ? 'Active Officer Access' : 'Awaiting approval'}
+                  {application?.status === 'APPROVED'
+                    ? t('registration.stageActiveAccess', { defaultValue: 'Active Officer Access' })
+                    : t('registration.stageAwaitingApproval', { defaultValue: 'Awaiting approval' })}
                 </div>
               </div>
             </div>
@@ -245,13 +253,15 @@ export default function OfficerApplicationStatusPage() {
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-2">
                 <div className="font-bold flex items-center gap-1.5 text-amber-950">
                   <AlertCircle className="w-4 h-4 text-amber-700" />
-                  <span>Administrator Clarification Request:</span>
+                  <span>{t('registration.adminClarificationTitle', { defaultValue: 'Administrator Clarification Request:' })}</span>
                 </div>
                 <p className="italic bg-white/70 p-3 rounded-lg border border-amber-200">
                   "{application.clarificationMessage}"
                 </p>
                 <p className="text-[11px] text-amber-800">
-                  Please contact the district nodal officer or email support@landrecord.gov.in with your clarification.
+                  {t('registration.clarificationContactHelp', {
+                    defaultValue: 'Please contact the district nodal officer or email support@landrecord.gov.in with your clarification.',
+                  })}
                 </p>
               </div>
             )}
@@ -261,10 +271,13 @@ export default function OfficerApplicationStatusPage() {
               <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-2">
                 <div className="font-bold flex items-center gap-1.5 text-rose-950">
                   <AlertCircle className="w-4 h-4 text-rose-700" />
-                  <span>Application Rejection Notice:</span>
+                  <span>{t('registration.rejectionTitle', { defaultValue: 'Application Rejection Notice:' })}</span>
                 </div>
                 <p className="bg-white/70 p-3 rounded-lg border border-rose-200">
-                  {application.rejectionReason || 'Officer credentials could not be verified by the administration.'}
+                  {application.rejectionReason ||
+                    t('registration.defaultRejectionReason', {
+                      defaultValue: 'Officer credentials could not be verified by the administration.',
+                    })}
                 </p>
               </div>
             )}
@@ -274,17 +287,19 @@ export default function OfficerApplicationStatusPage() {
               <div className="p-5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <div className="font-bold text-sm text-emerald-950">
-                    Your Officer Account is Activated!
+                    {t('registration.officerAccountActivated', { defaultValue: 'Your Officer Account is Activated!' })}
                   </div>
                   <p className="text-emerald-800 text-xs mt-0.5">
-                    You have authorized access to the dual-pane 4-pillar verification workspace.
+                    {t('registration.officerAccountActivatedDesc', {
+                      defaultValue: 'You have authorized access to the dual-pane 4-pillar verification workspace.',
+                    })}
                   </p>
                 </div>
                 <Link
                   href="/verification"
                   className="py-2.5 px-4 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-xs"
                 >
-                  <span>Go to Verification Workspace</span>
+                  <span>{t('registration.goToVerificationWorkspace', { defaultValue: 'Go to Verification Workspace' })}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -293,27 +308,27 @@ export default function OfficerApplicationStatusPage() {
             {/* Official Application Summary */}
             <div>
               <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                Submitted Application Details
+                {t('registration.submittedDetailsTitle', { defaultValue: 'Submitted Application Details' })}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-slate-500 block text-[11px]">Employee ID</span>
+                  <span className="text-slate-500 block text-[11px]">{t('registration.employeeIdLabel', { defaultValue: 'Employee ID' })}</span>
                   <span className="font-mono font-semibold text-slate-800">{application?.employeeId || 'N/A'}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-slate-500 block text-[11px]">Official Email</span>
+                  <span className="text-slate-500 block text-[11px]">{t('registration.officialEmailLabel', { defaultValue: 'Official Email' })}</span>
                   <span className="font-mono font-semibold text-slate-800">{application?.email || 'N/A'}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-slate-500 block text-[11px]">Department & Office</span>
+                  <span className="text-slate-500 block text-[11px]">{t('registration.departmentAndOffice', { defaultValue: 'Department & Office' })}</span>
                   <span className="font-medium text-slate-800">
-                    {application?.department} • {application?.office || 'District Office'}
+                    {application?.department} • {application?.office || t('registration.districtOfficeFallback', { defaultValue: 'District Office' })}
                   </span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-slate-500 block text-[11px]">Jurisdiction</span>
+                  <span className="text-slate-500 block text-[11px]">{t('registration.jurisdiction', { defaultValue: 'Jurisdiction' })}</span>
                   <span className="font-medium text-slate-800">
-                    District: {application?.district} {application?.taluka ? `| Taluka: ${application.taluka}` : ''}
+                    {t('registration.districtLabel', { defaultValue: 'District:' })} {application?.district} {application?.taluka ? `| ${t('registration.talukaLabel', { defaultValue: 'Taluka:' })} ${application.taluka}` : ''}
                   </span>
                 </div>
               </div>
@@ -327,7 +342,7 @@ export default function OfficerApplicationStatusPage() {
                 className="inline-flex items-center gap-1.5 text-xs text-blue-900 hover:underline font-semibold cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh Status</span>
+                <span>{t('registration.refreshStatus', { defaultValue: 'Refresh Status' })}</span>
               </button>
             </div>
           </div>
@@ -337,7 +352,9 @@ export default function OfficerApplicationStatusPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>

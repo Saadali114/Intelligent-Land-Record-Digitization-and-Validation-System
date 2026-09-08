@@ -204,7 +204,9 @@ export default function RegisterLandingPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>
