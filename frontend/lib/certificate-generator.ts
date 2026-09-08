@@ -1,7 +1,11 @@
 import { DocumentRecord } from '../types';
 import { formatDate } from './utils';
 import { FormCategory } from './cadastral-utils';
-import { generateQrDataUrl, generateBarcodeDataUrl, buildVerificationUrl } from './qr-barcode';
+import {
+  generateQrDataUrl,
+  generateBarcodeDataUrl,
+  createCadastralVerificationPayload,
+} from './qr-barcode';
 
 export interface CertificateExportOptions {
   doc: DocumentRecord;
@@ -9,6 +13,7 @@ export interface CertificateExportOptions {
   isTranslated: boolean;
   translatedData: Record<string, string>;
   targetLanguage: string;
+  withSticker?: boolean;
 }
 
 export const exportCadastralPdfCertificate = async ({
@@ -17,6 +22,7 @@ export const exportCadastralPdfCertificate = async ({
   isTranslated,
   translatedData,
   targetLanguage,
+  withSticker = true,
 }: CertificateExportOptions): Promise<void> => {
   if (!doc || !doc.landRecord) {
     alert('Cannot export PDF: Cadastral record has not been digitized yet.');
@@ -47,9 +53,9 @@ export const exportCadastralPdfCertificate = async ({
   const certNumber = `ILRDVS-${doc.documentId}-${Date.now().toString().slice(-6)}`;
   const verifiedDate = formatDate(doc.updatedAt || doc.createdAt);
 
-  // Generate dynamic QR Code and Code 128 Barcode for tamper-evident physical print verification
-  const verificationUrl = buildVerificationUrl(doc.documentId);
-  const qrDataUrl = await generateQrDataUrl(verificationUrl, { width: 140, margin: 1 });
+  // Generate dynamic QR Code and Code 128 Barcode with secret PIN for tamper-evident physical verification
+  const { secretCode, verificationUrl } = createCadastralVerificationPayload(doc, lr);
+  const qrDataUrl = await generateQrDataUrl(verificationUrl, { width: 160, margin: 1 });
   const barcodeDataUrl = generateBarcodeDataUrl(doc.documentId);
 
   let formTitleEn = 'FORM 7/12 CADASTRAL EXTRACT';
@@ -382,6 +388,86 @@ export const exportCadastralPdfCertificate = async ({
           position: relative;
           z-index: 1;
         }
+        .sticker-affixed-badge {
+          margin: 12px 0 16px 0;
+          border: 2px dashed #059669;
+          border-radius: 8px;
+          background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+          padding: 8px 12px;
+          position: relative;
+          z-index: 1;
+        }
+        .sticker-affixed-inner {
+          border: 1.5px solid #047857;
+          border-radius: 6px;
+          background: #ffffff;
+          padding: 8px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+        }
+        .sticker-affixed-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .sticker-qr-box {
+          width: 68px;
+          height: 68px;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 2px;
+          background: #ffffff;
+          flex-shrink: 0;
+        }
+        .sticker-affixed-mid {
+          text-align: left;
+        }
+        .sticker-affixed-title {
+          font-size: 10px;
+          font-weight: 800;
+          color: #065f46;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .sticker-affixed-sub {
+          font-size: 8px;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+        .sticker-affixed-meta {
+          font-size: 9px;
+          color: #1e293b;
+          margin-top: 4px;
+          line-height: 1.35;
+        }
+        .sticker-affixed-right {
+          text-align: right;
+          border-left: 1px dashed #cbd5e1;
+          padding-left: 14px;
+          flex-shrink: 0;
+        }
+        .sticker-affixed-pin {
+          background: #fef3c7;
+          border: 1.5px solid #d97706;
+          border-radius: 6px;
+          padding: 3px 8px;
+          font-family: monospace;
+          font-size: 10.5px;
+          font-weight: 900;
+          color: #92400e;
+          letter-spacing: 0.5px;
+          display: inline-block;
+        }
+        .sticker-affixed-instructions {
+          font-size: 7.5px;
+          color: #059669;
+          font-weight: 800;
+          margin-top: 3px;
+          text-transform: uppercase;
+        }
         .footer {
           margin-top: 18px;
           padding-top: 12px;
@@ -485,6 +571,42 @@ export const exportCadastralPdfCertificate = async ({
           }
         </div>
 
+        ${
+          withSticker
+            ? `
+        <div class="sticker-affixed-badge">
+          <div class="sticker-affixed-inner">
+            <div class="sticker-affixed-left">
+              <img src="${qrDataUrl}" class="sticker-qr-box" alt="Official QR Sticker Seal" />
+              <div class="sticker-affixed-mid">
+                <div class="sticker-affixed-title">🏛️ महाराष्ट्र शासन • महसूल व वन विभाग</div>
+                <div class="sticker-affixed-sub">Official Cadastral Authenticity Sticker Seal</div>
+                <div class="sticker-affixed-meta">
+                  <div><strong>Document ID:</strong> <span style="font-family: monospace; font-weight: bold; color: #047857;">${doc.documentId}</span></div>
+                  <div><strong>Survey / Gat:</strong> ${lr.surveyNumber || '—'} &bull; <strong>Khata:</strong> ${lr.khataNumber || '—'}</div>
+                  <div><strong>Owner:</strong> ${(lr.ownerName || 'State Cadastral Archive').slice(0, 32)}</div>
+                  <div><strong>Location:</strong> ${lr.village || '—'}, ${lr.district || '—'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sticker-affixed-right">
+              ${
+                barcodeDataUrl
+                  ? `<img src="${barcodeDataUrl}" style="height: 22px; max-width: 140px; display: inline-block; margin-bottom: 3px;" alt="Barcode" />`
+                  : ''
+              }
+              <div>
+                <div style="font-size: 7.5px; color: #78350f; font-weight: 800; text-transform: uppercase;">Tamper-Proof Physical PIN:</div>
+                <div class="sticker-affixed-pin">🔒 ${secretCode}</div>
+              </div>
+              <div class="sticker-affixed-instructions">✓ Scan QR with phone to verify</div>
+            </div>
+          </div>
+        </div>`
+            : ''
+        }
+
         <table class="cadastral-grid">
           ${tableHtml}
         </table>
@@ -539,4 +661,8 @@ export const exportCadastralPdfCertificate = async ({
       printWin.print();
     }, 400);
   }
+};
+
+export const printDocumentWithSticker = (options: CertificateExportOptions): Promise<void> => {
+  return exportCadastralPdfCertificate({ ...options, withSticker: true });
 };
