@@ -14,8 +14,8 @@ import { useTranslation } from 'react-i18next';
 interface NoticeItem {
   id: string;
   category: 'CIRCULAR' | 'GAZETTE' | 'ORDER' | 'PROJECT';
-  title: string;
-  department: string;
+  titleKey: string;
+  departmentKey: string;
   date: string;
   refNo: string;
   isNew: boolean;
@@ -25,12 +25,20 @@ export const NewsNoticesSection: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('ALL');
 
+  const tabs: { key: string; labelKey: string }[] = [
+    { key: 'ALL', labelKey: 'news.tabs.all' },
+    { key: 'GAZETTE', labelKey: 'news.tabs.gazette' },
+    { key: 'CIRCULAR', labelKey: 'news.tabs.circular' },
+    { key: 'ORDER', labelKey: 'news.tabs.order' },
+    { key: 'PROJECT', labelKey: 'news.tabs.project' },
+  ];
+
   const notices: NoticeItem[] = [
     {
       id: '1',
       category: 'GAZETTE',
-      title: 'Implementation of AI-Driven Cadastral Validation for All Historical 7/12 Satbara Extracts',
-      department: 'Revenue & Forest Department, Mantralaya',
+      titleKey: 'notice1Title',
+      departmentKey: 'notice1Dept',
       date: '04 March 2026',
       refNo: 'REV-GAZ/2026/089',
       isNew: true,
@@ -38,8 +46,8 @@ export const NewsNoticesSection: React.FC = () => {
     {
       id: '2',
       category: 'CIRCULAR',
-      title: 'Time-Bound 15-Day Clearance Directive for Online Form 6 Mutation (Ferfar) Applications',
-      department: 'Office of the Settlement Commissioner & Director of Land Records',
+      titleKey: 'notice2Title',
+      departmentKey: 'notice2Dept',
       date: '28 February 2026',
       refNo: 'CIR-DILRMP/2026/112',
       isNew: true,
@@ -47,8 +55,8 @@ export const NewsNoticesSection: React.FC = () => {
     {
       id: '3',
       category: 'ORDER',
-      title: 'Notification on Mandatory Digital Watermark & QR Code Verification on Certified Extracts',
-      department: 'State Land Governance & E-Mahabhumi Mission',
+      titleKey: 'notice3Title',
+      departmentKey: 'notice3Dept',
       date: '15 February 2026',
       refNo: 'ORD-SEC/2026/045',
       isNew: false,
@@ -56,8 +64,8 @@ export const NewsNoticesSection: React.FC = () => {
     {
       id: '4',
       category: 'PROJECT',
-      title: 'SVAMITVA Drone Cadastral Mapping Phase-IV Commencement across 12,000 Rural Gaothans',
-      department: 'Survey of India & Ministry of Panchayati Raj Joint Cell',
+      titleKey: 'notice4Title',
+      departmentKey: 'notice4Dept',
       date: '02 February 2026',
       refNo: 'PRJ-SVM/2026/031',
       isNew: false,
@@ -65,8 +73,8 @@ export const NewsNoticesSection: React.FC = () => {
     {
       id: '5',
       category: 'CIRCULAR',
-      title: 'Standard Operating Procedures for Online Land Classification Change and Non-Agricultural (NA) Permissions',
-      department: 'Urban Development & Revenue Joint Secretariat',
+      titleKey: 'notice5Title',
+      departmentKey: 'notice5Dept',
       date: '18 January 2026',
       refNo: 'CIR-NA/2026/014',
       isNew: false,
@@ -84,30 +92,30 @@ export const NewsNoticesSection: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-xs font-bold text-rose-800 uppercase tracking-wider">
               <Bell className="w-3.5 h-3.5 text-rose-600" />
-              {t('news.badge') || 'Official Gazette & Circulars'}
+              {t('news.badge')}
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight mt-2">
-              {t('news.title') || 'News, Notices & Press Releases'}
+              {t('news.title')}
             </h2>
             <p className="text-sm text-slate-600 mt-1">
-              {t('news.subtitle') || 'Latest statutory orders, administrative guidelines, and land modernization updates.'}
+              {t('news.subtitle')}
             </p>
           </div>
 
           {/* Filter Tabs */}
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 text-xs font-semibold self-start md:self-auto">
-            {['ALL', 'GAZETTE', 'CIRCULAR', 'ORDER', 'PROJECT'].map((tab) => (
+            {tabs.map((tab) => (
               <button
-                key={tab}
+                key={tab.key}
                 type="button"
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setActiveTab(tab.key)}
                 className={`px-3 py-1.5 rounded-lg transition-all ${
-                  activeTab === tab
+                  activeTab === tab.key
                     ? 'bg-white text-blue-950 font-bold shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {tab === 'ALL' ? 'All Updates' : tab.charAt(0) + tab.slice(1).toLowerCase()}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>
@@ -133,12 +141,12 @@ export const NewsNoticesSection: React.FC = () => {
                         : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     }`}
                   >
-                    {n.category}
+                    {t(`news.tabs.${n.category.toLowerCase()}`)}
                   </span>
 
                   {n.isNew && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white animate-pulse">
-                      NEW
+                      {t('common.newBadge')}
                     </span>
                   )}
 
@@ -146,11 +154,11 @@ export const NewsNoticesSection: React.FC = () => {
                 </div>
 
                 <h3 className="font-bold text-slate-900 text-sm hover:text-blue-900 transition-colors cursor-pointer">
-                  {n.title}
+                  {t(`news.notices.${n.titleKey}`)}
                 </h3>
 
                 <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span>{n.department}</span>
+                  <span>{t(`news.notices.${n.departmentKey}`)}</span>
                   <span>&bull;</span>
                   <span className="flex items-center gap-1 font-medium">
                     <Calendar className="w-3 h-3 text-slate-400" />
@@ -165,7 +173,7 @@ export const NewsNoticesSection: React.FC = () => {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-slate-300 hover:border-blue-900 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-900 text-xs font-bold transition-all shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-800" />
-                  <span>Download PDF</span>
+                  <span>{t('common.downloadPdf')}</span>
                 </Link>
               </div>
             </div>

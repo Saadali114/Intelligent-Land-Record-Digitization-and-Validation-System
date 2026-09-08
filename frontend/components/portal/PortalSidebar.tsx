@@ -43,17 +43,17 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       icon: UploadCloud,
     },
     {
-      name: 'Verify Land Record',
+      name: t('sidebar.verifyLandRecord', { defaultValue: 'Verify Land Record' }),
       href: '/portal/verify',
       icon: ShieldCheck,
       highlight: true,
       badge: 'AI',
     },
     {
-      name: 'AI Verifications',
+      name: t('sidebar.aiVerifications', { defaultValue: 'AI Verifications' }),
       href: '/citizen/verifications',
       icon: FileText,
-      badge: 'Active',
+      badge: t('status.active', { defaultValue: 'Active' }),
     },
     {
       name: t('applications.title'),
@@ -162,7 +162,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
             {t('common.tollFree')}
           </p>
           <p className="text-[10px] text-slate-500 mt-0.5">
-            Mon–Sat: 9:00 AM to 6:00 PM
+            {t('common.helpdeskHours', { defaultValue: 'Mon–Sat: 9:00 AM to 6:00 PM' })}
           </p>
         </div>
 

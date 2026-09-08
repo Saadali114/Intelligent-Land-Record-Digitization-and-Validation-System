@@ -117,25 +117,25 @@ export default function AdminOfficerApplicationsPage() {
       case 'APPROVED':
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-            Approved
+            {t('adminOfficer.approvedFilter', { defaultValue: 'Approved' })}
           </span>
         );
       case 'REJECTED':
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-300">
-            Rejected
+            {t('adminOfficer.rejectedFilter', { defaultValue: 'Rejected' })}
           </span>
         );
       case 'ACTION_REQUIRED':
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300">
-            Action Required
+            {t('adminOfficer.actionRequiredFilter', { defaultValue: 'Action Required' })}
           </span>
         );
       default:
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-            Pending Review
+            {t('adminOfficer.pendingReviewFilter', { defaultValue: 'Pending Review' })}
           </span>
         );
     }
@@ -150,12 +150,17 @@ export default function AdminOfficerApplicationsPage() {
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-5 h-5 text-blue-900" />
               <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
-                Administrative Governance
+                {t('adminOfficer.administrativeGovernance', { defaultValue: 'Administrative Governance' })}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Officer Access Applications</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {t('adminOfficer.officerAccessApplications', { defaultValue: 'Officer Access Applications' })}
+            </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Review, verify official credentials, and grant statutory access to revenue officers.
+              {t('adminOfficer.officerAccessDesc', {
+                defaultValue:
+                  'Review, verify official credentials, and grant statutory access to revenue officers.',
+              })}
             </p>
           </div>
 
@@ -165,7 +170,7 @@ export default function AdminOfficerApplicationsPage() {
               className="px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <span>{t('adminOfficer.refresh', { defaultValue: 'Refresh' })}</span>
             </button>
           </div>
         </div>
@@ -185,14 +190,14 @@ export default function AdminOfficerApplicationsPage() {
                 }`}
               >
                 {st === 'ALL'
-                  ? 'All Applications'
+                  ? t('adminOfficer.allApplications', { defaultValue: 'All Applications' })
                   : st === 'PENDING_APPROVAL'
-                  ? 'Pending Review'
+                  ? t('adminOfficer.pendingReviewFilter', { defaultValue: 'Pending Review' })
                   : st === 'ACTION_REQUIRED'
-                  ? 'Action Required'
+                  ? t('adminOfficer.actionRequiredFilter', { defaultValue: 'Action Required' })
                   : st === 'APPROVED'
-                  ? 'Approved'
-                  : 'Rejected'}
+                  ? t('adminOfficer.approvedFilter', { defaultValue: 'Approved' })
+                  : t('adminOfficer.rejectedFilter', { defaultValue: 'Rejected' })}
               </button>
             ))}
           </div>
@@ -204,7 +209,7 @@ export default function AdminOfficerApplicationsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, ID, district..."
+              placeholder={t('adminOfficer.searchPlaceholder', { defaultValue: 'Search by name, ID, district...' })}
               className="w-full pl-9 pr-3.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
             />
           </div>
@@ -216,20 +221,20 @@ export default function AdminOfficerApplicationsPage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-                  <th className="py-3 px-4">Officer Name & Email</th>
-                  <th className="py-3 px-4">Employee ID</th>
-                  <th className="py-3 px-4">Department & Office</th>
-                  <th className="py-3 px-4">District</th>
-                  <th className="py-3 px-4">Email OTP</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-3 px-4">{t('adminOfficer.officerNameEmailCol', { defaultValue: 'Officer Name & Email' })}</th>
+                  <th className="py-3 px-4">{t('adminOfficer.employeeIdCol', { defaultValue: 'Employee ID' })}</th>
+                  <th className="py-3 px-4">{t('adminOfficer.departmentOfficeCol', { defaultValue: 'Department & Office' })}</th>
+                  <th className="py-3 px-4">{t('adminOfficer.districtCol', { defaultValue: 'District' })}</th>
+                  <th className="py-3 px-4">{t('adminOfficer.emailOtpCol', { defaultValue: 'Email OTP' })}</th>
+                  <th className="py-3 px-4">{t('adminOfficer.statusCol', { defaultValue: 'Status' })}</th>
+                  <th className="py-3 px-4 text-right">{t('adminOfficer.actionCol', { defaultValue: 'Action' })}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredApplications.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-slate-400">
-                      No officer applications found matching criteria.
+                      {t('adminOfficer.noAppsFound', { defaultValue: 'No officer applications found matching criteria.' })}
                     </td>
                   </tr>
                 ) : (
@@ -253,10 +258,10 @@ export default function AdminOfficerApplicationsPage() {
                         {app.emailVerified ? (
                           <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Verified</span>
+                            <span>{t('status.verified', { defaultValue: 'Verified' })}</span>
                           </span>
                         ) : (
-                          <span className="text-slate-400">Pending</span>
+                          <span className="text-slate-400">{t('status.pending', { defaultValue: 'Pending' })}</span>
                         )}
                       </td>
                       <td className="py-3 px-4">{getStatusBadge(app.status)}</td>
@@ -265,7 +270,7 @@ export default function AdminOfficerApplicationsPage() {
                           href={`/admin/officer-applications/${app._id}`}
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs transition-colors shadow-xs"
                         >
-                          <span>Review</span>
+                          <span>{t('adminOfficer.reviewBtn', { defaultValue: 'Review' })}</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
                       </td>

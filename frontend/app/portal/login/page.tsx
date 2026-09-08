@@ -64,7 +64,7 @@ export default function CitizenLoginPage() {
 
   const handleVerifyOtp = async (otpCode: string) => {
     if (!otpCode || otpCode.length !== 6) {
-      setError(t('auth.invalidOtp', { defaultValue: 'Please enter the full 6-digit OTP code.' }));
+      setError(t('auth.otpRequiredSixDigits', { defaultValue: 'Please enter the full 6-digit OTP code.' }));
       return;
     }
     setError('');
@@ -192,7 +192,7 @@ export default function CitizenLoginPage() {
                       setError('');
                       setEmail(e.target.value);
                     }}
-                    placeholder="citizen@example.com"
+                    placeholder={t('registration.emailPlaceholderCitizen', { defaultValue: 'citizen@example.com' })}
                     autoComplete="email"
                     className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
@@ -267,7 +267,9 @@ export default function CitizenLoginPage() {
       {/* Footer Bar */}
       <footer className="bg-white border-t border-slate-200 px-4 py-3 text-center text-xs text-slate-500">
         <div>
-          ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal
+          {t('common.portalGovNotice', {
+            defaultValue: 'ILRDVS — Government of Maharashtra Revenue & Forest Department Land Record Governance Portal',
+          })}
         </div>
       </footer>
     </div>

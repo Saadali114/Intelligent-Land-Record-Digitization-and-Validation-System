@@ -60,7 +60,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
           <button
             onClick={onToggleSidebar}
             className="md:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none"
-            aria-label="Toggle navigation"
+            aria-label={t('topbar.toggleNavigation', { defaultValue: 'Toggle navigation' })}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -96,7 +96,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none transition-colors"
               title={t('notifications.title')}
-              aria-label="View notifications"
+              aria-label={t('notifications.viewNotifications', { defaultValue: 'View notifications' })}
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
@@ -169,7 +169,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) =
             onClick={handleLogout}
             className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
             title={t('common.logout')}
-            aria-label="Sign out of Citizen Portal"
+            aria-label={t('common.signOutCitizen', { defaultValue: 'Sign out of Citizen Portal' })}
           >
             <LogOut className="w-4 h-4" />
           </button>

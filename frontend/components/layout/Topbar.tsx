@@ -24,7 +24,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
           <button
             onClick={onMobileMenuToggle}
             className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-            aria-label="Toggle Navigation"
+            aria-label={t('topbar.toggleNavigation', { defaultValue: 'Toggle Navigation' })}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -37,7 +37,10 @@ export const Topbar: React.FC<TopbarProps> = ({ onMobileMenuToggle }) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-slate-900 tracking-tight">
-                {t('common.portalName')} Officer Portal
+                {t('topbar.officerPortalTitle', {
+                  portalName: t('common.portalName'),
+                  defaultValue: `${t('common.portalName')} Officer Portal`,
+                })}
               </span>
               <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
                 {t('common.govtOfIndia')}

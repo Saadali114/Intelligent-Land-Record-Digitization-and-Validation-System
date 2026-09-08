@@ -106,7 +106,7 @@ export const SubNavbar: React.FC = () => {
                   <Layers className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
                   <div>
                     <div className="font-bold text-xs">{t('navbar.services')}</div>
-                    <div className="text-[10px] text-slate-500">Single window digital portal</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.singleWindowPortal', 'Single window digital portal')}</div>
                   </div>
                 </Link>
                 <Link
@@ -164,28 +164,28 @@ export const SubNavbar: React.FC = () => {
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('resources.userGuides')}</div>
-                  <div className="text-[10px] text-slate-500">Step-by-step portal manuals</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.stepByStepManuals', 'Step-by-step portal manuals')}</div>
                 </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('resources.actsRules')}</div>
-                  <div className="text-[10px] text-slate-500">Official cadastral guidelines</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.officialCadastralGuidelines', 'Official cadastral guidelines')}</div>
                 </Link>
                 <Link
                   href="#services"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('resources.downloads')}</div>
-                  <div className="text-[10px] text-slate-500">Gazette circulars & guidelines</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.gazetteCircularsGuidelines', 'Gazette circulars & guidelines')}</div>
                 </Link>
                 <Link
                   href="#contact"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
-                  <div className="font-bold">Important Links</div>
-                  <div className="text-[10px] text-slate-500">State & Central Land Portals</div>
+                  <div className="font-bold">{t('navbar.importantLinks', 'Important Links')}</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.stateCentralPortals', 'State & Central Land Portals')}</div>
                 </Link>
               </div>
             )}
@@ -212,21 +212,21 @@ export const SubNavbar: React.FC = () => {
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('schemes.scheme1')}</div>
-                  <div className="text-[10px] text-slate-500">DILRMP, NLRMP, SVAMITVA</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.dilrmpSubtitle', 'DILRMP, NLRMP, SVAMITVA')}</div>
                 </Link>
                 <Link
                   href="#notices"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('schemes.scheme2')}</div>
-                  <div className="text-[10px] text-slate-500">High-Resolution Drone Cadastral Mapping</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.droneMappingSubtitle', 'High-Resolution Drone Cadastral Mapping')}</div>
                 </Link>
                 <Link
                   href="#about"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('schemes.scheme3')}</div>
-                  <div className="text-[10px] text-slate-500">100% Computerized Repositories</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.computerizedReposSubtitle', '100% Computerized Repositories')}</div>
                 </Link>
               </div>
             )}
@@ -272,28 +272,28 @@ export const SubNavbar: React.FC = () => {
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('citizenCorner.portalLink')}</div>
-                  <div className="text-[10px] text-slate-500">Title Search & Digital Extract Copy</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.titleSearchSubtitle', 'Title Search & Digital Extract Copy')}</div>
                 </Link>
                 <Link
                   href="/verification"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('citizenCorner.applicationStatus')}</div>
-                  <div className="text-[10px] text-slate-500">Track Mutation or Verification Request</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.trackRequestSubtitle', 'Track Mutation or Verification Request')}</div>
                 </Link>
                 <Link
                   href="#contact"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('citizenCorner.grievance')}</div>
-                  <div className="text-[10px] text-slate-500">Register Land Record Discrepancy</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.grievanceSubtitle', 'Register Land Record Discrepancy')}</div>
                 </Link>
                 <Link
                   href="#contact"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('citizenCorner.feedback')}</div>
-                  <div className="text-[10px] text-slate-500">Portal Experience & Suggestions</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.feedbackSubtitle', 'Portal Experience & Suggestions')}</div>
                 </Link>
               </div>
             )}
@@ -350,7 +350,7 @@ export const SubNavbar: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
           >
             <UserPlus className="w-3.5 h-3.5 text-blue-900" />
-            <span>{t('registration.registerNow', { defaultValue: 'Register' })}</span>
+            <span>{t('navbar.register', 'Register')}</span>
           </Link>
 
           <Link
@@ -377,19 +377,19 @@ export const SubNavbar: React.FC = () => {
             href="/register"
             className="px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-bold text-xs"
           >
-            Register
+            {t('navbar.register', 'Register')}
           </Link>
           <Link
             href="/portal"
             className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
           >
-            Portal
+            {t('navbar.citizenPortal', 'Portal')}
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg text-slate-700 hover:bg-slate-100"
-            aria-label="Toggle Menu"
+            aria-label={t('navbar.toggleMenu', 'Toggle Menu')}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

@@ -23,15 +23,23 @@ export const StepDualPaneOcrReview: React.FC<StepDualPaneOcrReviewProps> = ({ wo
           </div>
           <div>
             <h2 className="text-lg font-semibold text-white">
-              {t('verificationWorkflow.originalDocumentScan', 'Original Archival Document')} & OCR Analysis
+              {t('verificationWorkflow.originalDocumentScan', {
+                defaultValue: 'Original Archival Document',
+              })}{' '}
+              & {t('verificationWorkflow.ocrAnalysis', { defaultValue: 'OCR Analysis' })}
             </h2>
             <p className="text-xs text-slate-400">
-              Synchronized side-by-side inspection between raw revenue scan and neural OCR model
+              {t('verificationWorkflow.sideBySideSubtitle', {
+                defaultValue:
+                  'Synchronized side-by-side inspection between raw revenue scan and neural OCR model',
+              })}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Average OCR Confidence:</span>
+          <span className="text-xs text-slate-400">
+            {t('verificationWorkflow.avgOcrConfidence', { defaultValue: 'Average OCR Confidence' })}:
+          </span>
           <span
             className={`font-mono text-xs font-semibold px-2 py-0.5 rounded border ${
               workflow.document.avgConfidence >= 0.9
@@ -101,7 +109,7 @@ export const StepDualPaneOcrReview: React.FC<StepDualPaneOcrReviewProps> = ({ wo
                   {fields.plotArea?.value}
                   {isAlteredCase && (
                     <span className="block text-[9px] text-rose-700 font-sans font-normal">
-                      [Tamper Flagged]
+                      {t('verificationWorkflow.tamperFlagged', { defaultValue: '[Tamper Flagged]' })}
                     </span>
                   )}
                 </div>
@@ -132,9 +140,15 @@ export const StepDualPaneOcrReview: React.FC<StepDualPaneOcrReviewProps> = ({ wo
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-slate-200">
-                {t('verificationWorkflow.extractedAttributes', 'Extracted Cadastral Attributes')}
+                {t('verificationWorkflow.extractedAttributes', {
+                  defaultValue: 'Extracted Cadastral Attributes',
+                })}
               </h3>
-              <span className="text-[11px] text-slate-400">Model: Devanagari Cadastral OCR</span>
+              <span className="text-[11px] text-slate-400">
+                {t('verificationWorkflow.ocrModelLabel', {
+                  defaultValue: 'Model: Devanagari Cadastral OCR',
+                })}
+              </span>
             </div>
 
             <div className="space-y-2.5">
@@ -163,7 +177,7 @@ export const StepDualPaneOcrReview: React.FC<StepDualPaneOcrReviewProps> = ({ wo
 
                     <div className="text-right shrink-0">
                       <div className="text-[10px] text-slate-400 mb-0.5">
-                        {t('verificationWorkflow.confidence', 'Confidence')}
+                        {t('verificationWorkflow.confidence', { defaultValue: 'Confidence' })}
                       </div>
                       <span
                         className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
@@ -185,7 +199,12 @@ export const StepDualPaneOcrReview: React.FC<StepDualPaneOcrReviewProps> = ({ wo
 
           <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-400 flex items-center gap-2">
             <FileCheck2 className="w-4 h-4 text-sky-400 shrink-0" />
-            <span>Entities normalized against Maharashtra Land Revenue Code 1966 nomenclature.</span>
+            <span>
+              {t('verificationWorkflow.entitiesNormalized', {
+                defaultValue:
+                  'Entities normalized against Maharashtra Land Revenue Code 1966 nomenclature.',
+              })}
+            </span>
           </div>
         </div>
       </div>

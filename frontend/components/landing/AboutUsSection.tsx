@@ -39,25 +39,25 @@ export const AboutUsSection: React.FC = () => {
           <div className="lg:col-span-6 space-y-5 text-sm text-slate-600 leading-relaxed">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-900" />
-              The Challenge of Archival Land Records
+              {t('about.challengeTitle')}
             </h3>
             <p>
-              For decades, land records—including <strong className="text-slate-800">Records of Rights (RoR), mutation registers, and registered sale deeds</strong>—have been maintained on physical paper, making them vulnerable to yellowing, ink bleeding, tear damage, and manual transcription errors.
+              {t('about.challengeP1')}
             </p>
             <p>
-              These vulnerabilities can contribute to <strong className="text-slate-800">duplicate or conflicting land records, ownership disputes, lengthy civil litigation, and delays in land verification</strong>. <strong className="text-blue-900 font-bold">ILRDVS</strong> addresses these challenges through an end-to-end AI-powered workflow for <strong className="text-slate-800">digitizing, validating, and verifying land records</strong>.
+              {t('about.challengeP2')}
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-xl font-black text-blue-950 font-mono">100%</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">Audit Trail Provenance</div>
-                <div className="text-[11px] text-slate-500">Every edit and action is cryptographically tracked</div>
+                <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.auditTrailTitle')}</div>
+                <div className="text-[11px] text-slate-500">{t('about.auditTrailDesc')}</div>
               </div>
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-xl font-black text-emerald-800 font-mono">98.4%</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">OCR Extraction Accuracy</div>
-                <div className="text-[11px] text-slate-500">Validated across Marathi, Hindi, and English</div>
+                <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.accuracyTitle')}</div>
+                <div className="text-[11px] text-slate-500">{t('about.accuracyDesc')}</div>
               </div>
             </div>
           </div>
@@ -68,9 +68,9 @@ export const AboutUsSection: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center font-bold">
                 <Cpu className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-slate-900 text-sm">OpenCV & EasyOCR</h4>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar1Title')}</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Adaptive thresholding, deskewing, and multilingual neural recognition of cursive and handwritten Devanagari script.
+                {t('about.pillar1Desc')}
               </p>
             </div>
 
@@ -78,9 +78,9 @@ export const AboutUsSection: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-slate-900 text-sm">Spatial NER Extraction</h4>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar2Title')}</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Heuristic cadastral parsing isolates Survey No, Khasra, Khata, Plot Area, Owner Name, and Mutation references.
+                {t('about.pillar2Desc')}
               </p>
             </div>
 
@@ -88,9 +88,9 @@ export const AboutUsSection: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center font-bold">
                 <Users className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-slate-900 text-sm">Inspector Workstation</h4>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar3Title')}</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Dual-pane zoomable review interface enabling revenue officers to verify AI predictions before sanctioning.
+                {t('about.pillar3Desc')}
               </p>
             </div>
 
@@ -98,9 +98,9 @@ export const AboutUsSection: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
                 <Lock className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-slate-900 text-sm">Tamper-Proof Certificates</h4>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar4Title')}</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Automated generation of official bilingual certificates with digital seal watermarks and instant print capability.
+                {t('about.pillar4Desc')}
               </p>
             </div>
           </div>
