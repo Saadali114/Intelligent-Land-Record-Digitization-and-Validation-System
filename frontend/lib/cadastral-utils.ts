@@ -96,16 +96,33 @@ export const getDocumentFormCategory = (doc: DocumentRecord | null): FormCategor
     return 'SALE_DEED';
   }
 
-  // 3. Mutation Register check (ONLY if document itself is specifically a Mutation Register)
+  // 3. Mutation Register check (Village Form 6 / फेरफार नोंदवही / नामांतरण)
   if (
-    (ft.includes('mutation') || ft.includes('ferfar') || ft.includes('form 6')) &&
-    !ft.includes('7/12')
-  ) {
-    return 'MUTATION_REGISTER';
-  }
-  if (
-    (on.includes('mutation') || on.includes('ferfar') || on.includes('form_6') || on.includes('form-6')) &&
-    !on.includes('7/12') && !on.includes('7-12') && !on.includes('7_12')
+    ft.includes('mutation') ||
+    ft.includes('ferfar') ||
+    ft.includes('form 6') ||
+    ft.includes('form_6') ||
+    ft.includes('form-6') ||
+    ft.includes('गाव नमुना ६') ||
+    ft.includes('फेरफार') ||
+    dt.includes('mutation') ||
+    dt.includes('ferfar') ||
+    dt.includes('फेरफार') ||
+    metaDt.includes('mutation') ||
+    metaDt.includes('ferfar') ||
+    metaDt.includes('फेरफार') ||
+    on.includes('mutation') ||
+    on.includes('ferfar') ||
+    on.includes('form_6') ||
+    on.includes('form-6') ||
+    on.includes('फेरफार') ||
+    on.includes('नामांतरण') ||
+    remarks.includes('mutation register') ||
+    remarks.includes('गाव नमुना ६') ||
+    remarks.includes('फेरफार नोंद') ||
+    rawSnippet.includes('गाव नमुना ६') ||
+    rawSnippet.includes('गाव नमुना सहा') ||
+    rawSnippet.includes('फेरफार नोंदवही')
   ) {
     return 'MUTATION_REGISTER';
   }

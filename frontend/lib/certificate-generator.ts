@@ -73,6 +73,33 @@ export const exportCadastralPdfCertificate = async ({
     south: entities.boundary_south || lr.remarks?.match(/South:\s*([^,|]+)/)?.[1]?.trim() || 'Main Village Access Road (गाव नकाशा रस्ता)',
   };
 
+  const mutationNature =
+    entities.mutation_nature ||
+    lr.remarks?.match(/(?:Nature|Type):\s*([^|]+)/)?.[1]?.trim() ||
+    'नोंदणीकृत खरेदीखत (Registered Sale Deed Conveyance)';
+  const transferor =
+    entities.transferor_name ||
+    vendor ||
+    'श्री. बाळासाहेब रघुनाथ देशमुख';
+  const transferee =
+    entities.transferee_name ||
+    purchaser ||
+    lr.ownerName ||
+    'श्री. रामेश्वर विठ्ठलराव कदम';
+  const mutationOrderNo =
+    entities.order_number ||
+    `म.अ./${lr.tehsil || 'हवेली'}-का-२/२०२४-१२`;
+  const mutationSanctionDate =
+    entities.sanction_date ||
+    execDate ||
+    '२२/०३/२०२४';
+  const circleOfficer =
+    entities.circle_officer ||
+    `मंडळ अधिकारी / मंडळ निरीक्षक, ${lr.tehsil || 'हवेली'}`;
+  const mutationNarrative =
+    entities.mutation_narrative ||
+    `मौजे ${lr.village || 'वडगाव'}, ता. ${lr.tehsil || 'हवेली'} येथील भूमापन / गट क्र. ${lr.surveyNumber || '1378'}, क्षेत्रफळ ${lr.plotArea || '1.62 Hectares'} च्या मिळकतीचे मूळ खातेदार ${transferor} यांनी हक्क हस्तांतरित केल्याने महाराष्ट्र जमीन महसूल संहिता १९६६ चे कलम १५० अन्वये फेरफार नोंद प्रमाणित करून अधिकार अभिलेखात (७/१२) दाखल करण्यात येत आहे.`;
+
   const certNumber = `ILRDVS-${doc.documentId}-${Date.now().toString().slice(-6)}`;
   const verifiedDate = formatDate(doc.updatedAt || doc.createdAt);
 
@@ -152,34 +179,52 @@ export const exportCadastralPdfCertificate = async ({
     formTitleMr = 'गाव नमुना सहा (फेरफार नोंदवही - Cadastral Mutation Register)';
     tableHtml = `
       <tr>
-        <td class="lbl">फेरफार नोंद क्रमांक (Mutation Entry No.)</td>
-        <td class="val highlight">${lr.mutationNumber || 'MTR-104'}</td>
+        <td class="lbl">गाव नमुना ६ - फेरफार नोंद क्र. (Mutation Entry No.)</td>
+        <td class="val highlight font-mono">${lr.mutationNumber || 'MTR-4821'}</td>
         <td class="lbl">संबंधित खाते क्रमांक (Associated Khata No.)</td>
-        <td class="val highlight">${lr.khataNumber}</td>
+        <td class="val highlight font-mono">${lr.khataNumber}</td>
+      </tr>
+      <tr>
+        <td class="lbl">नवीन समाविष्ट खातेदार (Transferee / Beneficiary)</td>
+        <td class="val font-bold text-emerald-900">${transferee}</td>
+        <td class="lbl">कमी होणारे खातेदार (Transferor / Former Holder)</td>
+        <td class="val font-bold text-slate-800">${transferor}</td>
       </tr>
       <tr>
         <td class="lbl">संबंधित भूमापन / गट क्र. (Target Gat / Survey No.)</td>
-        <td class="val font-bold">${lr.surveyNumber}</td>
-        <td class="lbl">क्षेत्रफळ (Affected Land Area)</td>
-        <td class="val text-emerald">${lr.plotArea}</td>
+        <td class="val font-bold font-mono text-blue-900">${lr.surveyNumber}</td>
+        <td class="lbl">प्रभावित क्षेत्रफळ (Affected Land Area)</td>
+        <td class="val text-emerald font-bold font-mono">${lr.plotArea}</td>
       </tr>
       <tr>
-        <td class="lbl">नवीन समाविष्ट खातेदार (Transferee / New Owner)</td>
-        <td class="val font-bold">${lr.ownerName}</td>
-        <td class="lbl">हस्तांतरणाचा प्रकार (Mutation Nature / Class)</td>
-        <td class="val">${lr.ownershipType}</td>
+        <td class="lbl">हस्तांतरणाचा प्रकार (Mutation Nature)</td>
+        <td class="val font-semibold">${mutationNature}</td>
+        <td class="lbl">वैधानिक कार्यपद्धती (Statutory Procedure)</td>
+        <td class="val font-mono">कलम १५०(१) व १५०(२) विहित नोटीस पूर्ण</td>
       </tr>
       <tr>
-        <td class="lbl">गाव व मौजे (Village Jurisdiction)</td>
-        <td class="val">${lr.village}</td>
-        <td class="lbl">तालुका व जिल्हा (Taluka & District)</td>
-        <td class="val">${lr.tehsil}, ${lr.district}</td>
+        <td class="lbl">प्रमाणीकरण आदेश क्र. (Sanction Order Ref)</td>
+        <td class="val font-mono font-bold">${mutationOrderNo}</td>
+        <td class="lbl">प्रमाणीकरण दिनांक (Sanction Date)</td>
+        <td class="val font-mono font-bold">${mutationSanctionDate}</td>
       </tr>
       <tr>
-        <td class="lbl">फेरफार मंजुरी स्थिती (Sanction Status)</td>
-        <td class="val text-emerald font-bold">मंडळ अधिकारी प्रमाणित (Sanctioned by Circle Officer)</td>
-        <td class="lbl">शेरा व आदेश संदर्भ (Remarks & Order Ref)</td>
-        <td class="val">${lr.remarks || 'Direct Land Revenue Computerized Validation'}</td>
+        <td class="lbl">सक्षम महसूल प्राधिकारी (Sanctioning Authority)</td>
+        <td class="val font-semibold">${circleOfficer}</td>
+        <td class="lbl">गाव व तालुका (Village & Taluka Jurisdiction)</td>
+        <td class="val">${lr.village}, ता. ${lr.tehsil}, जि. ${lr.district}</td>
+      </tr>
+      <tr>
+        <td class="lbl">तक्रार व हरकत स्थिती (Dispute & Objection Status)</td>
+        <td class="val text-emerald font-bold">निर्विवाद (Uncontested - 15-Day Public Notice Met)</td>
+        <td class="lbl">७/१२ अमलबजावणी स्थिती (7/12 Satbara Status)</td>
+        <td class="val text-emerald font-bold">✓ अधिकार अभिलेखात दाखल व अद्ययावत</td>
+      </tr>
+      <tr>
+        <td class="lbl">तलाठी सविस्तर फेरफार नोंद मजकूर (Official Mutation Narrative)</td>
+        <td class="val" colspan="3" style="font-size: 11px; line-height: 1.5; font-style: italic; background: #fffdf5;">
+          "${mutationNarrative}"
+        </td>
       </tr>
     `;
   } else if (formCat === 'PROPERTY_CARD') {

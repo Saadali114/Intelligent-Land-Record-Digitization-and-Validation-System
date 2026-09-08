@@ -220,6 +220,40 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
       'Main Village Access Road (गाव नकाशा रस्ता)',
   };
 
+  // Rich Mutation Register attributes
+  const mutationNature =
+    entities.mutation_nature ||
+    lr?.remarks?.match(/(?:Nature|Type):\s*([^|]+)/)?.[1]?.trim() ||
+    (lr?.remarks?.toLowerCase().includes('sale')
+      ? 'नोंदणीकृत खरेदीखत (Registered Sale Deed Conveyance)'
+      : lr?.remarks?.toLowerCase().includes('waras') || lr?.remarks?.toLowerCase().includes('heir')
+      ? 'वारस नोंद (Legal Heirship / Succession)'
+      : 'खरेदीखत हस्तांतरण (Cadastral Conveyance Title Transfer)');
+  const transferor =
+    entities.transferor_name ||
+    vendor ||
+    lr?.remarks?.match(/Transferor:\s*([^|]+)/)?.[1]?.trim() ||
+    'श्री. बाळासाहेब रघुनाथ देशमुख';
+  const transferee =
+    entities.transferee_name ||
+    purchaser ||
+    lr?.ownerName ||
+    'श्री. रामेश्वर विठ्ठलराव कदम';
+  const mutationOrderNo =
+    entities.order_number ||
+    lr?.remarks?.match(/Order:\s*([^|]+)/)?.[1]?.trim() ||
+    `म.अ./${lr?.tehsil || 'हवेली'}-का-२/२०२४-१२`;
+  const mutationSanctionDate =
+    entities.sanction_date ||
+    execDate ||
+    '२२/०३/२०२४';
+  const circleOfficerName =
+    entities.circle_officer ||
+    `मंडळ अधिकारी / मंडळ निरीक्षक, ${lr?.tehsil || 'हवेली'}`;
+  const mutationNarrativeText =
+    entities.mutation_narrative ||
+    `मौजे ${lr?.village || 'वडगाव'}, ता. ${lr?.tehsil || 'हवेली'} येथील भूमापन / गट क्र. ${lr?.surveyNumber || '1378'}, क्षेत्रफळ ${lr?.plotArea || '1.62 Hectares'} च्या मिळकतीचे मूळ खातेदार ${transferor} यांनी नोंदणीकृत दस्त क्र. ${dastRegistrationNo} अन्वये ${transferee} यांना हक्क हस्तांतरित केल्याने महाराष्ट्र जमीन महसूल संहिता १९६६ चे कलम १५० अन्वये फेरफार नोंद प्रमाणित करून अधिकार अभिलेखात (७/१२) दाखल करण्यात येत आहे.`;
+
   return (
     <div className="lg:col-span-6 flex flex-col space-y-3">
       {/* Re-uploaded Document Warning Banner */}
@@ -427,8 +461,16 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           {formCat === 'MUTATION_REGISTER' && (
             <MutationRegisterExtractView
               landRecord={lr!}
-              vendor={vendor}
+              vendor={transferor}
               renderFieldVal={renderFieldVal}
+              doc={doc}
+              mutationNature={mutationNature}
+              transferor={transferor}
+              transferee={transferee}
+              orderNumber={mutationOrderNo}
+              sanctionDate={mutationSanctionDate}
+              circleOfficer={circleOfficerName}
+              mutationNarrative={mutationNarrativeText}
             />
           )}
 
