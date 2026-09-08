@@ -122,9 +122,8 @@ export const MainNavbar: React.FC = () => {
               )
             </span>
             <ChevronDown
-              className={`w-3 h-3 text-slate-400 transition-transform ${
-                districtDropdownOpen ? 'rotate-180' : ''
-              }`}
+              className={`w-3 h-3 text-slate-400 transition-transform ${districtDropdownOpen ? 'rotate-180' : ''
+                }`}
             />
           </button>
 

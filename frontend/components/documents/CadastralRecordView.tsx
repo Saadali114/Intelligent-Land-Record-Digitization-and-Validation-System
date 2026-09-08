@@ -12,6 +12,7 @@ import { PropertyCardExtractView } from './extract-views/PropertyCardExtractView
 import { AwaitingExtractionPlaceholder } from './extract-views/AwaitingExtractionPlaceholder';
 import { RawOcrSnippet } from './extract-views/RawOcrSnippet';
 import { DocumentQrModal } from './DocumentQrModal';
+import { downloadStickerLabelImage } from '../../lib/qr-barcode';
 import {
   Sparkles,
   Building2,
@@ -26,6 +27,7 @@ import {
   ShieldCheck,
   ExternalLink,
   QrCode,
+  Download,
 } from 'lucide-react';
 
 interface CadastralRecordViewProps {
@@ -50,6 +52,18 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
   const [translatedData, setTranslatedData] = useState<Record<string, string>>({});
   const [translationNotice, setTranslationNotice] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [isDownloadingSticker, setIsDownloadingSticker] = useState(false);
+
+  const handleDownloadSticker = async () => {
+    setIsDownloadingSticker(true);
+    try {
+      await downloadStickerLabelImage(doc, doc.landRecord);
+    } catch (err) {
+      console.error('Failed to download sticker image:', err);
+    } finally {
+      setIsDownloadingSticker(false);
+    }
+  };
 
   // Reset translator when document changes
   useEffect(() => {
@@ -258,24 +272,49 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           </div>
 
           {doc.landRecord && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                exportCadastralPdfCertificate({
-                  doc,
-                  formCat,
-                  isTranslated,
-                  translatedData,
-                  targetLanguage,
-                })
-              }
-              className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
-              title={t('documents.downloadPdfTitle', { defaultValue: 'Download official digital certificate as PDF' })}
-            >
-              <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
-              {t('documents.downloadPdf', { defaultValue: 'Download PDF' })}
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadSticker}
+                isLoading={isDownloadingSticker}
+                className="text-xs h-7.5 px-2.5 bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100 font-semibold"
+                title="Download high-resolution physical adhesive QR sticker seal image (PNG)"
+              >
+                <Download className="w-3.5 h-3.5 mr-1 text-emerald-700" />
+                QR Sticker
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowQrModal(true)}
+                className="text-xs h-7.5 px-2.5 bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100 font-semibold"
+                title="View & test tamper-proof QR verification seal or print sticker label"
+              >
+                <QrCode className="w-3.5 h-3.5 mr-1 text-emerald-700" />
+                QR Seal
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  exportCadastralPdfCertificate({
+                    doc,
+                    formCat,
+                    isTranslated,
+                    translatedData,
+                    targetLanguage,
+                  })
+                }
+                className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
+                title={t('documents.downloadPdfTitle', { defaultValue: 'Download official digital certificate as PDF' })}
+              >
+                <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
+                {t('documents.downloadPdf', { defaultValue: 'Download PDF' })}
+              </Button>
+            </div>
           )}
         </div>
       </div>
