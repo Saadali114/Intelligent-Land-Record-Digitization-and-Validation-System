@@ -78,7 +78,7 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
       <PortalLayout>
         <div className="py-20 text-center text-slate-400">
           <div className="inline-block animate-spin w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full mb-3"></div>
-          <p className="text-sm">Loading verification details...</p>
+          <p className="text-sm">{t('citizenVerifications.verificationDetail.loadingDetails')}</p>
         </div>
       </PortalLayout>
     );
@@ -89,12 +89,12 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
       <PortalLayout>
         <div className="py-20 text-center text-slate-400">
           <FileText className="w-12 h-12 mx-auto mb-3 text-slate-600" />
-          <p className="text-base font-semibold text-slate-300">Application not found</p>
+          <p className="text-base font-semibold text-slate-300">{t('citizenVerifications.verificationDetail.appNotFound')}</p>
           <Link
             href="/citizen/verifications"
             className="inline-flex items-center gap-1.5 mt-4 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-800 text-sky-400 hover:bg-slate-700"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to My Applications
+            <ArrowLeft className="w-4 h-4" /> {t('citizenVerifications.verificationDetail.backToVerifications')}
           </Link>
         </div>
       </PortalLayout>
@@ -118,7 +118,7 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Verifications List
+            {t('citizenVerifications.verificationDetail.backToList')}
           </Link>
 
           <span className="font-mono text-xs text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded border border-sky-500/20">
@@ -135,16 +135,16 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
               </span>
               <span className="text-xs text-slate-500">•</span>
               <span className="text-xs text-slate-400">
-                Submitted {new Date(workflow.createdAt || Date.now()).toLocaleDateString('en-IN', {
+                {t('citizenVerifications.verificationDetail.submitted')} {new Date(workflow.createdAt || Date.now()).toLocaleDateString('en-IN', {
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric',
                 })}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-white">Application Tracking Dossier</h1>
+            <h1 className="text-2xl font-bold text-white">{t('citizenVerifications.verificationDetail.pageTitle')}</h1>
             <p className="text-sm text-slate-400 mt-1">
-              Survey No: {workflow.officialRecordMatch?.matchedSurveyNumber || '145/2A'} •{' '}
+              {t('citizenVerifications.verificationDetail.surveyNo')}: {workflow.officialRecordMatch?.matchedSurveyNumber || '145/2A'} •{' '}
               {workflow.officialRecordMatch?.matchedVillage || 'Khadakwasla'},{' '}
               {workflow.officialRecordMatch?.matchedTaluka || 'Haveli'}
             </p>
@@ -172,12 +172,12 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
                 <Clock className="w-5 h-5" />
               )}
               {isApproved
-                ? 'Statutory Verified'
+                ? t('citizenVerifications.verificationDetail.statusStatutoryVerified')
                 : isRejected
-                ? 'Verification Rejected'
+                ? t('citizenVerifications.verificationDetail.statusRejected')
                 : isClarification
-                ? 'Action Required: Clarification Requested'
-                : 'Pending Sub-Divisional Officer Review'}
+                ? t('citizenVerifications.verificationDetail.statusClarificationRequested')
+                : t('citizenVerifications.verificationDetail.statusPendingOfficer')}
             </span>
           </div>
         </div>
@@ -191,10 +191,10 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
               </div>
               <div>
                 <h3 className="text-base font-bold text-amber-300">
-                  Officer Clarification Notice
+                  {t('citizenVerifications.verificationDetail.officerClarificationTitle')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  The Revenue Officer reviewed your document and provided the following instruction:
+                  {t('citizenVerifications.verificationDetail.officerClarificationDesc')}
                 </p>
                 <div className="mt-3 p-3.5 rounded-lg bg-slate-950 border border-amber-500/30 text-sm text-amber-200 font-medium leading-relaxed">
                   "{workflow.officerDecision?.remarks || 'Applicant name differs from recorded Khatedar. Please provide succession proof or legal heir affidavit.'}"
@@ -205,18 +205,18 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
             {replySuccess ? (
               <div className="p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-sm flex items-center gap-2">
                 <Check className="w-5 h-5 text-emerald-400" />
-                <span>Your clarification has been submitted to the Sub-Divisional Officer. Application status returned to active review.</span>
+                <span>{t('citizenVerifications.verificationDetail.clarificationReplySuccess')}</span>
               </div>
             ) : (
               <form onSubmit={handleClarificationSubmit} className="space-y-3 pt-2">
                 <label className="block text-xs font-semibold text-slate-300">
-                  Your Clarification Statement / Document References:
+                  {t('citizenVerifications.verificationDetail.clarificationLabel')}
                 </label>
                 <textarea
                   rows={3}
                   value={clarificationReply}
                   onChange={(e) => setClarificationReply(e.target.value)}
-                  placeholder="Explain the relationship, succession order, or attach reference numbers..."
+                  placeholder={t('citizenVerifications.verificationDetail.clarificationPlaceholder')}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
                   required
                 />
@@ -227,7 +227,7 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-colors disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
-                    {submittingReply ? 'Submitting...' : 'Submit Clarification to Officer'}
+                    {submittingReply ? t('citizenVerifications.verificationDetail.submitting') : t('citizenVerifications.verificationDetail.submitClarification')}
                   </button>
                 </div>
               </form>
@@ -241,32 +241,32 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
             <div className="flex items-center gap-2 text-sky-400 border-b border-slate-800 pb-3">
               <FileText className="w-5 h-5" />
-              <h2 className="text-base font-bold text-white">Extracted Entities</h2>
+              <h2 className="text-base font-bold text-white">{t('citizenVerifications.verificationDetail.extractedEntities')}</h2>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Owner Name</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.ownerName')}</span>
                 <span className="font-medium text-white text-right">
                   {workflow.document?.extractedFields?.ownerName?.value || 'Shankar Ganpat Patil'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Survey / Gat No.</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.surveyGatNo')}</span>
                 <span className="font-medium text-white">
                   {workflow.document?.extractedFields?.surveyNumber?.value || '145/2A'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Land Area</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.landArea')}</span>
                 <span className="font-medium text-white">
                   {workflow.document?.extractedFields?.plotArea?.value || '1.25 Hectares'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">OCR Engine Metric</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.ocrMetric')}</span>
                 <span className="font-medium text-emerald-400">
-                  {Math.round((workflow.document?.avgConfidence || 0.98) * 100)}% Confidence
+                  {t('citizenVerifications.verificationDetail.ocrConfidence', { percent: Math.round((workflow.document?.avgConfidence || 0.98) * 100) })}
                 </span>
               </div>
             </div>
@@ -276,30 +276,30 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
             <div className="flex items-center gap-2 text-emerald-400 border-b border-slate-800 pb-3">
               <Building2 className="w-5 h-5" />
-              <h2 className="text-base font-bold text-white">Cadastral Cross-Check</h2>
+              <h2 className="text-base font-bold text-white">{t('citizenVerifications.verificationDetail.cadastralCrossCheck')}</h2>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Reference Match</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.referenceMatch')}</span>
                 <span className="font-medium text-emerald-400">
                   {workflow.officialRecordMatch?.status || 'STRONG_MATCH'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Official Record ID</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.officialRecordId')}</span>
                 <span className="font-mono text-xs text-sky-300">
                   {workflow.officialRecordMatch?.matchedRecordId || 'REC-MH-PUN-001'}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Title Relationship</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.titleRelationship')}</span>
                 <span className="font-medium text-white">
                   {workflow.relationshipVerification?.relationshipType || 'OWNER'}
                 </span>
               </div>
               <div className="text-xs text-slate-400 pt-1 leading-relaxed">
-                {workflow.officialRecordMatch?.summary || 'Matched against state prototype cadastral database.'}
+                {workflow.officialRecordMatch?.summary || t('citizenVerifications.verificationDetail.cadastralMatchSummary')}
               </div>
             </div>
           </div>
@@ -308,12 +308,12 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
             <div className="flex items-center gap-2 text-purple-400 border-b border-slate-800 pb-3">
               <ShieldCheck className="w-5 h-5" />
-              <h2 className="text-base font-bold text-white">Integrity Evaluation</h2>
+              <h2 className="text-base font-bold text-white">{t('citizenVerifications.verificationDetail.integrityEvaluation')}</h2>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Discrepancy Risk</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.discrepancyRisk')}</span>
                 <span
                   className={`font-bold ${
                     workflow.riskAssessment?.level === 'LOW'
@@ -327,12 +327,12 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Visual Density</span>
-                <span className="font-medium text-emerald-400">Intact / No Alteration</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.visualDensity')}</span>
+                <span className="font-medium text-emerald-400">{t('citizenVerifications.verificationDetail.visualDensityValue')}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800/40">
-                <span className="text-slate-400 text-xs">Consistency Checks</span>
-                <span className="font-medium text-white">6 of 6 Passed</span>
+                <span className="text-slate-400 text-xs">{t('citizenVerifications.verificationDetail.consistencyChecks')}</span>
+                <span className="font-medium text-white">{t('citizenVerifications.verificationDetail.consistencyChecksValue')}</span>
               </div>
               <div className="text-xs text-slate-400 pt-1 leading-relaxed">
                 {workflow.riskAssessment?.summary || 'Document evaluation shows low discrepancy risk.'}
@@ -345,7 +345,7 @@ export const CitizenVerificationWorkspace: React.FC<Props> = ({ id }) => {
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2 text-slate-300 border-b border-slate-800 pb-3">
             <History className="w-5 h-5 text-sky-400" />
-            <h2 className="text-base font-bold text-white">Statutory Audit Timeline</h2>
+            <h2 className="text-base font-bold text-white">{t('citizenVerifications.verificationDetail.auditTimeline')}</h2>
           </div>
 
           <div className="space-y-4 pt-2">

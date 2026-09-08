@@ -158,11 +158,11 @@ export default function CitizenUploadWizardPage() {
 
   // AI Pipeline Stages
   const aiStages = [
-    { name: 'Document Preprocessing & Skew Correction', duration: 700 },
-    { name: 'Multilingual OCR (Devanagari Marathi & English)', duration: 900 },
-    { name: 'Entity & Cadastral Extraction (Survey, Khata, Area)', duration: 800 },
-    { name: 'Cross-checking with Cadastral Map Geometry', duration: 800 },
-    { name: 'Anomaly & Discrepancy Assessment', duration: 600 },
+    { key: 'aiStage1', name: 'Document Preprocessing & Skew Correction', duration: 700 },
+    { key: 'aiStage2', name: 'Multilingual OCR (Devanagari Marathi & English)', duration: 900 },
+    { key: 'aiStage3', name: 'Entity & Cadastral Extraction (Survey, Khata, Area)', duration: 800 },
+    { key: 'aiStage4', name: 'Cross-checking with Cadastral Map Geometry', duration: 800 },
+    { key: 'aiStage5', name: 'Anomaly & Discrepancy Assessment', duration: 600 },
   ];
 
   // Run AI processing animation when entering step 4
@@ -415,7 +415,7 @@ export default function CitizenUploadWizardPage() {
                 {t('common.submitting')}: {documentType}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Upload clear scanned copies or photos. Supported formats: PDF, PNG, JPG (up to 15 MB).
+                {t('upload.fileFormatNote')}
               </p>
             </div>
             <button
@@ -503,7 +503,7 @@ export default function CitizenUploadWizardPage() {
                 {uploadedFile.name}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Confirm your uploaded file details before initiating automated AI digitization.
+                {t('upload.confirmFileDesc')}
               </p>
             </div>
             <button
@@ -525,7 +525,7 @@ export default function CitizenUploadWizardPage() {
                   {uploadedFile.name}
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">
-                  Size: {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB &bull; Type: {documentType}
+                  {t('upload.sizeLabel')}: {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB &bull; {t('upload.typeLabel')}: {documentType}
                 </div>
               </div>
             </div>
@@ -541,7 +541,7 @@ export default function CitizenUploadWizardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                State
+                {t('upload.stateLabel')}
               </label>
               <input
                 type="text"
@@ -645,7 +645,7 @@ export default function CitizenUploadWizardPage() {
                     ) : (
                       <div className="w-4 h-4 rounded-full border border-slate-300 flex-shrink-0" />
                     )}
-                    <span>{stage.name}</span>
+                    <span>{t(`upload.${stage.key}`, stage.name)}</span>
                   </div>
 
                   <span className="text-[10px] uppercase font-bold tracking-wider">
@@ -678,7 +678,7 @@ export default function CitizenUploadWizardPage() {
               </div>
             </div>
             <span className="px-2.5 py-1 rounded bg-blue-100 text-blue-900 font-bold text-xs whitespace-nowrap self-start sm:self-auto">
-              Average Confidence: 97%
+              {t('upload.averageConfidence')}: 97%
             </span>
           </div>
 
@@ -749,7 +749,7 @@ export default function CitizenUploadWizardPage() {
                     {t('upload.extractedFieldsTitle')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Review and modify any discrepancies detected.
+                    {t('upload.reviewDiscrepanciesDesc')}
                   </p>
                 </div>
                 <span className="text-[11px] text-slate-400">
@@ -863,7 +863,7 @@ export default function CitizenUploadWizardPage() {
               className="w-full text-center text-xl font-mono font-bold tracking-widest bg-white border border-slate-300 rounded-lg py-2.5 focus:ring-2 focus:ring-blue-900"
             />
             <p className="text-[11px] text-center text-slate-400">
-              Demo OTP automatically filled: <strong>841920</strong>
+              {t('upload.demoOtpNote')} <strong>841920</strong>
             </p>
           </div>
 
@@ -906,7 +906,7 @@ export default function CitizenUploadWizardPage() {
             </div>
             <div className="p-4 grid grid-cols-2 gap-3 divide-y divide-slate-100 sm:divide-y-0">
               <div>
-                <span className="text-slate-500">Document Type:</span>
+                <span className="text-slate-500">{t('upload.docTypeLabel')}</span>
                 <div className="font-bold text-slate-900">{documentType}</div>
               </div>
               <div>

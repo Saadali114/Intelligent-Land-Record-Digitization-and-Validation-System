@@ -39,7 +39,7 @@ export default function CitizenLandRecordsPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 uppercase tracking-wider">
             <Layers className="w-4 h-4" />
-            <span>Digital Repository</span>
+            <span>{t('landRecords.digitalRepository')}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
             {t('landRecords.title')}
