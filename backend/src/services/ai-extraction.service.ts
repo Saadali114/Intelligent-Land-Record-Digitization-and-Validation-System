@@ -972,6 +972,7 @@ export const extractLandRecordFromDocument = async (
         remarks: geminiResult.remarks,
         entities: {
           gatNumber: geminiResult.gatNumber || '',
+          ...((geminiResult as any).entities || {}),
         },
       };
       ocrEngineUsed = geminiResult.ocrEngine;

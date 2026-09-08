@@ -34,6 +34,16 @@ export const getDocumentFormCategory = (doc: DocumentRecord | null): FormCategor
   const sn = (doc.landRecord?.surveyNumber || '').toLowerCase();
   const kn = (doc.landRecord?.khasraNumber || '').toLowerCase();
 
+  const dt = ((doc as any).documentType || '').toLowerCase();
+  const metaDt = (
+    doc.metadata?.aiExtraction?.documentType ||
+    (doc.metadata as any)?.docType ||
+    (doc.metadata as any)?.documentType ||
+    ''
+  ).toLowerCase();
+  const remarks = (doc.landRecord?.remarks || '').toLowerCase();
+  const rawSnippet = (doc.metadata?.aiExtraction?.rawTextSnippet || '').toLowerCase();
+
   // 1. Explicit 7/12 Extract check FIRST (prioritized over mutation/other)
   if (
     ft.includes('7/12') ||
@@ -43,18 +53,42 @@ export const getDocumentFormCategory = (doc: DocumentRecord | null): FormCategor
     on.includes('7-12') ||
     on.includes('7_12') ||
     on.includes('satbara') ||
+    dt.includes('7/12') ||
+    metaDt.includes('7/12') ||
     kn.includes('7/12')
   ) {
     return '7_12_SATBARA';
   }
 
-  // 2. Sale Deed / Conveyance Deed check
+  // 2. Sale Deed / Conveyance Deed check (English, Marathi & Hindi)
   if (
     ft.includes('sale') ||
     ft.includes('kharidi') ||
     ft.includes('conveyance') ||
+    ft.includes('खरेदी') ||
+    ft.includes('बैनामा') ||
+    dt.includes('sale') ||
+    dt.includes('kharidi') ||
+    dt.includes('खरेदी') ||
+    metaDt.includes('sale') ||
+    metaDt.includes('kharidi') ||
+    metaDt.includes('खरेदी') ||
+    metaDt.includes('deed') ||
     on.includes('sale') ||
+    on.includes('kharidi') ||
+    on.includes('खरेदी') ||
+    on.includes('खत') ||
+    on.includes('बैनामा') ||
+    on.includes('विक्रय') ||
+    on.includes('conveyance') ||
     on.includes('deed') ||
+    remarks.includes('sale deed') ||
+    remarks.includes('deed of absolute sale') ||
+    remarks.includes('खरेदीखत') ||
+    remarks.includes('conveyance') ||
+    rawSnippet.includes('sale deed') ||
+    rawSnippet.includes('खरेदीखत') ||
+    rawSnippet.includes('deed of absolute sale') ||
     cl.includes('residential') ||
     kn.includes('sale deed') ||
     sn.includes('site')

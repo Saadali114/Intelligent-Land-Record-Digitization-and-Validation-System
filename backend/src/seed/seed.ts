@@ -217,8 +217,35 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
           scannedDPI: 300,
           originalLanguage: lang,
           docType,
-          extractedConfidence: 0.92,
+          documentType: docType.includes('Sale Deed')
+            ? 'SALE_DEED'
+            : docType.includes('Mutation')
+            ? 'MUTATION_REGISTER'
+            : docType.includes('Property')
+            ? 'PROPERTY_CARD'
+            : '7_12_SATBARA',
+          extractedConfidence: 0.94,
           archivalSerial: `ARCH-MH-REG-${2000 + i}`,
+          aiExtraction: docType.includes('Sale Deed')
+            ? {
+                documentType: 'SALE_DEED',
+                entities: {
+                  vendor_name: 'Balasaheb Raghunath Deshmukh',
+                  purchaser_name: 'Shri. Rameshwar Vithalrao Kadam',
+                  consideration_amount: '₹ 48,50,000/-',
+                  market_value: '₹ 51,00,000/-',
+                  stamp_duty: '₹ 3,39,500/- (e-Challan GRAS-MH-2024-819)',
+                  registration_fee: '₹ 30,000/-',
+                  execution_date: '18/02/2024',
+                  sub_registrar: 'दुय्यम निबंधक कार्यालय, हवेली क्र. ३, पुणे',
+                  registration_number: `REG-MH-2024-${4000 + i}`,
+                  boundary_east: 'Internal 12m DP Sector Road (१२ मी. रस्ता)',
+                  boundary_west: 'Adjacent Survey / Gat No. 1377',
+                  boundary_north: 'Open Layout Amenity Space / Garden (आरक्षित उद्यान)',
+                  boundary_south: 'Main Village Access Road (गाव नकाशा रस्ता)',
+                },
+              }
+            : undefined,
         },
       });
       documents.push(doc);
@@ -350,7 +377,9 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         verifiedBy: verificationStatus !== 'PENDING' ? verifier._id : undefined,
         confidenceScore: 0.88 + (i % 12) * 0.01,
         remarks:
-          verificationStatus === 'VERIFIED'
+          doc.metadata?.docType?.includes('Sale Deed')
+            ? `Deed of Absolute Sale | Vendor: Balasaheb Raghunath Deshmukh | Purchaser: ${ownerName} | Consideration: ₹ 48,50,000/- | Date: 18/02/2024`
+            : verificationStatus === 'VERIFIED'
             ? 'Verified against field survey and archival 7/12 register.'
             : verificationStatus === 'REJECTED'
             ? 'Discrepancy detected in survey boundaries versus khasra record.'

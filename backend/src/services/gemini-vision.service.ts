@@ -24,6 +24,7 @@ export interface GeminiCadastralResult {
   ocrDurationMs: number;
   ocrCharsExtracted: number;
   preprocessingSteps: string[];
+  entities?: Record<string, any>;
 }
 
 /**
@@ -84,8 +85,18 @@ Guidelines:
 6. "village": Village name (गाव / मौजे). E.g. "माळगाव" or "वडगाव". Strictly DO NOT return administrative labels like "तालुका" or "जिल्हा".
 7. "tehsil": Tehsil / Taluka name (तालुका). E.g. "बारामती" or "करजत". Strictly DO NOT return "नोंद" or "तपशील".
 8. "district": District name (जिल्हा). E.g. "सोलापूर" or "रायगड" or "पुणे".
-9. "tenureClass": भू-धारणा पद्धती (Occupant Class 1 / भोगवटादार वर्ग - १ or Class 2).
+9. "tenureClass": भू-धारणा पद्धती (Occupant Class 1 / भोगवटादार वर्ग - १ or Class 2 / Freehold).
 10. "mutationNumber": Latest ferfar / mutation number (e.g. "MTR-18211" or "MTR-10345"). Return empty string if none.
+11. If the document is a Registered Sale Deed / Conveyance Deed (खरेदीखत / बैनामा / Deed of Absolute Sale):
+    - documentType: Set to "SALE_DEED"
+    - purchaserName: The Buyer / Transferee / खरेदीदार / लिहून घेणारा (also set ownerName to this purchaser)
+    - vendorName: The Seller / Transferor / विक्रेता / लिहून देणारा
+    - considerationAmount: Agreed monetary price (e.g. "Rs. 45,00,000/-")
+    - marketValue: Ready Reckoner / Government market valuation if specified (बाजारभाव)
+    - stampDuty: Stamp duty amount paid and e-Challan / GRAS details (मुद्रांक शुल्क)
+    - executionDate: Date of deed execution / signing (दस्त निष्पादन दिनांक)
+    - subRegistrarOffice: Sub-Registrar Office jurisdiction (दुय्यम निबंधक कार्यालय)
+    - boundaryEast, boundaryWest, boundaryNorth, boundarySouth: Four boundaries / चतुःसीमा (पूर्व, पश्चिम, उत्तर, दक्षिण)
 
 Return pure JSON conforming to the requested schema.`;
 
@@ -114,7 +125,19 @@ Return pure JSON conforming to the requested schema.`;
         responseSchema: {
           type: 'OBJECT',
           properties: {
+            documentType: { type: 'STRING' },
             ownerName: { type: 'STRING' },
+            purchaserName: { type: 'STRING' },
+            vendorName: { type: 'STRING' },
+            considerationAmount: { type: 'STRING' },
+            marketValue: { type: 'STRING' },
+            stampDuty: { type: 'STRING' },
+            executionDate: { type: 'STRING' },
+            subRegistrarOffice: { type: 'STRING' },
+            boundaryEast: { type: 'STRING' },
+            boundaryWest: { type: 'STRING' },
+            boundaryNorth: { type: 'STRING' },
+            boundarySouth: { type: 'STRING' },
             surveyNumber: { type: 'STRING' },
             gatNumber: { type: 'STRING' },
             khataNumber: { type: 'STRING' },
@@ -238,28 +261,53 @@ Return pure JSON conforming to the requested schema.`;
     if (ownerName === 'Not Detected') anomalies.push('Owner name not detected');
     if (plotArea === 'Not Detected') anomalies.push('Plot area not detected');
 
+    const isSaleDeed = parsed.documentType === 'SALE_DEED' || !!parsed.purchaserName || !!parsed.vendorName;
+    const purchaser = (parsed.purchaserName || ownerName).trim();
+    const vendor = (parsed.vendorName || '').trim();
+    const consideration = (parsed.considerationAmount || '').trim();
+    const execDate = (parsed.executionDate || '').trim();
+
+    let computedRemarks = parsed.remarks;
+    if (isSaleDeed && (!computedRemarks || computedRemarks.includes('Verified Cadastral Extraction'))) {
+      computedRemarks = `Deed of Absolute Sale | Vendor: ${vendor || 'Prior Registered Holder'} | Purchaser: ${purchaser} | Consideration: ${consideration || 'Standard Schedule'} | Date: ${execDate || 'Registered'}`;
+    }
+
     return {
-      ownerName,
+      ownerName: purchaser || ownerName,
       surveyNumber,
       gatNumber,
-      khasraNumber: 'N/A (7/12 Form)',
+      khasraNumber: isSaleDeed ? 'N/A (Sale Deed)' : 'N/A (7/12 Form)',
       khataNumber,
       plotArea,
       village,
       tehsil,
       district,
-      landClassification: parsed.landClassification || 'Agricultural (Jirayat)',
-      ownershipType: parsed.ownershipType || 'Occupant Class 1 (भोगवटादार वर्ग - १)',
+      landClassification: parsed.landClassification || (isSaleDeed ? 'Residential / Non-Agricultural (Urban Plot)' : 'Agricultural (Jirayat)'),
+      ownershipType: parsed.ownershipType || (isSaleDeed ? 'Freehold / Absolute Ownership (पूर्ण मालकी हक्क)' : 'Occupant Class 1 (भोगवटादार वर्ग - १)'),
       mutationNumber,
       registrationNumber: parsed.registrationNumber || '',
       overallConfidence: 0.98,
       fieldConfidence,
       anomalies,
-      rawTextSnippet: parsed.rawTextSummary || `${ownerName} | ${surveyNumber} | ${village}, ${tehsil}, ${district}`,
-      remarks: parsed.remarks || `Verified Cadastral Extraction (Gemini 1.5 Flash Vision - ${duration}ms)`,
+      rawTextSnippet: parsed.rawTextSummary || `${purchaser} | ${surveyNumber} | ${village}, ${tehsil}, ${district}`,
+      remarks: computedRemarks || `Verified Cadastral Extraction (Gemini 1.5 Flash Vision - ${duration}ms)`,
       ocrEngine: 'Gemini-1.5-Flash-Vision',
       ocrDurationMs: duration,
       ocrCharsExtracted: rawJsonText.length,
+      entities: {
+        document_type: isSaleDeed ? 'SALE_DEED' : (parsed.documentType || '7_12_SATBARA'),
+        vendor_name: vendor,
+        purchaser_name: purchaser,
+        consideration_amount: consideration,
+        market_value: parsed.marketValue || '',
+        stamp_duty: parsed.stampDuty || '',
+        execution_date: execDate,
+        sub_registrar: parsed.subRegistrarOffice || '',
+        boundary_east: parsed.boundaryEast || '',
+        boundary_west: parsed.boundaryWest || '',
+        boundary_north: parsed.boundaryNorth || '',
+        boundary_south: parsed.boundarySouth || '',
+      },
       preprocessingSteps: [
         'mode: Hybrid Cloud-Edge Intelligence',
         'engine: Google Gemini 1.5 Flash Vision',
