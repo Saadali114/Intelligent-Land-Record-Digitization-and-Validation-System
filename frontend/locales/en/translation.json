@@ -848,6 +848,7 @@
     "title": "Create Your ILRDVS Account",
     "subtitle": "Select your account pathway to access land digitization, document verification, or official review workspaces.",
     "registrationHeader": "Registration Portal",
+    "registerNow": "Register / Apply for Access",
     "portalBadge": "Official Access Registration",
     "citizen": "Citizen",
     "officer": "Officer",
@@ -902,6 +903,7 @@
     "satara": "Satara"
   },
   "footer": {
+    "portalTitle": "ILRDVS Land Portal",
     "portalSubtitle": "Government of India & Maharashtra Revenue Initiative",
     "missionText": "An intelligent, AI-powered Cadastral Digitization & Validation System designed to safeguard, digitize, and authenticate historical land titles under the National Land Records Modernization Programme (NLRMP).",
     "sslEncrypted": "256-Bit SSL Encrypted",

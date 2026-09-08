@@ -27,27 +27,25 @@ export const LandingFooter: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-bold text-sm text-white tracking-tight">
-                  ILRDVS Land Portal
+                  {t('footer.portalTitle', 'ILRDVS Land Portal')}
                 </h4>
                 <p className="text-[11px] text-slate-400">
-                  Government of India & Maharashtra Revenue Initiative
+                  {t('footer.portalSubtitle')}
                 </p>
               </div>
             </div>
 
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              An intelligent, AI-powered Cadastral Digitization & Validation System designed to
-              safeguard, digitize, and authenticate historical land titles under the National Land
-              Records Modernization Programme (NLRMP).
+              {t('footer.missionText')}
             </p>
 
             <div className="pt-2 flex items-center gap-3 text-[11px] text-slate-400">
               <span className="flex items-center gap-1 text-emerald-400">
-                <Lock className="w-3.5 h-3.5" /> 256-Bit SSL Encrypted
+                <Lock className="w-3.5 h-3.5" /> {t('footer.sslEncrypted')}
               </span>
               <span>&bull;</span>
               <span className="flex items-center gap-1 text-amber-400">
-                <Shield className="w-3.5 h-3.5" /> W3C & STQC Compliant
+                <Shield className="w-3.5 h-3.5" /> {t('footer.compliance')}
               </span>
             </div>
           </div>
@@ -55,7 +53,7 @@ export const LandingFooter: React.FC = () => {
           {/* Col 2: Cadastral Services */}
           <div className="space-y-3">
             <h5 className="font-bold text-xs text-white uppercase tracking-wider">
-              {t('navbar.services')}
+              {t('footer.cadastralServices', t('navbar.services'))}
             </h5>
             <ul className="space-y-2 text-[11px]">
               <li>
@@ -65,7 +63,7 @@ export const LandingFooter: React.FC = () => {
               </li>
               <li>
                 <Link href="/land-records" className="hover:text-amber-400 transition-colors">
-                  Urban Property Cards (CTS)
+                  {t('footer.urbanPropertyCards')}
                 </Link>
               </li>
               <li>
@@ -80,7 +78,7 @@ export const LandingFooter: React.FC = () => {
               </li>
               <li>
                 <Link href="/verification" className="hover:text-amber-400 transition-colors">
-                  Inspector Workstation
+                  {t('footer.inspectorWorkstation')}
                 </Link>
               </li>
             </ul>
@@ -89,7 +87,7 @@ export const LandingFooter: React.FC = () => {
           {/* Col 3: Government Portals */}
           <div className="space-y-3">
             <h5 className="font-bold text-xs text-white uppercase tracking-wider">
-              Related Portals
+              {t('footer.relatedPortals')}
             </h5>
             <ul className="space-y-2 text-[11px]">
               <li>
@@ -99,7 +97,7 @@ export const LandingFooter: React.FC = () => {
                   rel="noreferrer"
                   className="hover:text-amber-400 transition-colors inline-flex items-center gap-1"
                 >
-                  <span>MahaBhumi Portal</span>
+                  <span>{t('footer.mahabhumiPortal')}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-slate-500" />
                 </a>
               </li>
@@ -110,7 +108,7 @@ export const LandingFooter: React.FC = () => {
                   rel="noreferrer"
                   className="hover:text-amber-400 transition-colors inline-flex items-center gap-1"
                 >
-                  <span>Digital India</span>
+                  <span>{t('footer.digitalIndia')}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-slate-500" />
                 </a>
               </li>
@@ -121,7 +119,7 @@ export const LandingFooter: React.FC = () => {
                   rel="noreferrer"
                   className="hover:text-amber-400 transition-colors inline-flex items-center gap-1"
                 >
-                  <span>National Portal of India</span>
+                  <span>{t('footer.nationalPortal')}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-slate-500" />
                 </a>
               </li>
@@ -132,7 +130,7 @@ export const LandingFooter: React.FC = () => {
                   rel="noreferrer"
                   className="hover:text-amber-400 transition-colors inline-flex items-center gap-1"
                 >
-                  <span>National Informatics Centre</span>
+                  <span>{t('footer.nic')}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-slate-500" />
                 </a>
               </li>
@@ -142,27 +140,27 @@ export const LandingFooter: React.FC = () => {
           {/* Col 4: Legal Policies */}
           <div className="space-y-3">
             <h5 className="font-bold text-xs text-white uppercase tracking-wider">
-              Policies & Help
+              {t('footer.policiesAndHelp')}
             </h5>
             <ul className="space-y-2 text-[11px]">
               <li>
                 <Link href="#about" className="hover:text-amber-400 transition-colors">
-                  Terms of Use
+                  {t('footer.termsOfUse')}
                 </Link>
               </li>
               <li>
                 <Link href="#about" className="hover:text-amber-400 transition-colors">
-                  Privacy & Data Policy
+                  {t('footer.privacyPolicy')}
                 </Link>
               </li>
               <li>
                 <Link href="#faq" className="hover:text-amber-400 transition-colors">
-                  Hyperlink & Copyright Policy
+                  {t('footer.hyperlinkPolicy')}
                 </Link>
               </li>
               <li>
                 <Link href="#contact" className="hover:text-amber-400 transition-colors">
-                  Citizen Grievance Policy
+                  {t('footer.grievancePolicy')}
                 </Link>
               </li>
               <li>
@@ -179,12 +177,12 @@ export const LandingFooter: React.FC = () => {
       <div className="border-t border-slate-800/80 bg-slate-950 py-5 px-4 text-slate-500 text-[11px]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div>
-            &copy; {new Date().getFullYear()} Intelligent Land Record Digitization & Validation System (ILRDVS). All Rights Reserved.
+            {t('footer.copyrightText', { year: new Date().getFullYear() })}
           </div>
           <div className="flex items-center gap-1 text-slate-400">
-            <span>Built with precision for</span>
-            <span className="font-bold text-amber-400">Smart India Hackathon (SIH)</span>
-            <span>&bull; Digital Land Governance</span>
+            <span>{t('footer.builtWith')}</span>
+            <span className="font-bold text-amber-400">{t('footer.sih')}</span>
+            <span>&bull; {t('footer.digitalGovernance')}</span>
           </div>
         </div>
       </div>
