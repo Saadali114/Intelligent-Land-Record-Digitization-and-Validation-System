@@ -4,7 +4,14 @@ export type FormCategory = '7_12_SATBARA' | 'SALE_DEED' | 'MUTATION_REGISTER' | 
 
 export const getBackendFileUrl = (doc: DocumentRecord | null): string => {
   if (!doc) return '';
-  if (doc.fileUrl && (doc.fileUrl.startsWith('http://') || doc.fileUrl.startsWith('https://'))) {
+  // 1. Direct embedded Data URL stored in database metadata (100% immune to cloud container resets)
+  if (doc.metadata?.previewDataUrl) {
+    return doc.metadata.previewDataUrl;
+  }
+  if (doc.metadata?.thumbnailDataUrl) {
+    return doc.metadata.thumbnailDataUrl;
+  }
+  if (doc.fileUrl && (doc.fileUrl.startsWith('http://') || doc.fileUrl.startsWith('https://') || doc.fileUrl.startsWith('data:'))) {
     return doc.fileUrl;
   }
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';

@@ -11,6 +11,7 @@ import { MutationRegisterExtractView } from './extract-views/MutationRegisterExt
 import { PropertyCardExtractView } from './extract-views/PropertyCardExtractView';
 import { AwaitingExtractionPlaceholder } from './extract-views/AwaitingExtractionPlaceholder';
 import { RawOcrSnippet } from './extract-views/RawOcrSnippet';
+import { DocumentQrModal } from './DocumentQrModal';
 import {
   Sparkles,
   Building2,
@@ -24,6 +25,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   ExternalLink,
+  QrCode,
 } from 'lucide-react';
 
 interface CadastralRecordViewProps {
@@ -47,6 +49,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
   const [showSideBySide, setShowSideBySide] = useState(false);
   const [translatedData, setTranslatedData] = useState<Record<string, string>>({});
   const [translationNotice, setTranslationNotice] = useState<string | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   // Reset translator when document changes
   useEffect(() => {
@@ -403,6 +406,13 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
 
       {/* Raw OCR Text Snippet */}
       <RawOcrSnippet rawText={doc.metadata?.aiExtraction?.rawTextSnippet} />
+
+      {/* QR & Barcode Verification Modal */}
+      <DocumentQrModal
+        document={doc}
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+      />
     </div>
   );
 };

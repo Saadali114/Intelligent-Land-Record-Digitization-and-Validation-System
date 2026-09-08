@@ -11,6 +11,7 @@ export interface ModalProps {
   description?: string;
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full';
+  fullHeight?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -20,6 +21,7 @@ export const Modal: React.FC<ModalProps> = ({
   description,
   children,
   maxWidth = 'lg',
+  fullHeight = false,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,38 +46,43 @@ export const Modal: React.FC<ModalProps> = ({
     '5xl': 'max-w-5xl',
     '6xl': 'max-w-6xl',
     '7xl': 'max-w-7xl',
-    full: 'max-w-[95vw]',
+    full: 'max-w-[98vw] w-[98vw]',
   };
 
+  const isFullView = maxWidth === 'full' || fullHeight;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden p-2 sm:p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Dialog */}
       <div
         className={cn(
-          'relative w-full rounded-xl bg-white shadow-2xl border border-slate-200 z-10 overflow-hidden transform transition-all',
-          maxWidths[maxWidth]
+          'relative w-full rounded-2xl bg-white shadow-2xl border border-slate-200 z-10 overflow-hidden transform transition-all',
+          maxWidths[maxWidth],
+          isFullView ? 'h-[96vh] max-h-[96vh] flex flex-col' : ''
         )}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 bg-slate-50/70 shrink-0">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+            <h3 className="text-base font-bold text-slate-900">{title}</h3>
             {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 max-h-[calc(85vh-8rem)] overflow-y-auto">{children}</div>
+        <div className={cn('p-4 sm:p-5 overflow-y-auto', isFullView ? 'flex-1 flex flex-col' : 'max-h-[calc(85vh-8rem)]')}>
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -156,3 +156,155 @@ export const verifyUserDocument = async (req: AuthenticatedRequest, res: Respons
   }
 };
 
+export function computeDocumentSecretCode(documentId: string, metadataCode?: string): string {
+  if (metadataCode && typeof metadataCode === 'string' && metadataCode.trim()) {
+    return metadataCode.trim().toUpperCase();
+  }
+  const str = `${(documentId || '').toUpperCase().trim()}:ILRDVS-MAHA-SEAL-2026`;
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c64e6d;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const part1 = (h1 >>> 0).toString(16).toUpperCase().padStart(8, '0').slice(0, 4);
+  const part2 = (h2 >>> 0).toString(16).toUpperCase().padStart(8, '0').slice(0, 4);
+  return `SEC-${part1}-${part2}`;
+}
+
+export const publicVerifyDocument = async (req: any, res: Response): Promise<void> => {
+  try {
+    const { query } = req.params;
+    if (!query || !query.trim()) {
+      sendError(res, 'Document identifier is required for verification', 400);
+      return;
+    }
+
+    const { DocumentModel } = await import('../models/Document.js');
+    const { LandRecord } = await import('../models/LandRecord.js');
+
+    const cleanQuery = query.trim();
+    const isQuerySecretCode = cleanQuery.toUpperCase().startsWith('SEC-');
+
+    let doc: any = null;
+
+    if (isQuerySecretCode) {
+      // Fast look up by secret code using lightweight select
+      const { prisma } = await import('../config/prisma.js');
+      const lightDocs = await prisma.document.findMany({
+        select: { id: true, documentId: true, metadata: true },
+        take: 200,
+      });
+      const matched = lightDocs.find((d: any) => {
+        const metaCode = d.metadata && typeof d.metadata === 'object' ? (d.metadata as any).securityCode : undefined;
+        const expected = computeDocumentSecretCode(d.documentId, metaCode);
+        return expected === cleanQuery.toUpperCase();
+      });
+      if (matched) {
+        doc = await DocumentModel.findById(matched.id);
+      }
+    } else {
+      // Query by documentId, or mongo/cuid _id, or checksum
+      doc = await DocumentModel.findOne({
+        $or: [
+          { documentId: cleanQuery },
+          { _id: cleanQuery },
+          { checksum: cleanQuery },
+        ],
+      });
+    }
+
+    if (!doc) {
+      sendError(
+        res,
+        isQuerySecretCode
+          ? `No registered land document found matching secret security code '${cleanQuery}'`
+          : `No registered land document found matching identifier '${cleanQuery}'`,
+        404
+      );
+      return;
+    }
+
+    const expectedSec = computeDocumentSecretCode(doc.documentId, doc.metadata?.securityCode);
+    const rawSuppliedSec = (req.query.sec as string) || (isQuerySecretCode ? cleanQuery : '');
+    const suppliedSec = rawSuppliedSec ? rawSuppliedSec.trim().toUpperCase() : null;
+
+    let secretCodeVerified: boolean | null = null;
+    let verificationTier: 'PHYSICAL_STICKER_AUTHENTICATED' | 'DIGITAL_RECORD_ONLY' | 'TAMPER_ALERT_MISMATCH' =
+      'DIGITAL_RECORD_ONLY';
+    let tamperWarning: string | null = null;
+
+    if (suppliedSec) {
+      if (suppliedSec === expectedSec) {
+        secretCodeVerified = true;
+        verificationTier = 'PHYSICAL_STICKER_AUTHENTICATED';
+      } else {
+        secretCodeVerified = false;
+        verificationTier = 'TAMPER_ALERT_MISMATCH';
+        tamperWarning = `Security PIN mismatch! The supplied secret PIN '${suppliedSec}' does not match the registered archive seal for this document. Possible counterfeit physical sticker.`;
+      }
+    }
+
+    const landRecord = await LandRecord.findOne({ sourceDocument: doc._id });
+
+    sendSuccess(
+      res,
+      verificationTier === 'PHYSICAL_STICKER_AUTHENTICATED'
+        ? 'Official Cadastral Record & Physical Sticker Authenticated'
+        : verificationTier === 'TAMPER_ALERT_MISMATCH'
+        ? 'TAMPER ALERT: Physical Sticker Security PIN Mismatch'
+        : 'Official Cadastral Record Verified (Digital Record)',
+      {
+        valid: verificationTier !== 'TAMPER_ALERT_MISMATCH',
+        documentId: doc.documentId,
+        originalName: doc.originalName,
+        fileType: doc.fileType,
+        processingStatus: doc.processingStatus,
+        checksum: doc.checksum,
+        uploadedAt: doc.uploadedAt,
+        verificationTier,
+        secretCodeVerified,
+        tamperWarning,
+        secretSecurityCode:
+          verificationTier === 'PHYSICAL_STICKER_AUTHENTICATED'
+            ? expectedSec
+            : suppliedSec
+            ? 'INVALID'
+            : `SEC-****-${expectedSec.slice(-4)}`,
+        physicalStickerInstructions:
+          'Scan the QR code on the physical document adhesive sticker or enter the 8-character Secret PIN to authenticate the physical paper document.',
+        landRecord: landRecord
+          ? {
+              ownerName: landRecord.ownerName,
+              surveyNumber: landRecord.surveyNumber,
+              gatNumber: landRecord.gatNumber || null,
+              khataNumber: landRecord.khataNumber,
+              plotArea: landRecord.plotArea,
+              village: landRecord.village,
+              tehsil: landRecord.tehsil,
+              district: landRecord.district,
+              landClassification: landRecord.landClassification,
+              ownershipType: landRecord.ownershipType,
+              mutationNumber: landRecord.mutationNumber,
+              verificationStatus: landRecord.verificationStatus,
+            }
+          : null,
+        digitalSeal: {
+          authority: 'Government of Maharashtra • Land Records & Revenue Directorate',
+          system: 'ILRDVS Cadastral Verification & Validation Service',
+          verifiedAt: new Date().toISOString(),
+          certificateNo: `CERT-ILRDVS-${doc.documentId}`,
+          securityHash: doc.checksum || 'VERIFIED-SEAL',
+          stickerPinVerified: secretCodeVerified === true,
+        },
+      },
+      200
+    );
+  } catch (error: any) {
+    sendError(res, error.message || 'Public document verification query failed', 500);
+  }
+};
+

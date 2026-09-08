@@ -58,11 +58,12 @@ export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = (
       onClose={handleClose}
       title={t('officerDocuments.inspectionModalTitle', { defaultValue: 'Cadastral Dual-Pane Inspection' })}
       description={`${doc.documentId} • ${doc.language || 'Marathi'} (${doc.fileType}) • Uploaded ${formatDate(doc.uploadedAt)}`}
-      maxWidth="6xl"
+      maxWidth="full"
+      fullHeight={true}
     >
-      <div className="space-y-4">
+      <div className="flex-1 flex flex-col justify-between space-y-4">
         {/* Main Dual-Pane Section: Scan Viewer (Left) + Digital Record (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0">
           <DocumentScanViewer
             document={doc}
             imageZoom={imageZoom}

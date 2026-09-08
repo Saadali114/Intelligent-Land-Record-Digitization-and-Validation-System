@@ -23,9 +23,13 @@ export const createDocumentRecord = async (
   const documentId = generateDocumentId();
 
   let checksum = '';
+  let previewDataUrl = '';
   try {
     const fileBuffer = fs.readFileSync(file.path);
     checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    if (file.mimetype.startsWith('image/') && fileBuffer.length <= 8 * 1024 * 1024) {
+      previewDataUrl = `data:${file.mimetype};base64,${fileBuffer.toString('base64')}`;
+    }
   } catch {
     // Ignore checksum calculation failure
   }
@@ -68,6 +72,7 @@ export const createDocumentRecord = async (
       uploadSource: 'Web Portal',
       isReuploaded,
       reuploadedFromId,
+      previewDataUrl: previewDataUrl || undefined,
       aiPipeline: {
         ocrReady: true,
         engine: 'ILRDVS-Cadastral-AI-Engine-v2.4',
