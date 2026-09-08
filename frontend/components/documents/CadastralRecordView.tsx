@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { DocumentRecord } from '../../types';
 import { FormCategory, getDocumentFormCategory, translateCadastralText } from '../../lib/cadastral-utils';
 import { exportCadastralPdfCertificate } from '../../lib/certificate-generator';
@@ -36,6 +37,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
   onRunExtraction,
   isExtracting,
 }) => {
+  const { t } = useTranslation();
   const formCat = getDocumentFormCategory(doc);
 
   // Translation States
@@ -97,24 +99,18 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
 
       setTranslatedData(result);
       setIsTranslated(true);
+      const langNames: Record<string, string> = {
+        en: 'English',
+        mr: 'मराठी',
+        hi: 'हिन्दी',
+        gu: 'ગુજરાતી',
+        kn: 'ಕನ್ನಡ',
+        te: 'తెలుగు',
+        ta: 'தமிழ்',
+        bn: 'বাংলা',
+      };
       setTranslationNotice(
-        `Record translated to ${
-          targetLanguage === 'en'
-            ? 'English'
-            : targetLanguage === 'mr'
-            ? 'Marathi'
-            : targetLanguage === 'hi'
-            ? 'Hindi'
-            : targetLanguage === 'gu'
-            ? 'Gujarati'
-            : targetLanguage === 'kn'
-            ? 'Kannada'
-            : targetLanguage === 'te'
-            ? 'Telugu'
-            : targetLanguage === 'ta'
-            ? 'Tamil'
-            : 'Bengali'
-        }`
+        `${t('documents.translatedRecord', { defaultValue: 'Translated record' })} (${langNames[targetLanguage] || targetLanguage})`
       );
     } catch (err: any) {
       alert('Translation service error: ' + (err.message || 'Unknown'));
@@ -147,28 +143,29 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
 
   const lr = doc.landRecord;
   const entities = doc.metadata?.aiExtraction?.entities || {};
+  const notSpecified = t('common.notSpecified', { defaultValue: 'Not Specified' });
   const vendor =
     translatedData.vendorName ||
     entities.vendor_name ||
     lr?.remarks?.match(/Vendor:\s*([^->|]+)/)?.[1]?.trim() ||
-    'Not Specified';
+    notSpecified;
   const purchaser =
     translatedData.purchaserName ||
     entities.purchaser_name ||
     lr?.remarks?.match(/Purchaser:\s*([^|]+)/)?.[1]?.trim() ||
     lr?.ownerName ||
-    'Not Specified';
+    notSpecified;
   const consideration =
     translatedData.considerationAmount ||
     entities.consideration_amount ||
     lr?.remarks?.match(/Consideration:\s*([^|]+)/)?.[1]?.trim() ||
-    'Not Specified';
+    notSpecified;
   const execDate =
     entities.execution_date ||
     lr?.remarks?.match(/(?:Date|Executed):\s*([^|]+)/)?.[1]?.trim() ||
     '';
   const stampDuty =
-    entities.stamp_duty || 'Non-Judicial Stamp Paper';
+    entities.stamp_duty || t('documents.nonJudicialStampPaper', { defaultValue: 'Non-Judicial Stamp Paper' });
 
   return (
     <div className="lg:col-span-6 flex flex-col space-y-3">
@@ -182,17 +179,17 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="font-bold flex items-center gap-1.5">
-              <span>Re-Uploaded Document Detected</span>
+              <span>{t('documents.reuploadedWarningTitle', { defaultValue: 'Re-Uploaded Document Detected' })}</span>
               <span className="text-[10px] font-semibold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded">
-                Duplicate Parcel
+                {t('documents.duplicateParcelBadge', { defaultValue: 'Duplicate Parcel' })}
               </span>
             </div>
             <p className="text-[11px] text-amber-800 mt-0.5">
-              This document or land parcel already exists in the registry
+              {t('documents.reuploadedWarningDesc', { defaultValue: 'This document or land parcel already exists in the registry' })}
               {doc.reuploadedFromId || doc.metadata?.reuploadedFromId
                 ? ` (Original: ${doc.reuploadedFromId || doc.metadata?.reuploadedFromId})`
                 : ''}
-              . AI confidence has been adjusted to mandate revenue officer review.
+              . {t('documents.reuploadedConfidenceNote', { defaultValue: 'AI confidence has been adjusted to mandate revenue officer review.' })}
             </p>
           </div>
         </div>
@@ -202,32 +199,32 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-emerald-600" />
-            Digitized Cadastral Record
+            {t('documents.digitizedCadastralRecord', { defaultValue: 'Digitized Cadastral Record' })}
           </span>
 
           {/* Form Category Badge */}
           {formCat === 'SALE_DEED' && (
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center gap-1">
               <Building2 className="w-3 h-3" />
-              खरेदी खत (Sale Deed)
+              {t('documents.saleDeedBadge', { defaultValue: 'खरेदी खत (Sale Deed)' })}
             </span>
           )}
           {formCat === 'MUTATION_REGISTER' && (
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
               <Landmark className="w-3 h-3" />
-              फेरफार नोंदवही (Form 6)
+              {t('documents.mutationRegisterBadge', { defaultValue: 'फेरफार नोंदवही (Form 6)' })}
             </span>
           )}
           {formCat === 'PROPERTY_CARD' && (
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1">
               <FileCheck2 className="w-3 h-3" />
-              मिळकत पत्रिका (Property Card)
+              {t('documents.propertyCardBadge', { defaultValue: 'मिळकत पत्रिका (Property Card)' })}
             </span>
           )}
           {formCat === '7_12_SATBARA' && (
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" />
-              गाव नमुना ७/१२ (Satbara)
+              {t('documents.satbaraBadge', { defaultValue: 'गाव नमुना ७/१२ (Satbara)' })}
             </span>
           )}
         </div>
@@ -253,7 +250,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
               isLoading={isTranslating}
               className="h-6 px-2 text-[10px] font-bold bg-white text-blue-700 border-slate-200 hover:bg-slate-50 shadow-none"
             >
-              Translate
+              {t('documents.translate', { defaultValue: 'Translate' })}
             </Button>
           </div>
 
@@ -271,10 +268,10 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
                 })
               }
               className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
-              title="Download official digital certificate as PDF"
+              title={t('documents.downloadPdfTitle', { defaultValue: 'Download official digital certificate as PDF' })}
             >
               <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
-              Download PDF
+              {t('documents.downloadPdf', { defaultValue: 'Download PDF' })}
             </Button>
           )}
         </div>
@@ -283,7 +280,7 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
       {/* Translation Compare Strip (Only visible when translated) */}
       {isTranslated && (
         <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-900 flex items-center justify-between">
-          <span className="font-medium">✓ {translationNotice || 'Translated record'}</span>
+          <span className="font-medium">✓ {translationNotice || t('documents.translatedRecord', { defaultValue: 'Translated record' })}</span>
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -295,14 +292,16 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
               }`}
             >
               <ArrowRightLeft className="w-3 h-3" />
-              {showSideBySide ? 'Side-by-Side: ON' : 'Compare View'}
+              {showSideBySide
+                ? t('documents.sideBySideOn', { defaultValue: 'Side-by-Side: ON' })
+                : t('documents.compareView', { defaultValue: 'Compare View' })}
             </button>
             <button
               type="button"
               onClick={handleResetTranslation}
               className="px-2 py-0.5 text-[10px] font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200 transition-colors"
             >
-              Show Original
+              {t('documents.showOriginal', { defaultValue: 'Show Original' })}
             </button>
           </div>
         </div>
@@ -315,9 +314,14 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
             <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-xs flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div>
-                <div className="font-bold text-rose-800">OCR Could Not Read This Document Clearly</div>
+                <div className="font-bold text-rose-800">
+                  {t('documents.lowOcrQualityTitle', { defaultValue: 'OCR Could Not Read This Document Clearly' })}
+                </div>
                 <div className="text-rose-700 mt-0.5">
-                  The scan quality prevented accurate text extraction. Values below are estimated placeholders — please update in Verification Workstation.
+                  {t('documents.lowOcrQualityDesc', {
+                    defaultValue:
+                      'The scan quality prevented accurate text extraction. Values below are estimated placeholders — please update in Verification Workstation.',
+                  })}
                 </div>
               </div>
             </div>
@@ -364,11 +368,11 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span className="font-semibold text-slate-800">
-                  AI Confidence: {((doc.metadata.aiExtraction.overallConfidence || 0.95) * 100).toFixed(0)}%
+                  {t('documents.aiConfidence', { defaultValue: 'AI Confidence' })}: {((doc.metadata.aiExtraction.overallConfidence || 0.95) * 100).toFixed(0)}%
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-[11px] font-mono text-slate-500">
-                  Engine: {doc.metadata.aiExtraction.ocrEngine || 'Gemini-1.5-Flash'}
+                  {t('documents.engine', { defaultValue: 'Engine' })}: {doc.metadata.aiExtraction.ocrEngine || 'Gemini-1.5-Flash'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -376,14 +380,14 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
                   href="/verification"
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded border border-blue-200 transition-colors"
                 >
-                  Verification Workstation
+                  {t('documents.verificationWorkstation', { defaultValue: 'Verification Workstation' })}
                   <ExternalLink className="w-3 h-3 ml-0.5" />
                 </Link>
                 <Link
                   href="/land-records"
                   className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-2.5 py-1 rounded border border-slate-200 transition-colors"
                 >
-                  Land Records
+                  {t('documents.landRecordsNav', { defaultValue: 'Land Records' })}
                 </Link>
               </div>
             </div>

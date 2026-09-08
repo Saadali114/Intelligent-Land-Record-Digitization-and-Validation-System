@@ -116,19 +116,31 @@ export default function VerificationPage() {
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-900 animate-pulse"></span>
               <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
-                Statutory Document & Title Verification
+                {t('officerVerification.statutoryDocumentTitle', {
+                  defaultValue: 'Statutory Document & Title Verification',
+                })}
               </span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <CheckCheck className="w-6 h-6 text-blue-900" />
               {activeQueueType === 'user-docs'
-                ? 'User Uploaded Document Verification'
-                : 'Cadastral Records Verification Queue'}
+                ? t('officerVerification.userUploadedDocVerif', {
+                    defaultValue: 'User Uploaded Document Verification',
+                  })
+                : t('officerVerification.cadastralRecordsQueue', {
+                    defaultValue: 'Cadastral Records Verification Queue',
+                  })}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               {activeQueueType === 'user-docs'
-                ? 'Inspect citizen uploaded land documents (7/12, 8A, Ferfar, Sale Deed), review AI extraction, and record official verifications.'
-                : 'Review cadastral land records, cross-check against physical scans, and record official verification decisions.'}
+                ? t('officerVerification.userDocsSubtitle', {
+                    defaultValue:
+                      'Inspect citizen uploaded land documents (7/12, 8A, Ferfar, Sale Deed), review AI extraction, and record official verifications.',
+                  })
+                : t('officerVerification.cadastralSubtitle', {
+                    defaultValue:
+                      'Review cadastral land records, cross-check against physical scans, and record official verification decisions.',
+                  })}
             </p>
           </div>
 
@@ -144,7 +156,11 @@ export default function VerificationPage() {
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Citizen Uploaded Docs</span>
+              <span>
+                {t('officerVerification.citizenUploadedDocsTab', {
+                  defaultValue: 'Citizen Uploaded Docs',
+                })}
+              </span>
             </button>
             <button
               type="button"
@@ -156,7 +172,11 @@ export default function VerificationPage() {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Cadastral Records</span>
+              <span>
+                {t('officerVerification.cadastralRecordsTab', {
+                  defaultValue: 'Cadastral Records',
+                })}
+              </span>
             </button>
           </div>
         </div>
@@ -179,7 +199,7 @@ export default function VerificationPage() {
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                All ({totalCount})
+                {t('officerDocuments.allStatuses', { defaultValue: 'All' })} ({totalCount})
               </button>
               <button
                 type="button"
@@ -191,7 +211,7 @@ export default function VerificationPage() {
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
-                Pending ({pendingCount})
+                {t('status.pending', { defaultValue: 'Pending' })} ({pendingCount})
               </button>
               <button
                 type="button"
@@ -203,7 +223,7 @@ export default function VerificationPage() {
                 }`}
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Needs Review ({needsReviewCount})
+                {t('status.needsReview', { defaultValue: 'Needs Review' })} ({needsReviewCount})
               </button>
               <button
                 type="button"
@@ -215,7 +235,7 @@ export default function VerificationPage() {
                 }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Verified ({verifiedCount})
+                {t('status.verified', { defaultValue: 'Verified' })} ({verifiedCount})
               </button>
               <button
                 type="button"
@@ -227,7 +247,7 @@ export default function VerificationPage() {
                 }`}
               >
                 <XCircle className="w-3.5 h-3.5" />
-                Rejected ({rejectedCount})
+                {t('status.rejected', { defaultValue: 'Rejected' })} ({rejectedCount})
               </button>
             </div>
 
@@ -270,7 +290,9 @@ export default function VerificationPage() {
                       {t('officerVerification.noRecords', { defaultValue: 'No active record selected for verification.' })}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Select an application from the review queue on the left to begin inspection.
+                      {t('officerVerification.selectAppFromQueue', {
+                        defaultValue: 'Select an application from the review queue on the left to begin inspection.',
+                      })}
                     </p>
                   </div>
                 )}

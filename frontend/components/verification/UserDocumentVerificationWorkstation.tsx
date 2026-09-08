@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DocumentRecord, User } from '../../types';
 import { documentsService } from '../../services/documents.service';
+import { formatStatus } from '../../lib/translationHelpers';
 import {
   FileText,
   Search,
-  Filter,
   CheckCircle2,
   XCircle,
   AlertTriangle,
@@ -18,14 +18,10 @@ import {
   RotateCcw,
   Sparkles,
   User as UserIcon,
-  Building2,
-  Layers,
   ShieldCheck,
   Send,
-  Eye,
   FileCheck,
 } from 'lucide-react';
-import { Badge } from '../ui/Badge';
 import { Skeleton } from '../ui/Skeleton';
 
 interface UserDocumentVerificationWorkstationProps {
@@ -100,18 +96,37 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const handleOpenDecision = (action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW') => {
     setActionModal({ isOpen: true, action });
     if (action === 'APPROVED') {
-      setRemarks('Verified against cadastral extract & revenue records. Document authenticated.');
+      setRemarks(
+        t('officerVerification.defaultApprovedRemarks', {
+          defaultValue:
+            'Verified against cadastral extract & revenue records. Document authenticated.',
+        })
+      );
     } else if (action === 'NEEDS_REVIEW') {
-      setRemarks('Clarification required: Legibility or surveyor seal verification needed.');
+      setRemarks(
+        t('officerVerification.defaultClarifyRemarks', {
+          defaultValue:
+            'Clarification required: Legibility or surveyor seal verification needed.',
+        })
+      );
     } else if (action === 'REJECTED') {
-      setRemarks('Document does not match official cadastral registry. Rejection confirmed.');
+      setRemarks(
+        t('officerVerification.defaultRejectedRemarks', {
+          defaultValue:
+            'Document does not match official cadastral registry. Rejection confirmed.',
+        })
+      );
     }
   };
 
   const handleExecuteDecision = async () => {
     if (!actionModal.action || !selectedDoc) return;
     if (!remarks.trim() || remarks.trim().length < 3) {
-      alert('Mandatory inspector remarks must be at least 3 characters.');
+      alert(
+        t('officerVerification.remarksMinLength', {
+          defaultValue: 'Mandatory inspector remarks must be at least 3 characters.',
+        })
+      );
       return;
     }
 
@@ -129,12 +144,18 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
       const actionText =
         actionModal.action === 'APPROVED'
-          ? 'approved and verified'
+          ? t('status.approved', { defaultValue: 'approved and verified' })
           : actionModal.action === 'REJECTED'
-          ? 'rejected'
-          : 'marked for clarification';
+          ? t('status.rejected', { defaultValue: 'rejected' })
+          : t('status.needsReview', { defaultValue: 'marked for clarification' });
 
-      setNotification(`Document #${selectedDoc.documentId} has been ${actionText} successfully!`);
+      setNotification(
+        t('officerVerification.docActionSuccess', {
+          defaultValue: 'Document #{{docId}} has been {{action}} successfully!',
+          docId: selectedDoc.documentId,
+          action: actionText,
+        })
+      );
       setActionModal({ isOpen: false, action: null });
       setRemarks('');
       setTimeout(() => setNotification(null), 5000);
@@ -175,7 +196,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                 <FileCheck className="w-4 h-4 text-blue-900" />
-                Citizen Uploads ({filteredDocs.length})
+                {t('officerVerification.citizenUploads', { defaultValue: 'Citizen Uploads' })} ({filteredDocs.length})
               </span>
 
               <select
@@ -183,12 +204,12 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-2 py-1 text-xs rounded border border-slate-300 bg-white text-slate-700 focus:ring-1 focus:ring-blue-900"
               >
-                <option value="">All Statuses</option>
-                <option value="UPLOADED">Uploaded</option>
-                <option value="PROCESSING">Processing</option>
-                <option value="NEEDS_REVIEW">Needs Review</option>
-                <option value="VERIFIED">Verified</option>
-                <option value="REJECTED">Rejected</option>
+                <option value="">{t('officerDocuments.allStatuses', { defaultValue: 'All Statuses' })}</option>
+                <option value="UPLOADED">{t('status.uploaded', { defaultValue: 'Uploaded' })}</option>
+                <option value="PROCESSING">{t('status.processing', { defaultValue: 'Processing' })}</option>
+                <option value="NEEDS_REVIEW">{t('status.needsReview', { defaultValue: 'Needs Review' })}</option>
+                <option value="VERIFIED">{t('status.verified', { defaultValue: 'Verified' })}</option>
+                <option value="REJECTED">{t('status.rejected', { defaultValue: 'Rejected' })}</option>
               </select>
             </div>
 
@@ -196,7 +217,9 @@ export const UserDocumentVerificationWorkstation: React.FC<
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search citizen name, file, or survey..."
+                placeholder={t('officerVerification.searchCitizenPlaceholder', {
+                  defaultValue: 'Search citizen name, file, or survey...',
+                })}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-900 focus:bg-white"
@@ -215,7 +238,11 @@ export const UserDocumentVerificationWorkstation: React.FC<
             ) : filteredDocs.length === 0 ? (
               <div className="text-center py-12 text-xs text-slate-400">
                 <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                <p>No user uploaded documents found matching filter.</p>
+                <p>
+                  {t('officerVerification.noCitizenDocsFound', {
+                    defaultValue: 'No user uploaded documents found matching filter.',
+                  })}
+                </p>
               </div>
             ) : (
               filteredDocs.map((doc) => {
@@ -249,14 +276,14 @@ export const UserDocumentVerificationWorkstation: React.FC<
                             : 'bg-amber-100 text-amber-800'
                         }`}
                       >
-                        {status}
+                        {formatStatus(status, t)}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-600">
                       <span className="flex items-center gap-1">
                         <UserIcon className="w-3 h-3 text-slate-400" />
-                        {docUploader?.name || 'Citizen User'}
+                        {docUploader?.name || t('roles.citizen', { defaultValue: 'Citizen User' })}
                       </span>
                       <span className="font-mono text-slate-400 text-[10px]">
                         {new Date(doc.uploadedAt || doc.createdAt).toLocaleDateString('en-IN', {
@@ -269,7 +296,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     {doc.landRecord && (
                       <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
                         <span className="font-mono text-slate-700">
-                          Survey: {doc.landRecord.surveyNumber}
+                          {t('common.survey', { defaultValue: 'Survey' })}: {doc.landRecord.surveyNumber}
                         </span>
                         <span className="text-emerald-700 font-medium flex items-center gap-1">
                           <Sparkles className="w-2.5 h-2.5" />
@@ -297,7 +324,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     </span>
                     <span className="text-slate-300">•</span>
                     <span className="text-xs text-slate-500">
-                      Uploaded on{' '}
+                      {t('officerVerification.uploadedOn', { defaultValue: 'Uploaded on' })}{' '}
                       {new Date(selectedDoc.uploadedAt || selectedDoc.createdAt).toLocaleString('en-IN', {
                         day: '2-digit',
                         month: 'short',
@@ -310,7 +337,10 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   <h2 className="text-base font-bold text-slate-900">{selectedDoc.originalName}</h2>
                   <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                     <span>
-                      Uploader: <strong className="text-slate-800">{uploader?.name || 'Citizen'}</strong>
+                      {t('officerVerification.uploaderLabel', { defaultValue: 'Uploader' })}:{' '}
+                      <strong className="text-slate-800">
+                        {uploader?.name || t('roles.citizen', { defaultValue: 'Citizen' })}
+                      </strong>
                     </span>
                     <span>•</span>
                     <span>{uploader?.email || 'N/A'}</span>
@@ -339,7 +369,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     ) : (
                       <Clock className="w-3.5 h-3.5" />
                     )}
-                    {selectedDoc.processingStatus || 'PENDING'}
+                    {formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
                   </span>
                 </div>
               </div>
@@ -357,7 +387,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      Original Document Scan
+                      {t('officerVerification.originalDocScan', { defaultValue: 'Original Document Scan' })}
                     </button>
                     <button
                       type="button"
@@ -368,7 +398,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      AI Extracted Fields
+                      {t('officerVerification.aiExtractedFields', { defaultValue: 'AI Extracted Fields' })}
                     </button>
                   </div>
 
@@ -377,21 +407,21 @@ export const UserDocumentVerificationWorkstation: React.FC<
                       <button
                         onClick={() => setZoom((z) => Math.min(2, z + 0.2))}
                         className="p-1.5 hover:bg-slate-200 rounded text-slate-700"
-                        title="Zoom In"
+                        title={t('documents.zoomIn', { defaultValue: 'Zoom In' })}
                       >
                         <ZoomIn className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setZoom((z) => Math.max(0.6, z - 0.2))}
                         className="p-1.5 hover:bg-slate-200 rounded text-slate-700"
-                        title="Zoom Out"
+                        title={t('documents.zoomOut', { defaultValue: 'Zoom Out' })}
                       >
                         <ZoomOut className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setZoom(1)}
                         className="p-1.5 hover:bg-slate-200 rounded text-slate-700"
-                        title="Reset"
+                        title={t('documents.resetZoom', { defaultValue: 'Reset' })}
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                       </button>
@@ -400,7 +430,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                         target="_blank"
                         rel="noreferrer"
                         className="p-1.5 hover:bg-slate-200 rounded text-blue-900 ml-1"
-                        title="Open in new tab"
+                        title={t('documents.openFullResolution', { defaultValue: 'Open in new tab' })}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
@@ -415,7 +445,11 @@ export const UserDocumentVerificationWorkstation: React.FC<
                         <FileText className="w-12 h-12 text-blue-900 mb-3" />
                         <h4 className="text-sm font-bold text-slate-800 mb-1">{selectedDoc.originalName}</h4>
                         <p className="text-xs text-slate-500 mb-4 max-w-sm">
-                          PDF Document Scan ({((selectedDoc.fileSize || 0) / 1024).toFixed(0)} KB). Open in viewer or new tab to inspect full multipage archival sheets.
+                          {t('officerVerification.pdfScanDesc', {
+                            defaultValue:
+                              'PDF Document Scan ({{size}} KB). Open in viewer or new tab to inspect full multipage archival sheets.',
+                            size: ((selectedDoc.fileSize || 0) / 1024).toFixed(0),
+                          })}
                         </p>
                         <a
                           href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
@@ -424,7 +458,9 @@ export const UserDocumentVerificationWorkstation: React.FC<
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-900 text-white font-semibold text-xs hover:bg-blue-800 transition-colors shadow-sm"
                         >
                           <ExternalLink className="w-4 h-4" />
-                          Open Document PDF in Full Viewer
+                          {t('officerVerification.openPdfViewer', {
+                            defaultValue: 'Open Document PDF in Full Viewer',
+                          })}
                         </a>
                       </div>
                     ) : (
@@ -445,47 +481,62 @@ export const UserDocumentVerificationWorkstation: React.FC<
                       <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                         <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                           <Sparkles className="w-4 h-4 text-emerald-600" />
-                          AI Cadastral Extraction Results
+                          {t('officerVerification.aiExtractionResults', {
+                            defaultValue: 'AI Cadastral Extraction Results',
+                          })}
                         </span>
                         <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          {Math.round((selectedDoc.landRecord?.confidenceScore || 0.95) * 100)}% Confidence
+                          {Math.round((selectedDoc.landRecord?.confidenceScore || 0.95) * 100)}%{' '}
+                          {t('officerVerification.confidence', { defaultValue: 'Confidence' })}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Khatedar / Land Owner</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.farmerOwner', { defaultValue: 'Khatedar / Land Owner' })}
+                          </span>
                           <span className="font-bold text-slate-900 text-sm">
                             {selectedDoc.landRecord?.ownerName || 'Shankar Ganpat Patil'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Survey / Gat Number</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.surveyGatNo', { defaultValue: 'Survey / Gat Number' })}
+                          </span>
                           <span className="font-bold text-slate-900 text-sm">
                             {selectedDoc.landRecord?.surveyNumber || '145/2A'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Village / Taluka</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.villageJurisdiction', { defaultValue: 'Village / Taluka' })}
+                          </span>
                           <span className="font-medium text-slate-800">
                             {selectedDoc.landRecord?.village || 'Khadakwasla'},{' '}
                             {selectedDoc.landRecord?.tehsil || 'Haveli'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Land Area</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.affectedLandArea', { defaultValue: 'Land Area' })}
+                          </span>
                           <span className="font-bold text-emerald-700">
                             {selectedDoc.landRecord?.plotArea || '1.25 Hectares'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Classification</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.landClassificationLabel', { defaultValue: 'Classification' })}
+                          </span>
                           <span className="text-slate-800">
                             {selectedDoc.landRecord?.landClassification || 'Agricultural (Jirayat)'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-400 block mb-0.5">Mutation (Ferfar)</span>
+                          <span className="text-slate-400 block mb-0.5">
+                            {t('documents.latestMutation', { defaultValue: 'Mutation (Ferfar)' })}
+                          </span>
                           <span className="font-mono text-slate-700">
                             {selectedDoc.landRecord?.mutationNumber || 'MUT-2024-8812'}
                           </span>
@@ -502,9 +553,16 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-blue-900" />
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900">Official Document Verification Decision</h3>
+                      <h3 className="text-sm font-bold text-slate-900">
+                        {t('officerVerification.officialDecisionTitle', {
+                          defaultValue: 'Official Document Verification Decision',
+                        })}
+                      </h3>
                       <p className="text-xs text-slate-500">
-                        Record statutory inspection verdict under Section 149 Maharashtra Land Revenue Code.
+                        {t('officerVerification.statutoryInspectionSubtitle', {
+                          defaultValue:
+                            'Record statutory inspection verdict under Section 149 Maharashtra Land Revenue Code.',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -517,7 +575,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    Verify & Approve Document
+                    {t('officerVerification.verifyApproveButton', { defaultValue: 'Verify & Approve Document' })}
                   </button>
 
                   <button
@@ -526,7 +584,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-xs transition-colors"
                   >
                     <AlertTriangle className="w-4 h-4" />
-                    Request Clarification
+                    {t('officerVerification.requestClarificationButton', { defaultValue: 'Request Clarification' })}
                   </button>
 
                   <button
@@ -535,7 +593,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                     className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-xs transition-colors"
                   >
                     <XCircle className="w-4 h-4" />
-                    Reject Document
+                    {t('officerVerification.rejectDocumentButton', { defaultValue: 'Reject Document' })}
                   </button>
                 </div>
               </div>
@@ -543,9 +601,16 @@ export const UserDocumentVerificationWorkstation: React.FC<
           ) : (
             <div className="bg-white border border-slate-200 rounded-xl p-16 text-center text-slate-400">
               <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p className="text-sm font-semibold text-slate-600">No user uploaded document selected</p>
+              <p className="text-sm font-semibold text-slate-600">
+                {t('officerVerification.noUserDocSelected', {
+                  defaultValue: 'No user uploaded document selected',
+                })}
+              </p>
               <p className="text-xs text-slate-400 mt-1">
-                Select a citizen document from the queue on the left to review and record official verification.
+                {t('officerVerification.selectCitizenDocDesc', {
+                  defaultValue:
+                    'Select a citizen document from the queue on the left to review and record official verification.',
+                })}
               </p>
             </div>
           )}
@@ -565,7 +630,10 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 ) : (
                   <AlertTriangle className="w-5 h-5 text-purple-600" />
                 )}
-                Confirm Verdict: {actionModal.action}
+                {t('officerVerification.confirmVerdict', {
+                  defaultValue: 'Confirm Verdict: {{action}}',
+                  action: actionModal.action ? formatStatus(actionModal.action, t) : '',
+                })}
               </h3>
               <button
                 onClick={() => setActionModal({ isOpen: false, action: null })}
@@ -577,22 +645,32 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
             <div className="space-y-2 text-xs text-slate-600">
               <p>
-                Document: <strong className="text-slate-800">{selectedDoc?.originalName}</strong>
+                {t('officerVerification.documentLabel', { defaultValue: 'Document' })}:{' '}
+                <strong className="text-slate-800">{selectedDoc?.originalName}</strong>
               </p>
               <p>
-                Citizen Uploader: <strong className="text-slate-800">{uploader?.name || 'Citizen'}</strong> ({uploader?.email || 'N/A'})
+                {t('officerVerification.citizenUploaderLabel', { defaultValue: 'Citizen Uploader' })}:{' '}
+                <strong className="text-slate-800">
+                  {uploader?.name || t('roles.citizen', { defaultValue: 'Citizen' })}
+                </strong>{' '}
+                ({uploader?.email || 'N/A'})
               </p>
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                Mandatory Inspector Remarks / Statutory Findings:
+                {t('officerVerification.mandatoryRemarksLabel', {
+                  defaultValue: 'Mandatory Inspector Remarks / Statutory Findings:',
+                })}
               </label>
               <textarea
                 rows={3}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Enter verification remarks, gazette reference, or reason for decision..."
+                placeholder={t('officerVerification.enterRemarksPlaceholder', {
+                  defaultValue:
+                    'Enter verification remarks, gazette reference, or reason for decision...',
+                })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
                 required
               />
@@ -604,7 +682,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 onClick={() => setActionModal({ isOpen: false, action: null })}
                 className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100"
               >
-                Cancel
+                {t('common.cancel', { defaultValue: 'Cancel' })}
               </button>
               <button
                 type="button"
@@ -619,7 +697,12 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 }`}
               >
                 <Send className="w-3.5 h-3.5" />
-                {isSubmitting ? 'Recording...' : `Confirm ${actionModal.action}`}
+                {isSubmitting
+                  ? t('common.recording', { defaultValue: 'Recording...' })
+                  : t('officerVerification.confirmAction', {
+                      defaultValue: 'Confirm {{action}}',
+                      action: actionModal.action ? formatStatus(actionModal.action, t) : '',
+                    })}
               </button>
             </div>
           </div>
@@ -628,3 +711,4 @@ export const UserDocumentVerificationWorkstation: React.FC<
     </div>
   );
 };
+

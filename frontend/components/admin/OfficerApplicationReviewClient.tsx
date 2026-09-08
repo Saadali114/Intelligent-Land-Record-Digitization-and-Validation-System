@@ -74,17 +74,30 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
   }, [applicationId]);
 
   const handleApprove = async () => {
-    if (!confirm(`Are you sure you want to approve officer access for ${application?.name}?`)) {
+    if (
+      !confirm(
+        t('adminOfficer.confirmApprovePrompt', {
+          defaultValue: 'Are you sure you want to approve officer access for {{name}}?',
+          name: application?.name,
+        })
+      )
+    ) {
       return;
     }
     setActionLoading(true);
     setFeedbackMessage(null);
     try {
       const res = await authService.approveOfficerApplication(applicationId);
-      setFeedbackMessage({ type: 'success', text: res.message || 'Officer approved successfully.' });
+      setFeedbackMessage({
+        type: 'success',
+        text: res.message || t('adminOfficer.approvedSuccess', { defaultValue: 'Officer approved successfully.' }),
+      });
       setApplication({ ...application, status: 'APPROVED' });
     } catch (err: any) {
-      setFeedbackMessage({ type: 'error', text: err.message || 'Failed to approve application.' });
+      setFeedbackMessage({
+        type: 'error',
+        text: err.message || t('adminOfficer.failedApprove', { defaultValue: 'Failed to approve application.' }),
+      });
     } finally {
       setActionLoading(false);
     }
@@ -93,18 +106,28 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
   const handleReject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectReason.trim() || rejectReason.trim().length < 5) {
-      alert('Please provide a substantive rejection reason (minimum 5 characters).');
+      alert(
+        t('adminOfficer.minRejectionReason', {
+          defaultValue: 'Please provide a substantive rejection reason (minimum 5 characters).',
+        })
+      );
       return;
     }
     setActionLoading(true);
     setFeedbackMessage(null);
     try {
       const res = await authService.rejectOfficerApplication(applicationId, rejectReason.trim());
-      setFeedbackMessage({ type: 'success', text: res.message || 'Application rejected.' });
+      setFeedbackMessage({
+        type: 'success',
+        text: res.message || t('adminOfficer.rejectedSuccess', { defaultValue: 'Application rejected.' }),
+      });
       setApplication({ ...application, status: 'REJECTED', rejectionReason: rejectReason });
       setShowRejectModal(false);
     } catch (err: any) {
-      setFeedbackMessage({ type: 'error', text: err.message || 'Failed to reject application.' });
+      setFeedbackMessage({
+        type: 'error',
+        text: err.message || t('adminOfficer.failedReject', { defaultValue: 'Failed to reject application.' }),
+      });
     } finally {
       setActionLoading(false);
     }
@@ -113,18 +136,32 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
   const handleClarify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clarifyMessage.trim() || clarifyMessage.trim().length < 5) {
-      alert('Please provide clarification details (minimum 5 characters).');
+      alert(
+        t('adminOfficer.minClarifyDetails', {
+          defaultValue: 'Please provide clarification details (minimum 5 characters).',
+        })
+      );
       return;
     }
     setActionLoading(true);
     setFeedbackMessage(null);
     try {
       const res = await authService.requestOfficerClarification(applicationId, clarifyMessage.trim());
-      setFeedbackMessage({ type: 'success', text: res.message || 'Clarification request recorded.' });
+      setFeedbackMessage({
+        type: 'success',
+        text:
+          res.message ||
+          t('adminOfficer.clarificationRecorded', { defaultValue: 'Clarification request recorded.' }),
+      });
       setApplication({ ...application, status: 'ACTION_REQUIRED', clarificationMessage: clarifyMessage });
       setShowClarifyModal(false);
     } catch (err: any) {
-      setFeedbackMessage({ type: 'error', text: err.message || 'Failed to request clarification.' });
+      setFeedbackMessage({
+        type: 'error',
+        text:
+          err.message ||
+          t('adminOfficer.failedClarify', { defaultValue: 'Failed to request clarification.' }),
+      });
     } finally {
       setActionLoading(false);
     }
@@ -140,13 +177,16 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-blue-900 mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Applications</span>
+            <span>{t('adminOfficer.backToApplications', { defaultValue: 'Back to Applications' })}</span>
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Officer Application Review</h1>
+              <h1 className="text-2xl font-bold text-slate-900">
+                {t('adminOfficer.title', { defaultValue: 'Officer Application Review' })}
+              </h1>
               <p className="text-xs text-slate-500 mt-0.5">
-                Application ID: <span className="font-mono text-slate-700">{applicationId}</span>
+                {t('adminOfficer.applicationIdLabel', { defaultValue: 'Application ID' })}:{' '}
+                <span className="font-mono text-slate-700">{applicationId}</span>
               </p>
             </div>
 
@@ -163,12 +203,14 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 }`}
               >
                 {application?.status === 'APPROVED'
-                  ? '✓ Approved & Active'
+                  ? t('adminOfficer.approvedActiveBadge', { defaultValue: '✓ Approved & Active' })
                   : application?.status === 'REJECTED'
-                  ? '✕ Rejected'
+                  ? t('adminOfficer.rejectedBadge', { defaultValue: '✕ Rejected' })
                   : application?.status === 'ACTION_REQUIRED'
-                  ? '⚠ Clarification Requested'
-                  : '● Pending Review'}
+                  ? t('adminOfficer.clarificationRequestedBadge', {
+                      defaultValue: '⚠ Clarification Requested',
+                    })
+                  : t('adminOfficer.pendingReviewBadge', { defaultValue: '● Pending Review' })}
               </span>
             </div>
           </div>
@@ -198,27 +240,35 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
             {/* Identity & Contact Section */}
             <div className="border-b border-slate-100 pb-6">
               <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
-                1. Officer Identity & Official Email
+                {t('adminOfficer.section1Title', {
+                  defaultValue: '1. Officer Identity & Official Email',
+                })}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] text-slate-400 font-medium">Applicant Full Name</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.applicantFullName', { defaultValue: 'Applicant Full Name' })}
+                  </div>
                   <div className="text-sm font-bold text-slate-900 mt-0.5">{application?.name}</div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] text-slate-400 font-medium">Official Organization Email</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.officialEmail', { defaultValue: 'Official Organization Email' })}
+                  </div>
                   <div className="text-sm font-bold font-mono text-slate-900 mt-0.5">{application?.email}</div>
                   <div className="mt-1 flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Email OTP Verified</span>
+                    <span>{t('adminOfficer.emailOtpVerified', { defaultValue: 'Email OTP Verified' })}</span>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] text-slate-400 font-medium">Contact Phone</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.contactPhone', { defaultValue: 'Contact Phone' })}
+                  </div>
                   <div className="text-sm font-bold font-mono text-slate-800 mt-0.5">
-                    {application?.phone || 'Not provided'}
+                    {application?.phone || t('common.notProvided', { defaultValue: 'Not provided' })}
                   </div>
                 </div>
               </div>
@@ -227,30 +277,47 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
             {/* Official Credentials Section */}
             <div className="border-b border-slate-100 pb-6">
               <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
-                2. Department, Designation & Jurisdiction
+                {t('adminOfficer.section2Title', {
+                  defaultValue: '2. Department, Designation & Jurisdiction',
+                })}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-medium">Official Employee ID</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.employeeId', { defaultValue: 'Official Employee ID' })}
+                  </div>
                   <div className="text-base font-bold font-mono text-blue-950">{application?.employeeId}</div>
-                  <div className="text-[11px] text-slate-500">Government Service Register Index</div>
+                  <div className="text-[11px] text-slate-500">
+                    {t('adminOfficer.serviceRegisterIndex', {
+                      defaultValue: 'Government Service Register Index',
+                    })}
+                  </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-medium">Designation & Role</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.designationRole', { defaultValue: 'Designation & Role' })}
+                  </div>
                   <div className="text-base font-bold text-slate-900">{application?.designation}</div>
                   <div className="text-[11px] text-slate-500">{application?.department}</div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-medium">Office / Posting Location</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.postingLocation', { defaultValue: 'Office / Posting Location' })}
+                  </div>
                   <div className="text-sm font-semibold text-slate-900">{application?.office}</div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-medium">District & Taluka</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    {t('adminOfficer.districtTaluka', { defaultValue: 'District & Taluka' })}
+                  </div>
                   <div className="text-sm font-semibold text-slate-900">
-                    District: {application?.district} {application?.taluka ? `| Taluka: ${application.taluka}` : ''}
+                    {t('common.district', { defaultValue: 'District' })}: {application?.district}{' '}
+                    {application?.taluka
+                      ? `| ${t('documents.taluka', { defaultValue: 'Taluka' })}: ${application.taluka}`
+                      : ''}
                   </div>
                 </div>
               </div>
@@ -260,23 +327,38 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
             <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 text-xs text-blue-950 space-y-1">
               <div className="font-semibold flex items-center gap-1.5">
                 <Shield className="w-4 h-4 text-blue-900" />
-                <span>Statutory Declaration Submitted</span>
+                <span>
+                  {t('adminOfficer.statutoryDeclarationTitle', {
+                    defaultValue: 'Statutory Declaration Submitted',
+                  })}
+                </span>
               </div>
               <p className="text-[11px] text-blue-900 leading-relaxed">
-                Applicant declared under penalty of perjury that all official credentials submitted are genuine and authorized for revenue record verification.
+                {t('adminOfficer.statutoryDeclarationText', {
+                  defaultValue:
+                    'Applicant declared under penalty of perjury that all official credentials submitted are genuine and authorized for revenue record verification.',
+                })}
               </p>
             </div>
 
             {/* Existing Rejection / Clarification text if any */}
             {application?.rejectionReason && (
               <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
-                <div className="font-bold">Recorded Rejection Reason:</div>
+                <div className="font-bold">
+                  {t('adminOfficer.recordedRejectionReason', {
+                    defaultValue: 'Recorded Rejection Reason:',
+                  })}
+                </div>
                 <p>{application.rejectionReason}</p>
               </div>
             )}
             {application?.clarificationMessage && (
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
-                <div className="font-bold">Pending Clarification Request:</div>
+                <div className="font-bold">
+                  {t('adminOfficer.pendingClarificationRequest', {
+                    defaultValue: 'Pending Clarification Request:',
+                  })}
+                </div>
                 <p>{application.clarificationMessage}</p>
               </div>
             )}
@@ -290,7 +372,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Clock className="w-4 h-4 text-amber-700" />
-                <span>Request Clarification</span>
+                <span>{t('adminOfficer.requestClarificationBtn', { defaultValue: 'Request Clarification' })}</span>
               </button>
 
               <button
@@ -300,7 +382,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <XCircle className="w-4 h-4 text-rose-600" />
-                <span>Reject Application</span>
+                <span>{t('adminOfficer.rejectApplicationBtn', { defaultValue: 'Reject Application' })}</span>
               </button>
 
               <button
@@ -312,12 +394,12 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 {actionLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing...</span>
+                    <span>{t('common.processing', { defaultValue: 'Processing...' })}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Approve & Activate Officer</span>
+                    <span>{t('adminOfficer.approveActivateBtn', { defaultValue: 'Approve & Activate Officer' })}</span>
                   </>
                 )}
               </button>
@@ -330,16 +412,24 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
       {showRejectModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-slate-900">Reject Officer Application</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              {t('adminOfficer.rejectModalTitle', { defaultValue: 'Reject Officer Application' })}
+            </h3>
             <p className="text-xs text-slate-500">
-              Please enter the statutory justification for rejecting this application. This reason will be logged in the immutable audit trail.
+              {t('adminOfficer.rejectModalDesc', {
+                defaultValue:
+                  'Please enter the statutory justification for rejecting this application. This reason will be logged in the immutable audit trail.',
+              })}
             </p>
             <textarea
               required
               rows={3}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="e.g. Officer employee ID could not be confirmed in the district personnel register."
+              placeholder={t('adminOfficer.rejectPlaceholder', {
+                defaultValue:
+                  'e.g. Officer employee ID could not be confirmed in the district personnel register.',
+              })}
               className="w-full p-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-600 focus:border-rose-600"
             />
             <div className="flex justify-end gap-2">
@@ -348,7 +438,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 onClick={() => setShowRejectModal(false)}
                 className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
               >
-                Cancel
+                {t('common.cancel', { defaultValue: 'Cancel' })}
               </button>
               <button
                 type="button"
@@ -356,7 +446,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 disabled={actionLoading}
                 className="px-4 py-2 text-xs font-semibold text-white bg-rose-700 hover:bg-rose-800 rounded-lg flex items-center gap-1"
               >
-                Confirm Rejection
+                {t('adminOfficer.confirmRejectionBtn', { defaultValue: 'Confirm Rejection' })}
               </button>
             </div>
           </div>
@@ -367,16 +457,24 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
       {showClarifyModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-slate-900">Request Officer Clarification</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              {t('adminOfficer.clarifyModalTitle', { defaultValue: 'Request Officer Clarification' })}
+            </h3>
             <p className="text-xs text-slate-500">
-              Specify what additional information or documents are required from the officer applicant.
+              {t('adminOfficer.clarifyModalDesc', {
+                defaultValue:
+                  'Specify what additional information or documents are required from the officer applicant.',
+              })}
             </p>
             <textarea
               required
               rows={3}
               value={clarifyMessage}
               onChange={(e) => setClarifyMessage(e.target.value)}
-              placeholder="e.g. Please confirm your current posting order number and circle jurisdiction."
+              placeholder={t('adminOfficer.clarifyPlaceholder', {
+                defaultValue:
+                  'e.g. Please confirm your current posting order number and circle jurisdiction.',
+              })}
               className="w-full p-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-amber-600"
             />
             <div className="flex justify-end gap-2">
@@ -385,7 +483,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 onClick={() => setShowClarifyModal(false)}
                 className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
               >
-                Cancel
+                {t('common.cancel', { defaultValue: 'Cancel' })}
               </button>
               <button
                 type="button"
@@ -393,7 +491,7 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
                 disabled={actionLoading}
                 className="px-4 py-2 text-xs font-semibold text-white bg-amber-800 hover:bg-amber-900 rounded-lg flex items-center gap-1"
               >
-                Send Request
+                {t('adminOfficer.sendRequestBtn', { defaultValue: 'Send Request' })}
               </button>
             </div>
           </div>

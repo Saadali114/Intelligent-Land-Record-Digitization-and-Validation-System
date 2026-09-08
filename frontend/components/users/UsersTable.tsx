@@ -50,14 +50,16 @@ export const UsersTable: React.FC<UsersTableProps> = ({
 
       {isError && (
         <div className="p-6 text-center text-rose-600 text-xs font-semibold">
-          {errorMessage || 'Failed to load users'}
+          {errorMessage || t('officerUsers.failedLoadUsers', { defaultValue: 'Failed to load users' })}
         </div>
       )}
 
       {!isLoading && !isError && (!users || users.length === 0) && (
         <EmptyState
-          title="No Users Found"
-          description="No official accounts match your current filter criteria."
+          title={t('officerUsers.noUsersFound', { defaultValue: 'No Users Found' })}
+          description={t('officerUsers.noUsersDesc', {
+            defaultValue: 'No official accounts match your current filter criteria.',
+          })}
         />
       )}
 
@@ -67,12 +69,17 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-semibold border-b border-slate-200 text-[10px]">
                 <tr>
-                  <th className="px-5 py-3.5">User {t('common.details')}</th>
-                  <th className="px-4 py-3.5">Role</th>
-                  <th className="px-4 py-3.5">Department</th>
+                  <th className="px-5 py-3.5">
+                    {t('officerUsers.userCol', { defaultValue: 'User' })}{' '}
+                    {t('common.details', { defaultValue: 'Details' })}
+                  </th>
+                  <th className="px-4 py-3.5">{t('common.role', { defaultValue: 'Role' })}</th>
+                  <th className="px-4 py-3.5">
+                    {t('officerProfile.department', { defaultValue: 'Department' })}
+                  </th>
                   <th className="px-4 py-3.5">{t('common.district')}</th>
                   <th className="px-4 py-3.5">{t('common.status')}</th>
-                  <th className="px-4 py-3.5">Joined</th>
+                  <th className="px-4 py-3.5">{t('officerUsers.joined', { defaultValue: 'Joined' })}</th>
                   <th className="px-5 py-3.5 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
@@ -97,14 +104,20 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <button
                           onClick={() => onToggleStatus(user._id, user.status)}
                           className="px-2 py-1 rounded text-[11px] font-medium border border-slate-200 hover:bg-slate-100 transition-colors"
-                          title="Toggle account active/inactive"
+                          title={t('officerUsers.toggleAccountTitle', {
+                            defaultValue: 'Toggle account active/inactive',
+                          })}
                         >
-                          {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                          {user.status === 'ACTIVE'
+                            ? t('officerUsers.deactivate', { defaultValue: 'Deactivate' })
+                            : t('officerUsers.activate', { defaultValue: 'Activate' })}
                         </button>
                         <button
                           onClick={() => onConfirmDelete(user._id)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                          title="Delete account"
+                          title={t('officerUsers.deleteAccountTitle', {
+                            defaultValue: 'Delete account',
+                          })}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -132,3 +145,4 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     </div>
   );
 };
+
