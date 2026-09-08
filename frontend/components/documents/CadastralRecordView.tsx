@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { DocumentRecord } from '../../types';
 import { FormCategory, getDocumentFormCategory, translateCadastralText } from '../../lib/cadastral-utils';
-import { exportCadastralPdfCertificate, printDocumentWithSticker } from '../../lib/certificate-generator';
+import { exportCadastralPdfCertificate } from '../../lib/certificate-generator';
 import { Button } from '../ui/Button';
 import { SatbaraExtractView } from './extract-views/SatbaraExtractView';
 import { SaleDeedExtractView } from './extract-views/SaleDeedExtractView';
@@ -25,7 +25,6 @@ import {
   ShieldCheck,
   ExternalLink,
   QrCode,
-  Stamp,
 } from 'lucide-react';
 
 interface CadastralRecordViewProps {
@@ -264,30 +263,11 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
           {doc.landRecord && (
             <div className="flex items-center gap-1.5">
               <Button
-                variant="primary"
-                size="sm"
-                onClick={() =>
-                  printDocumentWithSticker({
-                    doc,
-                    formCat,
-                    isTranslated,
-                    translatedData,
-                    targetLanguage,
-                  })
-                }
-                className="text-xs h-7.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs"
-                title="Print complete certified document with the physical tamper-proof authenticity sticker stamped on it"
-              >
-                <Stamp className="w-3.5 h-3.5 mr-1 text-emerald-100" />
-                Print Doc with Sticker
-              </Button>
-
-              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowQrModal(true)}
                 className="text-xs h-7.5 px-2.5 bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100 font-semibold"
-                title="View & test tamper-proof QR verification seal or print single sticker label"
+                title="View & test tamper-proof QR verification seal"
               >
                 <QrCode className="w-3.5 h-3.5 mr-1 text-emerald-700" />
                 QR Seal
@@ -303,14 +283,13 @@ export const CadastralRecordView: React.FC<CadastralRecordViewProps> = ({
                     isTranslated,
                     translatedData,
                     targetLanguage,
-                    withSticker: false,
                   })
                 }
-                className="text-xs h-7.5 px-2.5 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
-                title="Download standard official digital certificate without sticker"
+                className="text-xs h-7.5 px-3 bg-blue-50/80 border-blue-200 text-blue-900 hover:bg-blue-100 font-semibold"
+                title="Download official digital certificate as PDF"
               >
                 <Printer className="w-3.5 h-3.5 mr-1 text-blue-700" />
-                Plain PDF
+                Download PDF
               </Button>
             </div>
           )}
