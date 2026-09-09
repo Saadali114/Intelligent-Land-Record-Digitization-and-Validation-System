@@ -16,8 +16,13 @@ export const getVerificationQueueService = async (query: {
   const limit = Math.min(100, Math.max(1, query.limit || 10));
   const skip = (page - 1) * limit;
 
+  let targetStatus: any = query.status;
+  if (targetStatus === 'PROCESSED' || targetStatus === 'UPLOADED') {
+    targetStatus = 'PENDING';
+  }
+
   const filter: Record<string, any> = {
-    verificationStatus: query.status ? query.status : { $in: ['PENDING', 'NEEDS_REVIEW'] },
+    verificationStatus: targetStatus ? targetStatus : { $in: ['PENDING', 'NEEDS_REVIEW'] },
   };
 
   if (query.district) {
