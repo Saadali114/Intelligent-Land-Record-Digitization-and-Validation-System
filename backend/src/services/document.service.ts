@@ -3,6 +3,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { DocumentModel, IDocument, DocumentProcessingStatus } from '../models/Document.js';
 import { LandRecord } from '../models/LandRecord.js';
+import { prisma, withMongoId } from '../config/prisma.js';
 import { DocumentQueryInput } from '../schemas/document.schema.js';
 import { PaginationMeta } from '../utils/response.js';
 import { logAudit } from '../utils/audit.js';
@@ -21,15 +22,11 @@ export const createDocumentRecord = async (
   ip?: string
 ) => {
   const documentId = generateDocumentId();
+  let checksum: string | undefined;
 
-  let checksum = '';
-  let previewDataUrl = '';
   try {
     const fileBuffer = fs.readFileSync(file.path);
     checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
-    if (file.mimetype.startsWith('image/') && fileBuffer.length <= 8 * 1024 * 1024) {
-      previewDataUrl = `data:${file.mimetype};base64,${fileBuffer.toString('base64')}`;
-    }
   } catch {
     // Ignore checksum calculation failure
   }
@@ -72,7 +69,6 @@ export const createDocumentRecord = async (
       uploadSource: 'Web Portal',
       isReuploaded,
       reuploadedFromId,
-      previewDataUrl: previewDataUrl || undefined,
       aiPipeline: {
         ocrReady: true,
         engine: 'ILRDVS-Cadastral-AI-Engine-v2.4',
@@ -150,15 +146,27 @@ export const getDocumentsService = async (query: DocumentQueryInput) => {
   ]);
 
   // Batch query linked land records
-  const docIds = documents.map((d) => d._id);
-  const landRecords = await LandRecord.find({ sourceDocument: { $in: docIds } }).lean();
-  const lrMap = new Map(landRecords.map((lr) => [lr.sourceDocument?.toString(), lr]));
+  const docIds = documents.map((d) => d.id || d._id).filter(Boolean);
+  const landRecords = docIds.length > 0
+    ? await prisma.landRecord.findMany({
+        where: { sourceDocumentId: { in: docIds } },
+        include: {
+          createdBy: { select: { id: true, name: true, email: true } },
+          verifiedBy: { select: { id: true, name: true, email: true } },
+        },
+      })
+    : [];
 
-  const enrichedDocs = documents.map((d) => ({
-    ...d,
-    fileUrl: `/uploads/${d.fileName}`,
-    landRecord: lrMap.get(d._id.toString()) || null,
-  }));
+  const lrMap = new Map(landRecords.map((lr) => [lr.sourceDocumentId, withMongoId(lr)]));
+
+  const enrichedDocs = documents.map((d) => {
+    const docId = d.id || d._id;
+    return {
+      ...d,
+      fileUrl: `/uploads/${d.fileName}`,
+      landRecord: lrMap.get(docId) || null,
+    };
+  });
 
   const pagination: PaginationMeta = {
     page,

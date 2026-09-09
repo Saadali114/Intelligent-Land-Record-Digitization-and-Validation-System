@@ -40,6 +40,35 @@ export interface ILandRecord {
   populate(path: any, select?: any): Promise<ILandRecord>;
 }
 
+export const defaultLandRecordInclude = {
+  createdBy: true,
+  verifiedBy: true,
+  sourceDocument: {
+    select: {
+      id: true,
+      documentId: true,
+      fileName: true,
+      originalName: true,
+      filePath: true,
+      fileType: true,
+      fileSize: true,
+      mimeType: true,
+      language: true,
+      uploadedById: true,
+      processingStatus: true,
+      documentTypeEnum: true,
+      checksum: true,
+      version: true,
+      pageCount: true,
+      isReuploaded: true,
+      reuploadedFromId: true,
+      uploadedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  },
+};
+
 export function enrichLandRecord(raw: any): ILandRecord | null {
   if (!raw) return null;
   const rec = withMongoId({ ...raw }) as ILandRecord;
@@ -72,11 +101,10 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
 
   rec.save = async function (): Promise<ILandRecord> {
     const cleanVerifiedById =
-      this.verifiedBy && typeof this.verifiedBy === 'object' && this.verifiedBy.id
+      this.verifiedById ||
+      (this.verifiedBy && typeof this.verifiedBy === 'object' && this.verifiedBy.id
         ? this.verifiedBy.id
-        : typeof this.verifiedBy === 'string'
-        ? this.verifiedBy
-        : this.verifiedById;
+        : null);
 
     const updated = await prisma.landRecord.update({
       where: { id: this.id },
@@ -102,11 +130,7 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
         confidenceScore: this.confidenceScore,
         remarks: this.remarks,
       },
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(updated)!;
   };
@@ -114,11 +138,7 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
   rec.populate = async function (): Promise<ILandRecord> {
     const fresh = await prisma.landRecord.findUnique({
       where: { id: this.id },
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(fresh)!;
   };
@@ -135,11 +155,7 @@ export const LandRecord = {
         skip,
         take,
         orderBy: orderBy || { createdAt: 'desc' },
-        include: {
-          createdBy: true,
-          verifiedBy: true,
-          sourceDocument: true,
-        },
+        include: defaultLandRecordInclude,
       });
       return records.map((r) => enrichLandRecord(r)!);
     });
@@ -150,11 +166,7 @@ export const LandRecord = {
     return new PrismaSingleQueryBuilder<ILandRecord>(async ({ orderBy }) => {
       const record = await prisma.landRecord.findFirst({
         where,
-        include: {
-          createdBy: true,
-          verifiedBy: true,
-          sourceDocument: true,
-        },
+        include: defaultLandRecordInclude,
         orderBy: orderBy || { createdAt: 'desc' },
       });
       return enrichLandRecord(record);
@@ -167,11 +179,7 @@ export const LandRecord = {
       const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
       const record = await prisma.landRecord.findUnique({
         where: { id: cleanId },
-        include: {
-          createdBy: true,
-          verifiedBy: true,
-          sourceDocument: true,
-        },
+        include: defaultLandRecordInclude,
       });
       return enrichLandRecord(record);
     });
@@ -220,11 +228,7 @@ export const LandRecord = {
         confidenceScore: Number(data.confidenceScore) || 0.9,
         remarks: data.remarks || null,
       },
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
 
     return enrichLandRecord(created)!;
@@ -235,11 +239,7 @@ export const LandRecord = {
     const updated = await prisma.landRecord.update({
       where: { id: cleanId },
       data: update,
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(updated);
   },
@@ -252,11 +252,7 @@ export const LandRecord = {
     const updated = await prisma.landRecord.update({
       where: { id: existing.id },
       data: update,
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(updated);
   },
@@ -265,11 +261,7 @@ export const LandRecord = {
     const cleanId = typeof id === 'object' && (id as any).toString ? (id as any).toString() : String(id);
     const deleted = await prisma.landRecord.delete({
       where: { id: cleanId },
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(deleted);
   },
@@ -281,11 +273,7 @@ export const LandRecord = {
 
     const deleted = await prisma.landRecord.delete({
       where: { id: existing.id },
-      include: {
-        createdBy: true,
-        verifiedBy: true,
-        sourceDocument: true,
-      },
+      include: defaultLandRecordInclude,
     });
     return enrichLandRecord(deleted);
   },

@@ -49,6 +49,12 @@ export function enrichDocument(raw: any): IDocument | null {
   if (!raw) return null;
   const doc = withMongoId({ ...raw }) as IDocument;
 
+  if (doc.metadata && typeof doc.metadata === 'object' && 'previewDataUrl' in doc.metadata) {
+    const safeMetadata = { ...(doc.metadata as any) };
+    delete safeMetadata.previewDataUrl;
+    doc.metadata = safeMetadata;
+  }
+
   if (raw.uploadedBy) {
     doc.uploadedBy = withMongoId(raw.uploadedBy);
   } else if (raw.uploadedById) {
