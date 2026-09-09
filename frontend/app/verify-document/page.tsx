@@ -28,6 +28,7 @@ import {
   Camera,
 } from 'lucide-react';
 import Link from 'next/link';
+import { QrScannerModal } from '../../components/verification/QrScannerModal';
 
 interface VerifiedPayload {
   valid: boolean;
@@ -78,6 +79,7 @@ function VerifyDocumentContent() {
   const [result, setResult] = useState<VerifiedPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const fetchVerification = async (docId: string, secPin?: string) => {
     if (!docId || !docId.trim()) return;
@@ -212,16 +214,25 @@ function VerifyDocumentContent() {
               <button
                 type="submit"
                 disabled={loading || !searchQuery.trim()}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center gap-1.5 shrink-0"
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 {loading ? (
                   <span>Verifying...</span>
                 ) : (
                   <>
-                    <QrCode className="w-4 h-4" />
+                    <Search className="w-4 h-4" />
                     <span>Verify</span>
                   </>
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsScannerOpen(true)}
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center gap-1.5 shrink-0 border border-slate-700 cursor-pointer"
+                title="Scan physical QR code with live camera or image upload"
+              >
+                <Camera className="w-4 h-4 text-emerald-400" />
+                <span className="hidden sm:inline">Scan QR</span>
               </button>
             </div>
 
@@ -296,15 +307,16 @@ function VerifyDocumentContent() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase tracking-wider">
-                      Official Cadastral Record
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>✓ QR SCANNED &amp; VERIFIED</span>
                     </span>
                     <span className="text-[10px] font-mono text-slate-400">
                       ID: {result.documentId}
                     </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-white mt-1">
-                    Digitally Verified & Certified by Government Registry
+                    Digitally Verified &amp; Certified by Government Registry
                   </h3>
                 </div>
               </div>
@@ -510,6 +522,16 @@ function VerifyDocumentContent() {
           </div>
         )}
       </main>
+
+      {/* QR Scanner Live Modal */}
+      <QrScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onSelectDocument={(id) => {
+          setSearchQuery(id);
+          fetchVerification(id);
+        }}
+      />
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500">

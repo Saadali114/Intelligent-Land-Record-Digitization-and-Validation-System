@@ -20,8 +20,10 @@ import {
   DocumentsTable,
   UploadDocumentModal,
   DocumentInspectionModal,
+  DocumentQrModal,
 } from '../../components/documents';
-import { Files, UploadCloud } from 'lucide-react';
+import { QrScannerModal } from '../../components/verification/QrScannerModal';
+import { Files, UploadCloud, Camera, QrCode } from 'lucide-react';
 
 export default function DocumentsPage() {
   const { t } = useTranslation();
@@ -37,6 +39,8 @@ export default function DocumentsPage() {
   // Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<DocumentRecord | null>(null);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [qrModalDoc, setQrModalDoc] = useState<DocumentRecord | null>(null);
 
   // Polling & Extraction State
   const [processingDocId, setProcessingDocId] = useState<string | null>(null);
@@ -132,12 +136,22 @@ export default function DocumentsPage() {
             </p>
           </div>
 
-          {(isAdmin || isOfficer) && (
-            <Button onClick={() => setIsUploadModalOpen(true)} className="sm:self-start">
-              <UploadCloud className="w-4 h-4 mr-1.5" />
-              {t('officerDocuments.uploadButton', { defaultValue: 'Upload Document' })}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setIsQrScannerOpen(true)}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs border border-slate-700 shadow-xs"
+            >
+              <Camera className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
+              {t('officerDocuments.scanQr', { defaultValue: 'Scan Document QR' })}
             </Button>
-          )}
+            {(isAdmin || isOfficer) && (
+              <Button onClick={() => setIsUploadModalOpen(true)} className="sm:self-start">
+                <UploadCloud className="w-4 h-4 mr-1.5" />
+                {t('officerDocuments.uploadButton', { defaultValue: 'Upload Document' })}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Filter Toolbar */}
@@ -173,6 +187,7 @@ export default function DocumentsPage() {
           onRunExtraction={handleRunExtraction}
           onSelectDoc={setSelectedDoc}
           onDeleteDoc={handleDelete}
+          onShowQr={setQrModalDoc}
           isAdmin={isAdmin}
         />
       </div>
@@ -192,6 +207,19 @@ export default function DocumentsPage() {
         onClose={() => setSelectedDoc(null)}
         onRunExtraction={handleRunExtraction}
         isExtracting={extractingId === selectedDoc?._id}
+      />
+
+      {/* Physical QR Scanner Modal */}
+      <QrScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+      />
+
+      {/* Document Tamper-Proof QR & Adhesive Sticker Modal */}
+      <DocumentQrModal
+        document={qrModalDoc}
+        isOpen={Boolean(qrModalDoc)}
+        onClose={() => setQrModalDoc(null)}
       />
     </AppLayout>
   );

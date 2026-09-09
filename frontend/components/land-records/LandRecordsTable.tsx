@@ -4,7 +4,7 @@ import { Badge } from '../ui/Badge';
 import { Pagination } from '../ui/Pagination';
 import { Skeleton } from '../ui/Skeleton';
 import { EmptyState } from '../ui/EmptyState';
-import { MapPin, Sparkles, Eye, Edit, Trash2 } from 'lucide-react';
+import { MapPin, Sparkles, Eye, Edit, Trash2, QrCode } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface LandRecordsTableProps {
@@ -23,6 +23,7 @@ interface LandRecordsTableProps {
   onViewRecord: (rec: LandRecord) => void;
   onEditRecord: (rec: LandRecord) => void;
   onDeleteRecord: (id: string) => void;
+  onShowQr?: (rec: LandRecord) => void;
   canEdit: boolean;
   canDelete: boolean;
 }
@@ -38,6 +39,7 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
   onViewRecord,
   onEditRecord,
   onDeleteRecord,
+  onShowQr,
   canEdit,
   canDelete,
 }) => {
@@ -82,7 +84,7 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
                   </th>
                   <th className="px-4 py-3.5">{t('common.khataNumber')}</th>
                   <th className="px-4 py-3.5">{t('common.landType')}</th>
-                  <th className="px-4 py-3.5">{t('common.status')}</th>
+                  <th className="px-4 py-3.5">Status &amp; Verification</th>
                   <th className="px-4 py-3.5">
                     {t('landRecords.aiConfidence', { defaultValue: 'AI Confidence' })}
                   </th>
@@ -120,7 +122,14 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <Badge status={rec.verificationStatus} />
+                      {rec.verificationStatus === 'VERIFIED' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                          <QrCode className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>✓ QR Scanned &amp; Verified</span>
+                        </span>
+                      ) : (
+                        <Badge status={rec.verificationStatus} />
+                      )}
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2">
@@ -137,6 +146,15 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {onShowQr && (
+                          <button
+                            onClick={() => onShowQr(rec)}
+                            className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded transition-colors cursor-pointer"
+                            title="View Official Digital QR Verification Seal"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => onViewRecord(rec)}
                           className="p-1.5 text-slate-500 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors"

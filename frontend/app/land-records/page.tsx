@@ -21,7 +21,9 @@ import {
   EditLandRecordModal,
   ViewLandRecordModal,
 } from '../../components/land-records';
-import { FileSpreadsheet, Plus, CheckCircle2 } from 'lucide-react';
+import { FileSpreadsheet, Plus, CheckCircle2, Camera, QrCode } from 'lucide-react';
+import { QrScannerModal } from '../../components/verification/QrScannerModal';
+import { DocumentQrModal } from '../../components/documents/DocumentQrModal';
 
 export default function LandRecordsPage() {
   const { t } = useTranslation();
@@ -38,6 +40,8 @@ export default function LandRecordsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editRecord, setEditRecord] = useState<LandRecord | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<LandRecord | null>(null);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [qrRecordDoc, setQrRecordDoc] = useState<any | null>(null);
 
   const { data, isLoading, isError, error } = useLandRecordsQuery({
     page,
@@ -113,6 +117,14 @@ export default function LandRecordsPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setIsQrScannerOpen(true)}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs border border-slate-700 shadow-xs"
+            >
+              <Camera className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
+              {t('landRecords.scanQr', { defaultValue: 'Scan Physical QR' })}
+            </Button>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               {t('landRecords.verifiedOnlyBadge', { defaultValue: 'Verified Documents Only' })}
@@ -164,6 +176,23 @@ export default function LandRecordsPage() {
           onViewRecord={setSelectedRecord}
           onEditRecord={setEditRecord}
           onDeleteRecord={handleDelete}
+          onShowQr={(rec) => {
+            const docForQr =
+              typeof rec.sourceDocument === 'object' && rec.sourceDocument
+                ? { ...rec.sourceDocument, landRecord: rec }
+                : {
+                    _id: rec._id,
+                    documentId: (rec.registrationNumber || rec.mutationNumber || rec._id).slice(0, 24),
+                    fileName: `Record-${rec.surveyNumber || rec._id}.pdf`,
+                    originalName: `Record-${rec.surveyNumber || rec._id}.pdf`,
+                    fileType: rec.landClassification || '7/12 Extract',
+                    processingStatus: 'VERIFIED',
+                    landRecord: rec,
+                    createdAt: rec.createdAt,
+                    updatedAt: rec.updatedAt,
+                  };
+            setQrRecordDoc(docForQr);
+          }}
           canEdit={isAdmin || isOfficer || isVerifier}
           canDelete={isAdmin}
         />
@@ -190,6 +219,19 @@ export default function LandRecordsPage() {
       <ViewLandRecordModal
         selectedRecord={selectedRecord}
         onClose={() => setSelectedRecord(null)}
+      />
+
+      {/* Physical QR Scanner Modal */}
+      <QrScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+      />
+
+      {/* Document Tamper-Proof QR & Adhesive Sticker Modal */}
+      <DocumentQrModal
+        document={qrRecordDoc}
+        isOpen={Boolean(qrRecordDoc)}
+        onClose={() => setQrRecordDoc(null)}
       />
     </AppLayout>
   );

@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Eye,
   Trash2,
+  QrCode,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -35,6 +36,7 @@ interface DocumentsTableProps {
   onRunExtraction: (id: string) => void;
   onSelectDoc: (doc: DocumentRecord) => void;
   onDeleteDoc: (id: string) => void;
+  onShowQr?: (doc: DocumentRecord) => void;
   isAdmin: boolean;
 }
 
@@ -51,6 +53,7 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onRunExtraction,
   onSelectDoc,
   onDeleteDoc,
+  onShowQr,
   isAdmin,
 }) => {
   const { t } = useTranslation();
@@ -122,7 +125,14 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex flex-col gap-1 items-start">
-                        <Badge status={doc.processingStatus} />
+                        {doc.processingStatus === 'VERIFIED' ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded shadow-2xs">
+                            <QrCode className="w-3 h-3 text-emerald-700 shrink-0" />
+                            ✓ QR Scanned & Verified
+                          </span>
+                        ) : (
+                          <Badge status={doc.processingStatus} />
+                        )}
                         {processingDocId === doc._id &&
                           !TERMINAL_STATUSES.includes(doc.processingStatus) && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded animate-pulse">
@@ -212,6 +222,15 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+                        {onShowQr && (
+                          <button
+                            onClick={() => onShowQr(doc)}
+                            className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                            title="Tamper-Proof QR & Adhesive Sticker Seal"
+                          >
+                            <QrCode className="w-4 h-4 text-emerald-600" />
+                          </button>
+                        )}
                         {isAdmin && (
                           <button
                             onClick={() => onDeleteDoc(doc._id)}

@@ -31,8 +31,12 @@ import {
   Eye,
   Check,
   Building,
+  QrCode,
+  Camera,
 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
+import { QrScannerModal } from './QrScannerModal';
+import { generateQrDataUrl, computeDocumentSecretCode } from '../../lib/qr-barcode';
 
 interface UserDocumentVerificationWorkstationProps {
   canVerify?: boolean;
@@ -66,6 +70,8 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const [remarks, setRemarks] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
 
   useEffect(() => {
     fetchDocuments();
@@ -91,6 +97,16 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
   const selectedDoc =
     documents.find((d) => d._id === selectedDocId) || documents[0] || null;
+
+  useEffect(() => {
+    if (!selectedDoc) return;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const secret = computeDocumentSecretCode(selectedDoc.documentId);
+    const verifUrl = `${origin}/verify-document?id=${encodeURIComponent(selectedDoc.documentId)}&sec=${encodeURIComponent(secret)}`;
+    generateQrDataUrl(verifUrl, { width: 220, margin: 1 }).then((url) => {
+      setQrCodeDataUrl(url);
+    });
+  }, [selectedDoc?.documentId]);
 
   const filteredDocs = documents.filter((doc) => {
     const q = searchQuery.toLowerCase();
@@ -487,47 +503,61 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   </div>
                 </div>
 
-                {/* Right controls: Generate Report & Status Badge */}
-                <div className="flex items-center gap-2.5 self-start md:self-auto">
+                {/* Right controls: Scan QR, Generate Report & Status Badge */}
+                <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+                  {/* Scan QR Code to Verify Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsQrScannerOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-colors border border-slate-700 cursor-pointer"
+                    title="Scan physical deed or document QR code using camera"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Scan QR</span>
+                  </button>
+
                   {/* Generate Verification Report Button */}
                   <button
                     type="button"
                     onClick={handleGenerateReport}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold shadow-xs transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                     title="Generate and Print Official Statutory Verification Report (PDF)"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     <span>{t('officerVerification.generateReport', { defaultValue: 'Generate Report' })}</span>
                   </button>
 
-                  {/* Status Pill */}
-                  <span
-                    className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold uppercase ${
-                      selectedDoc.processingStatus === 'VERIFIED'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : selectedDoc.processingStatus === 'REJECTED'
-                        ? 'bg-red-100 text-red-800'
-                        : selectedDoc.processingStatus === 'NEEDS_REVIEW' ||
-                          selectedDoc.processingStatus === 'ACTION_REQUIRED'
-                        ? 'bg-purple-100 text-purple-800'
-                        : selectedDoc.processingStatus === 'PROCESSED'
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                        : 'bg-amber-100 text-amber-800'
-                    }`}
-                  >
-                    {selectedDoc.processingStatus === 'VERIFIED' ? (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    ) : selectedDoc.processingStatus === 'REJECTED' ? (
-                      <XCircle className="w-3.5 h-3.5" />
-                    ) : selectedDoc.processingStatus === 'PROCESSED' ? (
-                      <Sparkles className="w-3.5 h-3.5 text-blue-700" />
-                    ) : (
-                      <Clock className="w-3.5 h-3.5" />
-                    )}
-                    {selectedDoc.processingStatus === 'PROCESSED'
-                      ? 'PROCESSED'
-                      : formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
-                  </span>
+                  {/* Status Pill / QR Verified Badge */}
+                  {selectedDoc.processingStatus === 'VERIFIED' ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-black uppercase bg-emerald-700 text-white border border-emerald-500 shadow-xs">
+                      <QrCode className="w-3.5 h-3.5 text-white" />
+                      <span>✓ QR SCANNED &amp; VERIFIED</span>
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold uppercase ${
+                        selectedDoc.processingStatus === 'REJECTED'
+                          ? 'bg-red-100 text-red-800'
+                          : selectedDoc.processingStatus === 'NEEDS_REVIEW' ||
+                            selectedDoc.processingStatus === 'ACTION_REQUIRED'
+                          ? 'bg-purple-100 text-purple-800'
+                          : selectedDoc.processingStatus === 'PROCESSED'
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {selectedDoc.processingStatus === 'REJECTED' ? (
+                        <XCircle className="w-3.5 h-3.5" />
+                      ) : selectedDoc.processingStatus === 'PROCESSED' ? (
+                        <Sparkles className="w-3.5 h-3.5 text-blue-700" />
+                      ) : (
+                        <Clock className="w-3.5 h-3.5" />
+                      )}
+                      {selectedDoc.processingStatus === 'PROCESSED'
+                        ? 'PROCESSED'
+                        : formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -683,6 +713,54 @@ export const UserDocumentVerificationWorkstation: React.FC<
                         <div>
                           <span className="text-[10px] text-slate-400 block uppercase">Mutation (Ferfar)</span>
                           <span className="font-mono text-slate-700">{extractedMutation}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Official Digital QR Seal Card */}
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                          <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Official Digital QR Seal &amp; Security PIN</span>
+                        </span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                          <span>✓ QR Scanned &amp; Verified</span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-900 to-slate-950 rounded-xl text-white border border-slate-800 shadow-sm">
+                        {qrCodeDataUrl ? (
+                          <img
+                            src={qrCodeDataUrl}
+                            alt="QR Verification Seal"
+                            className="w-20 h-20 bg-white p-1 rounded-lg border border-slate-700 shrink-0 shadow-inner"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
+                            <QrCode className="w-8 h-8 text-slate-500 animate-pulse" />
+                          </div>
+                        )}
+                        <div className="space-y-1 text-xs min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-bold uppercase text-emerald-400">Security PIN:</span>
+                            <span className="font-mono text-xs font-black text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
+                              {computeDocumentSecretCode(selectedDoc.documentId)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 leading-snug">
+                            Cryptographically signed digital revenue seal. Scan with any phone camera to verify official registry status.
+                          </p>
+                          <a
+                            href={`/verify-document?id=${encodeURIComponent(selectedDoc.documentId)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline pt-0.5"
+                          >
+                            <span>Open Public Citizen Verification Portal</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -939,6 +1017,24 @@ export const UserDocumentVerificationWorkstation: React.FC<
           </div>
         </div>
       )}
+
+      {/* Interactive QR Scanner Modal for Officer */}
+      <QrScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+        onSelectDocument={(docId) => {
+          const match = documents.find((d) => d.documentId === docId || d._id === docId);
+          if (match) {
+            setSelectedDocId(match._id);
+          } else {
+            // refresh and select
+            fetchDocuments().then(() => {
+              const fresh = documents.find((d) => d.documentId === docId || d._id === docId);
+              if (fresh) setSelectedDocId(fresh._id);
+            });
+          }
+        }}
+      />
     </div>
   );
 };
