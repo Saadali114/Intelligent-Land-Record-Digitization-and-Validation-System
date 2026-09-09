@@ -15,16 +15,16 @@ interface DocumentInspectionModalProps {
   document: DocumentRecord | null;
   isOpen: boolean;
   onClose: () => void;
-  onRunExtraction: (id: string) => void;
-  isExtracting: boolean;
+  onRunExtraction?: (id: string) => void;
+  isExtracting?: boolean;
 }
 
 export const DocumentInspectionModal: React.FC<DocumentInspectionModalProps> = ({
   document: initialDoc,
   isOpen,
   onClose,
-  onRunExtraction,
-  isExtracting,
+  onRunExtraction = () => {},
+  isExtracting = false,
 }) => {
   const { t } = useTranslation();
   const [imageZoom, setImageZoom] = useState(1);

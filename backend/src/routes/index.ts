@@ -9,6 +9,7 @@ import auditRoutes from './audit.routes.js';
 import verificationWorkflowRoutes from './verificationWorkflow.routes.js';
 import adminOfficerRoutes from './admin-officers.routes.js';
 import verificationModuleRoutes from './verificationModule.routes.js';
+import complaintRoutes from './complaint.routes.js';
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.use('/verification', verificationRoutes);
 router.use('/verification-workflow', verificationWorkflowRoutes);
 router.use('/verifications', verificationModuleRoutes);
 router.use('/admin/officer-applications', adminOfficerRoutes);
+router.use('/complaints', complaintRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/audit', auditRoutes);
 

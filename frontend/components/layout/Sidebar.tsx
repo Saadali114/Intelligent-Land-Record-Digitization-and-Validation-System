@@ -58,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       label: t('navbar.userManagement'),
       href: '/users',
       icon: Users,
-      roles: ['ADMIN'],
+      roles: ['ADMIN', 'OFFICER'],
     },
     {
       label: t('navbar.myProfile'),
