@@ -21,8 +21,8 @@ export const DemoCaseSelector: React.FC<DemoCaseSelectorProps> = ({
     {
       id: 'CASE_1_GREEN' as const,
       label: t('verificationWorkflow.case1Green', 'Case 1: Genuine Owner (Low Risk / Approved)'),
-      subtitle: 'Shankar Patil • Survey 145/2A • Area 1.25 Ha • Matched Owner',
-      badge: 'LOW RISK',
+      subtitle: t('verificationWorkflow.case1Subtitle'),
+      badge: t('verificationWorkflow.lowRisk'),
       badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
       activeBorder: 'border-emerald-500 ring-1 ring-emerald-500/50 bg-emerald-950/20',
       icon: CheckCircle,
@@ -34,8 +34,8 @@ export const DemoCaseSelector: React.FC<DemoCaseSelectorProps> = ({
         'verificationWorkflow.case2Yellow',
         'Case 2: Stolen / Unestablished Relationship (Medium Risk / Action Required)'
       ),
-      subtitle: 'Applicant: Rahul Patil • Doc: Shankar Patil • Genuine 7/12 • Unverified Standing',
-      badge: 'MEDIUM RISK',
+      subtitle: t('verificationWorkflow.case2Subtitle'),
+      badge: t('verificationWorkflow.mediumRisk'),
       badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
       activeBorder: 'border-amber-500 ring-1 ring-amber-500/50 bg-amber-950/20',
       icon: AlertTriangle,
@@ -47,8 +47,8 @@ export const DemoCaseSelector: React.FC<DemoCaseSelectorProps> = ({
         'verificationWorkflow.case3Red',
         'Case 3: Cadastral Discrepancy & Alteration (High Risk / Officer Review)'
       ),
-      subtitle: 'Extracted Area 2.50 Ha vs Cadastre 1.25 Ha • Altered Survey 145/9X',
-      badge: 'HIGH RISK',
+      subtitle: t('verificationWorkflow.case3Subtitle'),
+      badge: t('verificationWorkflow.highRisk'),
       badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
       activeBorder: 'border-rose-500 ring-1 ring-rose-500/50 bg-rose-950/20',
       icon: XCircle,
@@ -66,7 +66,7 @@ export const DemoCaseSelector: React.FC<DemoCaseSelectorProps> = ({
           </h3>
         </div>
         <span className="text-[11px] text-slate-400">
-          Switch test cases to observe automated multi-factor risk detection
+          {t('verificationWorkflow.presetCasesSubtitle')}
         </span>
       </div>
 

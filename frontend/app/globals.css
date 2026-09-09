@@ -45,3 +45,26 @@
 .gov-subtle-gradient {
   background: linear-gradient(180deg, rgba(241, 245, 249, 0.6) 0%, rgba(255, 255, 255, 1) 100%);
 }
+
+/* Accessibility Font Scaling */
+html[data-font-size="small"] {
+  font-size: 87.5%;
+}
+
+html[data-font-size="normal"] {
+  font-size: 100%;
+}
+
+html[data-font-size="large"] {
+  font-size: 115%;
+}
+
+/* Ensure arbitrary pixel font size classes scale proportionally */
+html[data-font-size="small"] .text-\[11px\] { font-size: 9.6px; }
+html[data-font-size="small"] .text-\[10px\] { font-size: 8.75px; }
+html[data-font-size="small"] .text-\[9px\] { font-size: 8px; }
+
+html[data-font-size="large"] .text-\[11px\] { font-size: 12.65px; }
+html[data-font-size="large"] .text-\[10px\] { font-size: 11.5px; }
+html[data-font-size="large"] .text-\[9px\] { font-size: 10.5px; }
+

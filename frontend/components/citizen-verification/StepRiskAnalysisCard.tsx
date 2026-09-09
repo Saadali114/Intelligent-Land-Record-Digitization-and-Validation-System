@@ -36,7 +36,7 @@ export const StepRiskAnalysisCard: React.FC<StepRiskAnalysisCardProps> = ({ work
               {t('verificationWorkflow.riskAnalysisTitle', 'Rule-Based Risk & Discrepancy Analysis')}
             </h2>
             <p className="text-xs text-slate-400">
-              Deterministic composite scoring across Identity, Document, Registry, and Legal Standing
+              {t('verificationWorkflow.riskAnalysisDesc')}
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@ export const StepRiskAnalysisCard: React.FC<StepRiskAnalysisCardProps> = ({ work
         {/* Score Pill */}
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <span className="text-[11px] text-slate-400 block">Calculated Risk Index</span>
+            <span className="text-[11px] text-slate-400 block">{t('verificationWorkflow.calculatedRiskIndex')}</span>
             <span className="text-base font-bold font-mono text-white">
               {risk.score} <span className="text-xs text-slate-500">/ 100</span>
             </span>
@@ -100,7 +100,7 @@ export const StepRiskAnalysisCard: React.FC<StepRiskAnalysisCardProps> = ({ work
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-slate-500 italic">No positive signals verified.</p>
+            <p className="text-xs text-slate-500 italic">{t('verificationWorkflow.noPositiveSignals')}</p>
           )}
         </div>
 
@@ -124,7 +124,7 @@ export const StepRiskAnalysisCard: React.FC<StepRiskAnalysisCardProps> = ({ work
           ) : (
             <div className="flex items-center gap-2 text-xs text-emerald-400 p-2 rounded bg-emerald-950/20 border border-emerald-800/30">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Zero negative risk indicators flagged</span>
+              <span>{t('verificationWorkflow.zeroNegativeSignals')}</span>
             </div>
           )}
         </div>

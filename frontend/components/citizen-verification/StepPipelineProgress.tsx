@@ -51,9 +51,9 @@ export const StepPipelineProgress: React.FC<StepPipelineProgressProps> = ({
             <Cpu className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">Automated Verification Pipeline</h2>
+            <h2 className="text-lg font-semibold text-white">{t('verificationWorkflow.pipelineTitle')}</h2>
             <p className="text-xs text-slate-400">
-              Executing multi-pillar verification algorithms against state cadastral rules
+              {t('verificationWorkflow.pipelineSubtitle')}
             </p>
           </div>
         </div>
@@ -61,7 +61,12 @@ export const StepPipelineProgress: React.FC<StepPipelineProgressProps> = ({
           <span className="text-xs font-mono font-semibold text-sky-400">
             {Math.min(100, Math.round((currentStage / stages.length) * 100))}%
           </span>
-          <p className="text-[10px] text-slate-500">Processing Stage {Math.min(stages.length, currentStage + 1)} of {stages.length}</p>
+          <p className="text-[10px] text-slate-500">
+            {t('verificationWorkflow.processingStage', {
+              current: Math.min(stages.length, currentStage + 1),
+              total: stages.length,
+            })}
+          </p>
         </div>
       </div>
 
@@ -88,15 +93,15 @@ export const StepPipelineProgress: React.FC<StepPipelineProgressProps> = ({
                 {isDone ? (
                   <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Completed</span>
+                    <span>{t('common.completed')}</span>
                   </span>
                 ) : isCurrent ? (
                   <span className="flex items-center gap-1.5 text-xs text-sky-400 font-medium animate-pulse">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Evaluating...</span>
+                    <span>{t('verificationWorkflow.evaluating')}</span>
                   </span>
                 ) : (
-                  <span className="text-xs text-slate-600 font-mono">Queued</span>
+                  <span className="text-xs text-slate-600 font-mono">{t('verificationWorkflow.queued')}</span>
                 )}
               </div>
             </div>

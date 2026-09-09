@@ -118,7 +118,7 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
             </label>
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Registered Citizen Account • Email Verification Active</span>
+              <span>{t('verificationWorkflow.accountStatusValue')}</span>
             </div>
           </div>
         </div>
@@ -141,17 +141,17 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
                     )}
                   </span>
                   <span className="text-[10px] uppercase font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">
-                    VERIFIED
+                    {t('common.verified')}
                   </span>
                 </div>
                 <p className="text-[11px] text-emerald-200/80 mt-1">
-                  Email inbox control verified via 6-digit code for {workflow.applicant.name} ({applicantEmail}).
+                  {t('verificationWorkflow.identityVerifiedDesc', { name: workflow.applicant.name, email: applicantEmail })}
                 </p>
               </div>
             ) : !otpSent ? (
               <div className="space-y-4">
                 <p className="text-xs text-slate-400">
-                  Click below to dispatch a real 6-digit verification code to registered email{' '}
+                  {t('verificationWorkflow.sendOtpPrompt')}{' '}
                   <span className="font-mono text-white font-semibold">{applicantEmail}</span>.
                 </p>
 
@@ -170,7 +170,7 @@ export const StepIdentityVerification: React.FC<StepIdentityVerificationProps> =
                   {isSending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Sending Email OTP...</span>
+                      <span>{t('verificationWorkflow.sendingOtp')}</span>
                     </>
                   ) : (
                     <>

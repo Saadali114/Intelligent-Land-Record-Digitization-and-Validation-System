@@ -38,7 +38,7 @@ export const StepOfficialRecordMatch: React.FC<StepOfficialRecordMatchProps> = (
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Registry Reference:</span>
+          <span className="text-xs text-slate-400">{t('verificationWorkflow.registryReference')}</span>
           <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 text-sky-400 border border-slate-700">
             {match.matchedRecordId}
           </span>
@@ -60,20 +60,24 @@ export const StepOfficialRecordMatch: React.FC<StepOfficialRecordMatchProps> = (
             <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
           )}
           <div>
-            <h4 className="text-sm font-semibold">
+            <h3
+              className={`text-sm font-semibold ${
+                isStrongMatch ? 'text-emerald-300' : 'text-rose-300'
+              }`}
+            >
               {isStrongMatch
                 ? t('verificationWorkflow.strongMatch', 'Official Record Match: Strong')
                 : t('verificationWorkflow.mismatchDetected', 'Official Record Match: Discrepancy Detected')}
-            </h4>
-            <p className="text-xs opacity-90">{match.summary}</p>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">{match.summary}</p>
           </div>
         </div>
 
         <span
-          className={`text-xs font-mono font-bold px-2.5 py-1 rounded border uppercase shrink-0 ${
+          className={`text-xs font-mono font-bold px-3 py-1 rounded-full border ${
             isStrongMatch
-              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-              : 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+              : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
           }`}
         >
           {match.status}
@@ -81,11 +85,11 @@ export const StepOfficialRecordMatch: React.FC<StepOfficialRecordMatchProps> = (
       </div>
 
       {/* Side-by-Side Comparison Table */}
-      <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950/60">
+      <div className="border border-slate-800 rounded-lg overflow-hidden">
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900 border-b border-slate-800 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
             <tr>
-              <th className="py-3 px-4">Cadastral Attribute</th>
+              <th className="py-3 px-4">{t('verificationWorkflow.cadastralAttribute')}</th>
               <th className="py-3 px-4 text-sky-300">
                 {t('verificationWorkflow.uploadedDocHeader', 'Uploaded Document')}
               </th>
@@ -124,12 +128,12 @@ export const StepOfficialRecordMatch: React.FC<StepOfficialRecordMatchProps> = (
                   {item.isMatch ? (
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>MATCH</span>
+                      <span>{t('verificationWorkflow.statusMatch')}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/40">
                       <XCircle className="w-3.5 h-3.5" />
-                      <span>MISMATCH</span>
+                      <span>{t('verificationWorkflow.statusMismatch')}</span>
                     </span>
                   )}
                 </td>

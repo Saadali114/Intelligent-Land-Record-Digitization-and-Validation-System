@@ -76,16 +76,16 @@ export default function CitizenVerifyPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                Tracking: {workflow.trackingNumber}
+                {t('verificationWorkflow.trackingLabel')}: {workflow.trackingNumber}
               </span>
               <span className="text-slate-500">•</span>
               <span className="text-xs text-slate-400 font-mono">ID: {workflow.id}</span>
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">
-              Automated Land Record Verification
+              {t('verificationWorkflow.pageTitle')}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              4-Pillar Validation: Identity, Document Consistency, Cadastral Match & Legal Relationship
+              {t('verificationWorkflow.pageDesc')}
             </p>
           </div>
 
@@ -96,13 +96,13 @@ export default function CitizenVerifyPage() {
               className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Flow</span>
+              <span>{t('verificationWorkflow.resetFlow')}</span>
             </button>
             <Link
               href={`/verification/${workflow.id}`}
               className="px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium transition-colors flex items-center gap-1.5 shadow-md shadow-sky-950"
             >
-              <span>Officer Workspace</span>
+              <span>{t('verificationWorkflow.officerWorkspace')}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -126,7 +126,7 @@ export default function CitizenVerifyPage() {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
-            1. Identity
+            {t('verificationWorkflow.step1Identity')}
           </button>
           <button
             type="button"
@@ -137,7 +137,7 @@ export default function CitizenVerifyPage() {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
-            2. Upload Document
+            {t('verificationWorkflow.step2Upload')}
           </button>
           <button
             type="button"
@@ -148,7 +148,7 @@ export default function CitizenVerifyPage() {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
-            3. AI Pipeline
+            {t('verificationWorkflow.step3Pipeline')}
           </button>
           <button
             type="button"
@@ -159,7 +159,7 @@ export default function CitizenVerifyPage() {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
-            4. 4-Pillar Dossier
+            {t('verificationWorkflow.step4Dossier')}
           </button>
         </div>
 
@@ -209,9 +209,9 @@ export default function CitizenVerifyPage() {
             {/* Bottom Actions */}
             <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h4 className="text-sm font-semibold text-white">Application Successfully Processed</h4>
+                <h4 className="text-sm font-semibold text-white">{t('verificationWorkflow.appProcessedTitle')}</h4>
                 <p className="text-xs text-slate-400">
-                  Dossier is ready for statutory verification in the Officer Review Console.
+                  {t('verificationWorkflow.appProcessedDesc')}
                 </p>
               </div>
 
@@ -221,13 +221,13 @@ export default function CitizenVerifyPage() {
                   onClick={handleReset}
                   className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
                 >
-                  Test Another Case
+                  {t('verificationWorkflow.testAnotherCase')}
                 </button>
                 <Link
                   href={`/verification/${workflow.id}`}
                   className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-emerald-950"
                 >
-                  <span>Open Officer Workspace</span>
+                  <span>{t('verificationWorkflow.openOfficerWorkspace')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

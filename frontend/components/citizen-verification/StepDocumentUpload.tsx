@@ -120,7 +120,7 @@ export const StepDocumentUpload: React.FC<StepDocumentUploadProps> = ({
             className="w-full py-3 px-6 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-all shadow-lg shadow-emerald-950 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isProcessing ? (
-              <span>Running 4-Pillar Pipeline...</span>
+              <span>{t('verificationWorkflow.runningPipeline')}</span>
             ) : (
               <>
                 <span>

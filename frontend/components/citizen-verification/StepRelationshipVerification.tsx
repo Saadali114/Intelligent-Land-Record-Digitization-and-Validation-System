@@ -62,7 +62,7 @@ export const StepRelationshipVerification: React.FC<StepRelationshipVerification
           </span>
           <div className="text-sm font-semibold text-white font-mono">{rel.landOwnerName}</div>
           <div className="text-[11px] text-slate-500">
-            Recorded title holder in Form 7/12 Cadastral Registry
+            {t('verificationWorkflow.registeredOwnerDesc')}
           </div>
         </div>
 
@@ -72,7 +72,7 @@ export const StepRelationshipVerification: React.FC<StepRelationshipVerification
           </span>
           <div className="text-sm font-semibold text-white font-mono">{rel.applicantName}</div>
           <div className="text-[11px] text-slate-500">
-            Authenticated via Registered Mobile OTP in Pillar 1
+            {t('verificationWorkflow.verifiedApplicantDesc')}
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ export const StepRelationshipVerification: React.FC<StepRelationshipVerification
             <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
             <div>
               <h4 className="text-sm font-bold text-amber-300">
-                ACTION REQUIRED: Legal Relationship Not Established
+                {t('verificationWorkflow.actionRequiredRelationship')}
               </h4>
               <p className="text-xs text-amber-200/90 leading-relaxed mt-1">
                 {t(
@@ -93,7 +93,11 @@ export const StepRelationshipVerification: React.FC<StepRelationshipVerification
                 )}
               </p>
               <div className="mt-2 text-xs font-mono text-amber-300/80 bg-amber-950/50 p-2 rounded border border-amber-800/40">
-                <strong>System Note:</strong> The document itself is structurally valid and matches the cadastral record, but applicant <strong>{rel.applicantName}</strong> is not listed as the owner <strong>{rel.landOwnerName}</strong>.
+                <strong>{t('verificationWorkflow.systemNote')}</strong>{' '}
+                {t('verificationWorkflow.systemNoteDesc', {
+                  applicant: rel.applicantName,
+                  owner: rel.landOwnerName,
+                })}
               </div>
             </div>
           </div>
@@ -102,12 +106,12 @@ export const StepRelationshipVerification: React.FC<StepRelationshipVerification
           <div className="p-3 bg-slate-950/70 rounded-lg border border-amber-900/40 mt-3 space-y-2">
             <span className="text-xs font-semibold text-slate-200 flex items-center gap-2">
               <FileWarning className="w-4 h-4 text-amber-400" />
-              <span>Required Standing Documents to Resolve:</span>
+              <span>{t('verificationWorkflow.requiredDocuments')}</span>
             </span>
             <ul className="text-xs text-slate-400 space-y-1.5 list-disc pl-5">
-              <li>Registered Power of Attorney (कुलमुखत्यारपत्र) from {rel.landOwnerName}</li>
-              <li>Legal Heirship Certificate (वारस तपासणी प्रमाणपत्र) issued by Talathi/Tahsildar</li>
-              <li>Registered Registered Lease / Tenant Agreement</li>
+              <li>{t('verificationWorkflow.requiredDoc1', { owner: rel.landOwnerName })}</li>
+              <li>{t('verificationWorkflow.requiredDoc2')}</li>
+              <li>{t('verificationWorkflow.requiredDoc3')}</li>
             </ul>
           </div>
         </div>

@@ -25,7 +25,7 @@ export const DemoBanner: React.FC = () => {
         </div>
         <div className="flex items-center gap-1.5 text-amber-400/90 text-[11px] bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/40">
           <Info className="w-3.5 h-3.5 shrink-0" />
-          <span>Statutory Compliance Mode Active</span>
+          <span>{t('verificationWorkflow.statutoryComplianceActive')}</span>
         </div>
       </div>
     </div>
