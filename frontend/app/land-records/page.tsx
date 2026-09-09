@@ -21,7 +21,7 @@ import {
   EditLandRecordModal,
   ViewLandRecordModal,
 } from '../../components/land-records';
-import { FileSpreadsheet, Plus } from 'lucide-react';
+import { FileSpreadsheet, Plus, CheckCircle2 } from 'lucide-react';
 
 export default function LandRecordsPage() {
   const { t } = useTranslation();
@@ -44,7 +44,7 @@ export default function LandRecordsPage() {
     limit: 10,
     search: search || undefined,
     district: districtFilter || undefined,
-    status: statusFilter || undefined,
+    status: 'VERIFIED',
     landClassification: classificationFilter || undefined,
   });
 
@@ -112,12 +112,18 @@ export default function LandRecordsPage() {
             </p>
           </div>
 
-          {(isAdmin || isOfficer) && (
-            <Button onClick={() => setIsCreateModalOpen(true)} className="sm:self-start">
-              <Plus className="w-4 h-4 mr-1.5" />
-              {t('officerLandRecords.addRecord', { defaultValue: 'Add Record' })}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              {t('landRecords.verifiedOnlyBadge', { defaultValue: 'Verified Documents Only' })}
+            </span>
+            {(isAdmin || isOfficer) && (
+              <Button onClick={() => setIsCreateModalOpen(true)} className="sm:self-start">
+                <Plus className="w-4 h-4 mr-1.5" />
+                {t('officerLandRecords.addRecord', { defaultValue: 'Add Record' })}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Filter Toolbar */}

@@ -53,18 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       icon: CheckCheck,
       roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
-    {
-      label: t('sidebar.officerWorklist', { defaultValue: 'Officer Worklist (AI Review)' }),
-      href: '/officer/verifications',
-      icon: CheckCheck,
-      roles: ['ADMIN', 'OFFICER'],
-    },
-    {
-      label: t('sidebar.cadastralReferenceRecords', { defaultValue: 'Cadastral Reference Records' }),
-      href: '/admin/land-records',
-      icon: FileSpreadsheet,
-      roles: ['ADMIN'],
-    },
+
     {
       label: t('navbar.userManagement'),
       href: '/users',

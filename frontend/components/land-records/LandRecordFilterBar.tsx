@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDistrict, formatDocType } from '../../lib/translationHelpers';
 
@@ -70,17 +70,10 @@ export const LandRecordFilterBar: React.FC<LandRecordFilterBarProps> = ({
           ))}
         </select>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-900"
-        >
-          <option value="">{t('landRecords.allStatuses', { defaultValue: 'All Statuses' })}</option>
-          <option value="ACTIVE">{t('status.active', { defaultValue: 'Active' })}</option>
-          <option value="PENDING">{t('status.pending', { defaultValue: 'Pending' })}</option>
-          <option value="DISPUTED">{t('status.disputed', { defaultValue: 'Disputed' })}</option>
-          <option value="ARCHIVED">{t('status.archived', { defaultValue: 'Archived' })}</option>
-        </select>
+        <div className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-emerald-200 bg-emerald-50/80 text-emerald-800">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          <span>{t('landRecords.verifiedOnly', { defaultValue: 'Status: Verified Documents' })}</span>
+        </div>
       </div>
     </div>
   );
