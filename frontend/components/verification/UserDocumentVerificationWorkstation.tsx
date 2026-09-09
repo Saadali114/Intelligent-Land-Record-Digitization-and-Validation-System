@@ -76,7 +76,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
     try {
       const res = await documentsService.getDocuments({
         status: statusFilter || undefined,
-        limit: 50,
+        limit: 100,
       });
       setDocuments(res.documents || []);
       if (res.documents && res.documents.length > 0 && !selectedDocId) {
@@ -331,12 +331,13 @@ export const UserDocumentVerificationWorkstation: React.FC<
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:bg-white"
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:bg-white font-medium"
               >
                 <option value="">{t('officerDocuments.allStatuses', { defaultValue: 'All Queue Statuses' })}</option>
+                <option value="PROCESSED">{t('status.processed', { defaultValue: 'Processed (Ready for Review)' })}</option>
+                <option value="NEEDS_REVIEW">{t('status.needsReview', { defaultValue: 'Needs Review' })}</option>
                 <option value="UPLOADED">{t('status.uploaded', { defaultValue: 'Uploaded' })}</option>
                 <option value="PROCESSING">{t('status.processing', { defaultValue: 'Processing' })}</option>
-                <option value="NEEDS_REVIEW">{t('status.needsReview', { defaultValue: 'Needs Review' })}</option>
                 <option value="VERIFIED">{t('status.verified', { defaultValue: 'Verified' })}</option>
                 <option value="REJECTED">{t('status.rejected', { defaultValue: 'Rejected' })}</option>
               </select>
@@ -402,10 +403,12 @@ export const UserDocumentVerificationWorkstation: React.FC<
                               ? 'bg-red-100 text-red-800'
                               : status === 'NEEDS_REVIEW' || status === 'ACTION_REQUIRED'
                               ? 'bg-purple-100 text-purple-800'
+                              : status === 'PROCESSED'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
                               : 'bg-amber-100 text-amber-800'
                           }`}
                         >
-                          {formatStatus(status, t)}
+                          {status === 'PROCESSED' ? 'PROCESSED' : formatStatus(status, t)}
                         </span>
                       </div>
 
@@ -507,6 +510,8 @@ export const UserDocumentVerificationWorkstation: React.FC<
                         : selectedDoc.processingStatus === 'NEEDS_REVIEW' ||
                           selectedDoc.processingStatus === 'ACTION_REQUIRED'
                         ? 'bg-purple-100 text-purple-800'
+                        : selectedDoc.processingStatus === 'PROCESSED'
+                        ? 'bg-blue-100 text-blue-800 border border-blue-200'
                         : 'bg-amber-100 text-amber-800'
                     }`}
                   >
@@ -514,10 +519,14 @@ export const UserDocumentVerificationWorkstation: React.FC<
                       <CheckCircle2 className="w-3.5 h-3.5" />
                     ) : selectedDoc.processingStatus === 'REJECTED' ? (
                       <XCircle className="w-3.5 h-3.5" />
+                    ) : selectedDoc.processingStatus === 'PROCESSED' ? (
+                      <Sparkles className="w-3.5 h-3.5 text-blue-700" />
                     ) : (
                       <Clock className="w-3.5 h-3.5" />
                     )}
-                    {formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
+                    {selectedDoc.processingStatus === 'PROCESSED'
+                      ? 'PROCESSED'
+                      : formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
                   </span>
                 </div>
               </div>

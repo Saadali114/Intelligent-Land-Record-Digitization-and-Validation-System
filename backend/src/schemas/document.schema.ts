@@ -5,7 +5,21 @@ export const DocumentQuerySchema = z.object({
   limit: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 10)),
   search: z.string().optional(),
   language: z.string().optional(),
-  status: z.enum(['UPLOADED', 'PROCESSING', 'PROCESSED', 'FAILED', 'NEEDS_REVIEW']).optional(),
+  status: z
+    .enum([
+      'UPLOADED',
+      'PROCESSING',
+      'OCR_COMPLETED',
+      'ANALYSIS_COMPLETED',
+      'PENDING_OFFICER_REVIEW',
+      'ACTION_REQUIRED',
+      'PROCESSED',
+      'VERIFIED',
+      'REJECTED',
+      'FAILED',
+      'NEEDS_REVIEW',
+    ])
+    .optional(),
   sortBy: z.string().optional().default('uploadedAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
