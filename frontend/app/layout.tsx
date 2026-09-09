@@ -16,7 +16,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var size = localStorage.getItem('ilrdvs_font_size');
+                if (size === 'small') {
+                  document.documentElement.setAttribute('data-font-size', 'small');
+                  document.documentElement.style.fontSize = '87.5%';
+                } else if (size === 'large') {
+                  document.documentElement.setAttribute('data-font-size', 'large');
+                  document.documentElement.style.fontSize = '115%';
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>
         <I18nProvider>
           <QueryProvider>

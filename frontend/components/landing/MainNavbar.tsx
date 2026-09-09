@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,6 +14,25 @@ import {
   Eye,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+
+export type FontSize = 'small' | 'normal' | 'large';
+
+const FONT_SIZE_STYLES: Record<FontSize, string> = {
+  small: '87.5%',
+  normal: '100%',
+  large: '115%',
+};
+
+export const applyFontSize = (size: FontSize) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.setAttribute('data-font-size', size);
+  document.documentElement.style.fontSize = FONT_SIZE_STYLES[size];
+  try {
+    localStorage.setItem('ilrdvs_font_size', size);
+  } catch {
+    // ignore
+  }
+};
 
 interface DistrictOption {
   key: string;
@@ -39,7 +58,24 @@ export const MainNavbar: React.FC = () => {
   const { t } = useTranslation();
   const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
   const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
-  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'small'>('normal');
+  const [fontSize, setFontSize] = useState<FontSize>('normal');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ilrdvs_font_size') as FontSize | null;
+      if (saved && (saved === 'small' || saved === 'normal' || saved === 'large')) {
+        setFontSize(saved);
+        applyFontSize(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleFontSizeChange = (size: FontSize) => {
+    setFontSize(size);
+    applyFontSize(size);
+  };
 
   return (
     <div className="bg-slate-900 text-slate-200 text-[11px] border-b border-slate-800">
@@ -71,23 +107,38 @@ export const MainNavbar: React.FC = () => {
             <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
               <span className="text-slate-400">{t('navbar.textLabel', 'Text:')}</span>
               <button
-                onClick={() => setFontSize('small')}
-                className={`hover:text-white px-1 font-bold ${fontSize === 'small' ? 'text-amber-400' : ''}`}
+                type="button"
+                onClick={() => handleFontSizeChange('small')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'small' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
                 title={t('navbar.decreaseText')}
+                aria-label={t('navbar.decreaseText')}
+                aria-pressed={fontSize === 'small'}
               >
                 A-
               </button>
               <button
-                onClick={() => setFontSize('normal')}
-                className={`hover:text-white px-1 font-bold ${fontSize === 'normal' ? 'text-amber-400' : ''}`}
+                type="button"
+                onClick={() => handleFontSizeChange('normal')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'normal' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
                 title={t('navbar.standardText')}
+                aria-label={t('navbar.standardText')}
+                aria-pressed={fontSize === 'normal'}
               >
                 A
               </button>
               <button
-                onClick={() => setFontSize('large')}
-                className={`hover:text-white px-1 font-bold ${fontSize === 'large' ? 'text-amber-400' : ''}`}
+                type="button"
+                onClick={() => handleFontSizeChange('large')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'large' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
                 title={t('navbar.increaseText')}
+                aria-label={t('navbar.increaseText')}
+                aria-pressed={fontSize === 'large'}
               >
                 A+
               </button>
