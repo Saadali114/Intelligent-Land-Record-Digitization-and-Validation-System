@@ -192,25 +192,31 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
 
             <div>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  application?.status === 'APPROVED'
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                    : application?.status === 'REJECTED'
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${application?.status === 'APPROVED'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : application?.status === 'REJECTED'
                     ? 'bg-rose-100 text-rose-800 border border-rose-300'
                     : application?.status === 'ACTION_REQUIRED'
-                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                    : 'bg-blue-50 text-blue-900 border border-blue-200'
-                }`}
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                      : 'bg-blue-50 text-blue-900 border border-blue-200'
+                  }`}
               >
                 {application?.status === 'APPROVED'
                   ? t('adminOfficer.approvedActiveBadge', { defaultValue: '✓ Approved & Active' })
                   : application?.status === 'REJECTED'
+<<<<<<< HEAD
                   ? t('adminOfficer.rejectedBadge', { defaultValue: '✕ Rejected' })
                   : application?.status === 'ACTION_REQUIRED'
                   ? t('adminOfficer.clarificationRequestedBadge', {
                       defaultValue: '⚠ Clarification Requested',
                     })
                   : t('adminOfficer.pendingReviewBadge', { defaultValue: '● Pending Review' })}
+=======
+                    ? '✕ Rejected'
+                    : application?.status === 'ACTION_REQUIRED'
+                      ? '⚠ Clarification Requested'
+                      : '● Pending Review'}
+>>>>>>> origin/saad-mk
               </span>
             </div>
           </div>
@@ -219,11 +225,10 @@ export default function OfficerApplicationReviewClient({ applicationId }: Props)
         {/* Feedback Alert */}
         {feedbackMessage && (
           <div
-            className={`p-4 rounded-xl border text-xs flex items-center gap-2 ${
-              feedbackMessage.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                : 'bg-rose-50 border-rose-200 text-rose-800'
-            }`}
+            className={`p-4 rounded-xl border text-xs flex items-center gap-2 ${feedbackMessage.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
+              }`}
           >
             {feedbackMessage.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />

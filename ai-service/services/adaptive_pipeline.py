@@ -65,9 +65,11 @@ def _preprocess_clahe_boost(image_bytes: bytes) -> Tuple[bytes, List[str]]:
     """
     try:
         # pyrefly: ignore [missing-import]
+<<<<<<< HEAD
         import cv2  # type: ignore
         import numpy as np  # type: ignore
         from services.preprocessing import upscale_if_needed
+
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
         if img is None:
