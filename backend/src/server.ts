@@ -20,17 +20,25 @@ dotenv.config();
 import { createApp } from './app.js';
 import { connectDB } from './config/db.js';
 import { User } from './models/User.js';
-import { seedDatabase } from './seed/seed.js';
+import { seedDatabase, ensureDefaultAccounts } from './seed/seed.js';
 
 const startServer = async () => {
   try {
     await connectDB();
 
-    // Automatically seed default dataset if database is empty
+    // 1. Ensure core default system accounts always exist and are active
+    try {
+      await ensureDefaultAccounts();
+      console.log('System core accounts (Admin, Officers, Verifiers, Citizen) verified and active.');
+    } catch (accErr: any) {
+      console.warn('Warning: Default accounts initialization check encountered an issue:', accErr?.message);
+    }
+
+    // 2. Automatically seed full dataset if database is empty
     try {
       const userCount = await User.countDocuments();
-      if (userCount === 0) {
-        console.log('No users found in database. Automatically initializing demo data...');
+      if (userCount <= 6) {
+        console.log('Database has minimal users. Initializing full demo land records and workflows...');
         try {
           await seedDatabase(false);
           console.log('Demo data successfully initialized.');

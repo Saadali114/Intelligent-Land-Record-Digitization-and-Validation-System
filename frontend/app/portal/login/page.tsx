@@ -117,23 +117,26 @@ export default function CitizenLoginPage() {
         return;
       }
 
-      // If server returned 401 or invalid credentials
+      const serverMsg = err?.message || '';
       if (
-        err?.response?.status === 401 ||
-        err?.message?.toLowerCase().includes('credential') ||
-        err?.message?.toLowerCase().includes('password')
+        serverMsg.toLowerCase().includes('network error') ||
+        serverMsg.toLowerCase().includes('timeout') ||
+        serverMsg.toLowerCase().includes('econnrefused')
       ) {
+        setError(
+          'Unable to connect to the server. If the backend is cold-starting on Render, please wait 15–20 seconds and try again.'
+        );
+      } else if (serverMsg.toLowerCase().includes('verify your email')) {
+        setError(serverMsg);
+      } else if (serverMsg.toLowerCase().includes('inactive') || serverMsg.toLowerCase().includes('suspended')) {
+        setError(serverMsg);
+      } else if (serverMsg) {
+        setError(serverMsg);
+      } else {
         setError(
           t('auth.invalidCredentials', {
             defaultValue: 'Invalid email or password. Please verify your credentials and try again.',
           })
-        );
-      } else {
-        setError(
-          err?.message ||
-            t('auth.loginFailed', {
-              defaultValue: 'Unable to sign in. Please verify your email and password.',
-            })
         );
       }
     } finally {
@@ -195,9 +198,21 @@ export default function CitizenLoginPage() {
           </div>
 
           {error && (
-            <div className="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 animate-in fade-in">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+              {error.toLowerCase().includes('verify') && (
+                <div className="mt-2 pl-6">
+                  <Link
+                    href={`/register/citizen/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`}
+                    className="font-semibold text-blue-900 underline hover:text-blue-800"
+                  >
+                    Click here to enter your email verification OTP &rarr;
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

@@ -47,12 +47,19 @@ export const registerUserService = async (input: RegisterInput, ipAddress?: stri
 };
 
 export const loginUserService = async (input: LoginInput, ipAddress?: string) => {
-  const user = await User.findOne({ email: input.email.toLowerCase() }).select('+password');
+  const email = input.email.toLowerCase().trim();
+  const user = await User.findOne({ email }).select('+password');
   if (!user) {
     throw new Error('Invalid email or password.');
   }
 
-  if (user.status !== 'ACTIVE') {
+  // Check if account is unverified
+  if (user.accountStatus === 'PENDING_VERIFICATION' || (user.role === 'CITIZEN' && !user.emailVerified)) {
+    throw new Error('Please verify your email address before logging in. A verification code was sent during registration.');
+  }
+
+  // Officers in PENDING_APPROVAL are allowed to log in to view their application status tracking page
+  if (user.status !== 'ACTIVE' && user.accountStatus !== 'PENDING_APPROVAL') {
     throw new Error(`Account is ${user.status.toLowerCase()}. Please contact an administrator.`);
   }
 

@@ -94,6 +94,95 @@ const ensureSampleFiles = (uploadDir: string) => {
   }
 };
 
+export const ensureDefaultAccounts = async () => {
+  const defaultUsers = [
+    {
+      name: 'Revenue Division Admin',
+      email: 'admin@landrecord.gov.in',
+      password: SEED_PASSWORD,
+      role: 'ADMIN' as const,
+      department: 'Land Revenue & Settlement Commissioner',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+    {
+      name: 'Tehsildar Land Officer',
+      email: 'officer@landrecord.gov.in',
+      password: SEED_PASSWORD,
+      role: 'OFFICER' as const,
+      department: 'District Revenue & Survey Office',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+    {
+      name: 'Tehsildar Land Officer 1',
+      email: 'officer1@landrecord.gov.in',
+      password: SEED_PASSWORD,
+      role: 'OFFICER' as const,
+      department: 'District Revenue & Survey Office',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+    {
+      name: 'Land Record Inspector',
+      email: 'verifier@landrecord.gov.in',
+      password: SEED_PASSWORD,
+      role: 'VERIFIER' as const,
+      department: 'Record Verification & Audit Wing',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+    {
+      name: 'Land Record Inspector 1',
+      email: 'verifier1@landrecord.gov.in',
+      password: SEED_PASSWORD,
+      role: 'VERIFIER' as const,
+      department: 'Record Verification & Audit Wing',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+    {
+      name: 'Rahul Shankar Patil',
+      email: 'rahul.patil@example.com',
+      password: SEED_PASSWORD,
+      role: 'CITIZEN' as const,
+      department: 'Citizen & Landowner Services',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
+  ];
+
+  for (const u of defaultUsers) {
+    try {
+      const existing = await User.findOne({ email: u.email });
+      if (!existing) {
+        await User.create(u);
+        console.log(`Created default user: ${u.email} (${u.role})`);
+      } else {
+        existing.status = 'ACTIVE';
+        existing.accountStatus = 'ACTIVE';
+        existing.emailVerified = true;
+        existing.password = SEED_PASSWORD;
+        await existing.save();
+      }
+    } catch (err: any) {
+      console.warn(`Could not ensure user ${u.email}:`, err.message);
+    }
+  }
+};
+
 export const seedDatabase = async (dropExisting: boolean = true) => {
   try {
     console.log('Connecting to database for seeding...');
@@ -119,63 +208,50 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
     ensureSampleFiles(uploadDir);
 
     console.log('Creating users...');
-    // 1 Super Admin
-    const admin = await User.create({
-      name: 'Revenue Division Admin',
-      email: 'admin@landrecord.gov.in',
-      password: SEED_PASSWORD,
-      role: 'ADMIN',
-      department: 'Land Revenue & Settlement Commissioner',
-      district: 'Pune',
-      status: 'ACTIVE',
-    });
+    await ensureDefaultAccounts();
+    const admin = (await User.findOne({ email: 'admin@landrecord.gov.in' }))!;
 
     // 5 Officers
     const officers: IUser[] = [];
     for (let i = 1; i <= 5; i++) {
-      const dist = DISTRICTS[i % DISTRICTS.length];
-      const officer = await User.create({
-        name: `Tehsildar Land Officer ${i}`,
-        email: `officer${i}@landrecord.gov.in`,
-        password: SEED_PASSWORD,
-        role: 'OFFICER',
-        department: 'District Revenue & Survey Office',
-        district: dist,
-        status: 'ACTIVE',
-      });
+      const email = `officer${i}@landrecord.gov.in`;
+      let officer = await User.findOne({ email });
+      if (!officer) {
+        const dist = DISTRICTS[i % DISTRICTS.length];
+        officer = await User.create({
+          name: `Tehsildar Land Officer ${i}`,
+          email,
+          password: SEED_PASSWORD,
+          role: 'OFFICER',
+          department: 'District Revenue & Survey Office',
+          district: dist,
+          status: 'ACTIVE',
+        });
+      }
       officers.push(officer);
     }
 
     // 10 Verifiers
     const verifiers: IUser[] = [];
     for (let i = 1; i <= 10; i++) {
-      const dist = DISTRICTS[i % DISTRICTS.length];
-      const verifier = await User.create({
-        name: `Land Record Inspector ${i}`,
-        email: `verifier${i}@landrecord.gov.in`,
-        password: SEED_PASSWORD,
-        role: 'VERIFIER',
-        department: 'Record Verification & Audit Wing',
-        district: dist,
-        status: 'ACTIVE',
-      });
+      const email = `verifier${i}@landrecord.gov.in`;
+      let verifier = await User.findOne({ email });
+      if (!verifier) {
+        const dist = DISTRICTS[i % DISTRICTS.length];
+        verifier = await User.create({
+          name: `Land Record Inspector ${i}`,
+          email,
+          password: SEED_PASSWORD,
+          role: 'VERIFIER',
+          department: 'Record Verification & Audit Wing',
+          district: dist,
+          status: 'ACTIVE',
+        });
+      }
       verifiers.push(verifier);
     }
 
-    // 1 Demo Citizen
-    await User.create({
-      name: 'Rahul Shankar Patil',
-      email: 'rahul.patil@example.com',
-      password: SEED_PASSWORD,
-      role: 'CITIZEN',
-      department: 'Citizen & Landowner Services',
-      district: 'Pune',
-      status: 'ACTIVE',
-      accountStatus: 'ACTIVE',
-      emailVerified: true,
-    });
-
-    console.log(`Created ${2 + officers.length + verifiers.length + 1} users (including demo citizen).`);
+    console.log(`Created ${1 + officers.length + verifiers.length} users in seed.`);
 
     // Seed Documents
     console.log('Creating realistic land documents...');

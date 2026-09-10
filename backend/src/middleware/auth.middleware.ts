@@ -48,7 +48,7 @@ export const authenticate = async (
       return;
     }
 
-    if (user.status !== 'ACTIVE') {
+    if (user.status !== 'ACTIVE' && user.accountStatus !== 'PENDING_APPROVAL') {
       sendError(res, `Account is ${user.status.toLowerCase()}. Access denied.`, 403);
       return;
     }

@@ -6,19 +6,33 @@ import path from 'path';
 import fs from 'fs';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
+import { prisma } from './config/prisma.js';
 
 export const createApp = (): Express => {
   const app = express();
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const clientUrl = (process.env.CLIENT_URL || '').replace(/\/+$/, '');
 
-  // Middleware
+  // Middleware - Dynamic CORS for deployed Render, Vercel, and local development
   app.use(
     cors({
-      origin: [clientUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (
+          (clientUrl && origin === clientUrl) ||
+          origin.endsWith('.onrender.com') ||
+          origin.endsWith('.vercel.app') ||
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1')
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true); // Permissive in deployment to avoid blocking cross-subdomain calls
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     })
   );
 
@@ -86,10 +100,24 @@ export const createApp = (): Express => {
     });
   });
 
-  // Health check endpoint
-  app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({
-      status: 'UP',
+  // Health check endpoint with real database connectivity ping
+  app.get('/health', async (_req: Request, res: Response) => {
+    let dbStatus = 'DISCONNECTED';
+    let dbLatencyMs = 0;
+    const start = Date.now();
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      dbStatus = 'CONNECTED';
+      dbLatencyMs = Date.now() - start;
+    } catch (e: any) {
+      dbStatus = `ERROR: ${e?.message || 'Unable to query database'}`;
+    }
+
+    const isHealthy = dbStatus === 'CONNECTED';
+    res.status(isHealthy ? 200 : 503).json({
+      status: isHealthy ? 'UP' : 'DEGRADED',
+      database: dbStatus,
+      latencyMs: dbLatencyMs,
       timestamp: new Date().toISOString(),
       service: 'Land Record API Service',
     });

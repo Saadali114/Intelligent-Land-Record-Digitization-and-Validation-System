@@ -24,6 +24,8 @@ export default function LoginPage() {
     register,
     handleSubmit,
     setValue,
+    getValues,
+    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -37,14 +39,28 @@ export default function LoginPage() {
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      await login(data);
+      await login({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      });
     } catch (err: any) {
-      setErrorMessage(
-        err.message ||
-          t('auth.invalidCredentials', {
-            defaultValue: 'Invalid credentials. Please verify your email and password.',
-          })
-      );
+      const msg = err.message || '';
+      if (
+        msg.toLowerCase().includes('network error') ||
+        msg.toLowerCase().includes('timeout') ||
+        msg.toLowerCase().includes('econnrefused')
+      ) {
+        setErrorMessage(
+          'Unable to connect to the backend server. If the server is waking up (Render free tier cold start), please wait 15–20 seconds and try again.'
+        );
+      } else {
+        setErrorMessage(
+          msg ||
+            t('auth.invalidCredentials', {
+              defaultValue: 'Invalid credentials. Please verify your email and password.',
+            })
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -77,9 +93,21 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl border border-slate-200/80 sm:rounded-2xl sm:px-10">
           {errorMessage && (
-            <div className="mb-5 flex items-center gap-2 p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-              <span>{errorMessage}</span>
+            <div className="mb-5 p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{errorMessage}</span>
+              </div>
+              {errorMessage.toLowerCase().includes('verify') && (
+                <div className="mt-2 pl-6">
+                  <Link
+                    href={`/register/officer/verify-email?email=${encodeURIComponent(watch('email') || '')}`}
+                    className="font-semibold text-blue-900 underline hover:text-blue-800"
+                  >
+                    Click here to enter your email verification OTP &rarr;
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -124,27 +152,27 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickFill('officer1@landrecord.gov.in')}
+                onClick={() => handleQuickFill('officer@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
                 <div className="font-bold text-slate-900">{t('auth.roles.officer', { defaultValue: 'Officer' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.officerDesc', { defaultValue: 'Upload & record entry' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.officerDesc', { defaultValue: 'Digital signing & verification' })}</div>
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickFill('verifier1@landrecord.gov.in')}
+                onClick={() => handleQuickFill('verifier@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
                 <div className="font-bold text-slate-900">{t('auth.roles.verifier', { defaultValue: 'Verifier' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.verifierDesc', { defaultValue: 'Review & approval' })}</div>
+                <div className="text-slate-500 text-[10px]">{t('auth.roles.verifierDesc', { defaultValue: 'Upload & initial review' })}</div>
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickFill('viewer1@landrecord.gov.in')}
+                onClick={() => handleQuickFill('officer1@landrecord.gov.in')}
                 className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
               >
-                <div className="font-bold text-slate-900">{t('auth.roles.viewer', { defaultValue: 'Viewer' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.viewerDesc', { defaultValue: 'Read-only access' })}</div>
+                <div className="font-bold text-slate-900">Officer 1 (Tehsildar)</div>
+                <div className="text-slate-500 text-[10px]">District Revenue Division</div>
               </button>
             </div>
             <p className="text-[10px] text-slate-400 mt-2 text-center">
