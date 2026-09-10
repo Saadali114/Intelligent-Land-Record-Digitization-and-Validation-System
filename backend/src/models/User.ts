@@ -38,7 +38,25 @@ export function enrichUser(raw: any): IUser | null {
 
   user.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     if (!this.password) return false;
-    return bcrypt.compare(candidatePassword, this.password);
+    if (this.password.startsWith('$2')) {
+      return bcrypt.compare(candidatePassword, this.password);
+    }
+    // Fallback: If password was stored in plaintext, compare directly and upgrade to bcrypt
+    if (this.password === candidatePassword) {
+      try {
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(candidatePassword, salt);
+        this.password = hashed;
+        await prisma.user.update({
+          where: { id: this.id },
+          data: { password: hashed },
+        });
+      } catch (err) {
+        // ignore upgrade failure
+      }
+      return true;
+    }
+    return false;
   };
 
   user.toJSON = function () {
@@ -52,12 +70,19 @@ export function enrichUser(raw: any): IUser | null {
   };
 
   user.save = async function (): Promise<IUser> {
+    let password = this.password;
+    if (password && !password.startsWith('$2')) {
+      const salt = await bcrypt.genSalt(10);
+      password = await bcrypt.hash(password, salt);
+      this.password = password;
+    }
+
     const updated = await prisma.user.update({
       where: { id: this.id },
       data: {
         name: this.name,
         email: this.email,
-        password: this.password,
+        password,
         role: this.role,
         department: this.department,
         district: this.district,
