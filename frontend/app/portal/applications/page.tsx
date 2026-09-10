@@ -8,16 +8,17 @@ import {
   Search,
   Filter,
   ArrowRight,
-  UploadCloud,
   Clock,
   CheckCircle2,
   AlertTriangle,
   FileCheck,
   ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { PortalLayout } from '../../../components/portal/PortalLayout';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
+import { ApplyDigitalDocumentModal } from '../../../components/portal/ApplyDigitalDocumentModal';
 import { citizenService } from '../../../services/citizen.service';
 import { CitizenApplication } from '../../../types/citizen';
 
@@ -26,6 +27,7 @@ export default function CitizenApplicationsPage() {
   const [applications, setApplications] = useState<CitizenApplication[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   useEffect(() => {
     loadApplications();
@@ -64,12 +66,15 @@ export default function CitizenApplicationsPage() {
           </p>
         </div>
 
-        <Link href="/portal/upload">
-          <Button variant="primary" size="md" className="gap-2 bg-blue-900 hover:bg-blue-800">
-            <UploadCloud className="w-4 h-4 text-amber-300" />
-            <span>{t('dashboard.uploadCta')}</span>
-          </Button>
-        </Link>
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => setIsApplyModalOpen(true)}
+          className="gap-2 bg-blue-900 hover:bg-blue-800 cursor-pointer"
+        >
+          <FileText className="w-4 h-4 text-amber-300" />
+          <span>Apply for Digital Document</span>
+        </Button>
       </div>
 
       {/* Filter Tabs & Search Bar */}
@@ -116,11 +121,13 @@ export default function CitizenApplicationsPage() {
               {t('applications.noApplicationsDesc')}
             </p>
             <div className="pt-2">
-              <Link href="/portal/upload">
-                <Button variant="primary" size="sm">
-                  {t('dashboard.uploadCta')}
-                </Button>
-              </Link>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsApplyModalOpen(true)}
+              >
+                Apply for Digital Document
+              </Button>
             </div>
           </div>
         ) : (
@@ -130,7 +137,7 @@ export default function CitizenApplicationsPage() {
                 key={app.id}
                 className="p-5 hover:bg-slate-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-sm font-bold text-slate-950">
                       {app.id}
@@ -146,13 +153,24 @@ export default function CitizenApplicationsPage() {
                         ? t('common.processing')
                         : app.status.replace('_', ' ')}
                     </Badge>
-                    <span className="text-xs text-slate-400">
+                    {app.verifiedByOfficer ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                        <span>Verified by Officer</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                        <Clock className="w-3 h-3 text-blue-700" />
+                        <span>Under Officer Verification</span>
+                      </span>
+                    )}
+                    <span className="text-xs text-slate-400 ml-auto md:ml-0">
                       {app.submittedDate}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-700 font-medium">
-                    <span>
+                    <span className="font-semibold text-slate-900">
                       {app.documentType}
                     </span>
                     <span className="text-slate-300">&bull;</span>
@@ -167,6 +185,20 @@ export default function CitizenApplicationsPage() {
                     <span>
                       {t('common.landArea')}: <strong>{app.landArea}</strong>
                     </span>
+                  </div>
+
+                  {/* Officer Verification Details */}
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 pt-0.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-blue-900 flex-shrink-0" />
+                    <span>
+                      Officer: <strong className="text-slate-900">{app.officerName || 'Circle Revenue Officer (Haveli)'}</strong>
+                      {app.officerDesignation && <span className="text-slate-500"> ({app.officerDesignation})</span>}
+                    </span>
+                    {app.digitalSignatureId && (
+                      <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        DSC #{app.digitalSignatureId}
+                      </span>
+                    )}
                   </div>
 
                   {app.status === 'ACTION_REQUIRED' && (
@@ -204,6 +236,12 @@ export default function CitizenApplicationsPage() {
           </div>
         )}
       </div>
+
+      <ApplyDigitalDocumentModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        onSuccess={() => loadApplications()}
+      />
     </PortalLayout>
   );
 }

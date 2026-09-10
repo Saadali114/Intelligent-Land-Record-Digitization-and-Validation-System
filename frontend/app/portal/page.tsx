@@ -22,6 +22,7 @@ import { PortalLayout } from '../../components/portal/PortalLayout';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { ApplyDigitalDocumentModal } from '../../components/portal/ApplyDigitalDocumentModal';
 import { formatDocType, formatStatus } from '../../lib/translationHelpers';
 import { citizenService } from '../../services/citizen.service';
 import {
@@ -36,6 +37,7 @@ export default function CitizenDashboardPage() {
   const [profile, setProfile] = useState<CitizenProfile | null>(null);
   const [applications, setApplications] = useState<CitizenApplication[]>([]);
   const [landRecords, setLandRecords] = useState<CitizenLandRecord[]>([]);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   useEffect(() => {
     const prof = citizenService.getProfile();
@@ -86,16 +88,15 @@ export default function CitizenDashboardPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/portal/upload">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold border border-amber-300 shadow-md gap-2"
-              >
-                <UploadCloud className="w-5 h-5 text-slate-950" />
-                <span>{t('dashboard.uploadCta')}</span>
-              </Button>
-            </Link>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => setIsApplyModalOpen(true)}
+              className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold border border-amber-300 shadow-md gap-2 cursor-pointer"
+            >
+              <FileText className="w-5 h-5 text-slate-950" />
+              <span>Apply for Digital Document</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -248,15 +249,15 @@ export default function CitizenDashboardPage() {
                   title={t('dashboard.noRecentApplications', {
                     defaultValue: 'No recent land record applications found',
                   })}
-                  description={t('dashboard.noRecentApplicationsDesc', {
-                    defaultValue: 'Upload your 7/12 extract, 8A, or Ferfar document to start digitization.',
-                  })}
+                  description="Apply for an official digital 7/12 extract, 8A Khate-Utara, Property Card or Title Certificate."
                   action={
-                    <Link href="/portal/upload">
-                      <Button variant="primary" size="sm">
-                        {t('dashboard.uploadCta')}
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setIsApplyModalOpen(true)}
+                    >
+                      Apply for Digital Document
+                    </Button>
                   }
                 />
               </div>
@@ -266,25 +267,36 @@ export default function CitizenDashboardPage() {
                   key={app.id}
                   className="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-2 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-slate-900">
                         {app.id}
                       </span>
                       <Badge status={app.status}>
                         {formatStatus(app.status, t)}
                       </Badge>
+                      {app.verifiedByOfficer ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                          <span>Verified by Officer</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                          <Clock className="w-3 h-3 text-blue-700" />
+                          <span>Under Officer Review</span>
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs font-semibold text-slate-800">
                       {formatDocType(app.documentType, t)} &bull; {t('common.surveyNumber')}: <span className="font-mono">{app.surveyNumber}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
                       <span>{t('common.village')}: {app.village}</span>
                       <span>&bull;</span>
                       <span>{app.submittedDate}</span>
                       <span>&bull;</span>
-                      <span className="text-emerald-700 font-medium">
-                        OCR: {Math.round(app.ocrConfidence * 100)}%
+                      <span className="text-slate-700 font-medium">
+                        Officer: <strong className="text-slate-900">{app.officerName || 'Taluka Officer'}</strong>
                       </span>
                     </div>
                   </div>
@@ -356,26 +368,42 @@ export default function CitizenDashboardPage() {
             </div>
           </div>
 
-          {/* AI Digitization Transparency Box */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl border border-blue-200 p-5 text-xs text-slate-700 space-y-2.5">
+          {/* Officer Verification Transparency Box */}
+          <div className="bg-gradient-to-br from-blue-50 via-indigo-50/40 to-slate-50 rounded-xl border border-blue-200 p-5 text-xs text-slate-700 space-y-2.5 shadow-xs">
             <div className="flex items-center gap-2 font-bold text-blue-950">
-              <Sparkles className="w-4 h-4 text-blue-800" />
-              <span>{t('dashboard.aiTransparencyTitle')}</span>
+              <ShieldCheck className="w-4 h-4 text-blue-900" />
+              <span>Officer Verification Assurance</span>
             </div>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              {t('dashboard.aiTransparencyDesc')}
+              Every digital document requested by citizens is systematically inspected and cross-verified by assigned Circle Revenue Officers and Talathis against official cadastral geometry before issuing digitally signed records.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex items-center justify-between border-t border-blue-100">
               <Link
-                href="/portal/upload"
+                href="/portal/applications"
                 className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-700"
               >
-                {t('dashboard.uploadCta')} →
+                Track Officer Process →
               </Link>
+              <button
+                type="button"
+                onClick={() => setIsApplyModalOpen(true)}
+                className="text-xs font-bold text-amber-700 hover:text-amber-800"
+              >
+                + Apply Document
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      <ApplyDigitalDocumentModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        landRecords={landRecords}
+        onSuccess={() => {
+          setApplications(citizenService.getApplications());
+        }}
+      />
     </PortalLayout>
   );
 }

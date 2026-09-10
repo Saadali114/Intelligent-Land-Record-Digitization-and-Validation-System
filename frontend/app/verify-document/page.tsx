@@ -69,8 +69,8 @@ interface VerifiedPayload {
 
 function VerifyDocumentContent() {
   const searchParams = useSearchParams();
-  const initialId = searchParams.get('id') || '';
-  const initialSec = searchParams.get('sec') || '';
+  const initialId = searchParams?.get('id') || '';
+  const initialSec = searchParams?.get('sec') || '';
 
   const [searchQuery, setSearchQuery] = useState(initialId);
   const [secretPinQuery, setSecretPinQuery] = useState(initialSec);

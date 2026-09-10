@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PortalHeader } from './PortalHeader';
 import { PortalSidebar } from './PortalSidebar';
-import { useAuth } from '../../context/AuthContext';
 import { citizenService } from '../../services/citizen.service';
 import { Loader2 } from 'lucide-react';
 
@@ -13,23 +12,21 @@ interface PortalLayoutProps {
 }
 
 export const PortalLayout: React.FC<PortalLayoutProps> = ({ children }) => {
-  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isLoading) {
-      const isCitizenAuth = citizenService.isAuthenticated();
-      if (!isAuthenticated && !isCitizenAuth) {
-        router.push('/portal/login');
-      } else {
-        setCheckingAuth(false);
-      }
+    const isCitizenAuth = citizenService.isAuthenticated();
+    if (!isCitizenAuth) {
+      setIsAuthorized(false);
+      router.replace('/portal/login');
+    } else {
+      setIsAuthorized(true);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [router]);
 
-  if (isLoading && checkingAuth) {
+  if (isAuthorized !== true) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">

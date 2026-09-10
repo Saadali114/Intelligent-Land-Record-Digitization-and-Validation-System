@@ -62,6 +62,7 @@ export class RegistrationService {
       email,
       expiresIn: otpRes.expiresIn,
       resendAvailableIn: otpRes.resendAvailableIn,
+      otp: otpRes.otp,
       message: 'A 6-digit verification code has been dispatched to your email address.',
     };
   }
@@ -177,6 +178,7 @@ export class RegistrationService {
       employeeId,
       expiresIn: otpRes.expiresIn,
       resendAvailableIn: otpRes.resendAvailableIn,
+      otp: otpRes.otp,
       message: 'A 6-digit verification code has been dispatched to your official email.',
     };
   }

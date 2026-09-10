@@ -115,6 +115,6 @@ export class EmailService {
     const text = `Your ILRDVS verification code is: ${otp}. This code expires in ${expiryMinutes} minutes. Do not share this code with anyone.`;
 
     const provider = getEmailProvider();
-    return provider.sendEmail({ to, subject, html, text });
+    return provider.sendEmail({ to, subject, html, text, otp });
   }
 }

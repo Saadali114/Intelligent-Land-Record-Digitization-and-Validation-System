@@ -23,14 +23,19 @@ function CitizenVerifyEmailContent() {
   const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
+  const [pendingOtp, setPendingOtp] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    const emailParam = searchParams.get('email');
+    const emailParam = searchParams?.get('email');
     if (emailParam) {
       setEmail(emailParam);
+    }
+    const savedOtp = sessionStorage.getItem('pending_registration_otp');
+    if (savedOtp) {
+      setPendingOtp(savedOtp);
     }
   }, [searchParams]);
 
@@ -130,6 +135,18 @@ function CitizenVerifyEmailContent() {
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xl p-6 sm:p-8">
           {!isSuccess ? (
             <div>
+              {pendingOtp && (
+                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center text-xs text-emerald-900 shadow-xs animate-in fade-in">
+                  <div className="font-semibold text-emerald-800">✉️ Verification Code Dispatched:</div>
+                  <div className="mt-1 flex items-center justify-center gap-2">
+                    <span className="text-[11px] text-emerald-700">Sent to {email}:</span>
+                    <code className="font-mono font-black text-sm bg-white px-2.5 py-0.5 rounded border border-emerald-300 text-emerald-950 tracking-widest">
+                      {pendingOtp}
+                    </code>
+                  </div>
+                </div>
+              )}
+
               <OtpInput
                 length={6}
                 email={email || 'citizen@example.com'}
@@ -163,9 +180,14 @@ function CitizenVerifyEmailContent() {
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                   {t('registration.accountActiveMsg', {
                     defaultValue:
-                      'Your email has been verified. Your ILRDVS citizen account is now active and ready to submit records.',
+                      'Your email has been verified. Your ILRDVS citizen account is active and ready to access land records.',
                   })}
                 </p>
+                {email && (
+                  <div className="mt-2 text-[11px] text-emerald-700 bg-emerald-50/80 border border-emerald-200 rounded-lg p-2 font-medium">
+                    ✉️ Confirmation email dispatched to <strong>{email}</strong>
+                  </div>
+                )}
               </div>
 
               <div className="pt-3">
@@ -173,7 +195,7 @@ function CitizenVerifyEmailContent() {
                   href="/portal"
                   className="w-full py-3 px-4 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-xs"
                 >
-                  <span>{t('registration.goToCitizenPortal', { defaultValue: 'Go to Citizen Portal' })}</span>
+                  <span>{t('registration.goToCitizenDashboard', { defaultValue: 'Go to Citizen Dashboard' })}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

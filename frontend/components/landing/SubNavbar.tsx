@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { citizenService } from '../../services/citizen.service';
 import {
   Building2,
   ChevronDown,
@@ -27,11 +29,19 @@ import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export const SubNavbar: React.FC = () => {
   const { t } = useTranslation();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const toggleDropdown = (name: string) => {
     setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  const handleCitizenPortalClick = (e: React.MouseEvent) => {
+    if (!citizenService.isAuthenticated()) {
+      e.preventDefault();
+      router.push('/portal/login');
+    }
   };
 
   return (
@@ -259,6 +269,7 @@ export const SubNavbar: React.FC = () => {
               <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
                 <Link
                   href="/portal"
+                  onClick={handleCitizenPortalClick}
                   className="flex items-center gap-2.5 px-4 py-2.5 bg-amber-50/80 border-b border-amber-100 hover:bg-amber-100/70 text-amber-950 font-bold"
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
@@ -355,6 +366,7 @@ export const SubNavbar: React.FC = () => {
 
           <Link
             href="/portal"
+            onClick={handleCitizenPortalClick}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-slate-950" />
@@ -381,6 +393,7 @@ export const SubNavbar: React.FC = () => {
           </Link>
           <Link
             href="/portal"
+            onClick={handleCitizenPortalClick}
             className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
           >
             {t('navbar.citizenPortal', 'Portal')}
@@ -458,7 +471,10 @@ export const SubNavbar: React.FC = () => {
           <div className="pt-2 space-y-2">
             <Link
               href="/portal"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                handleCitizenPortalClick(e);
+              }}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
             >
               <ShieldCheck className="w-4 h-4 text-slate-950" />

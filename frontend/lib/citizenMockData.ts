@@ -37,6 +37,11 @@ export const INITIAL_APPLICATIONS: CitizenApplication[] = [
     mutationNumber: 'MTR-2026-012',
     documentDate: '12 Jan 2026',
     ocrConfidence: 0.98,
+    verifiedByOfficer: false,
+    officerName: 'Shri Suresh Deshmukh',
+    officerDesignation: 'Circle Revenue Officer (Mandal Adhikari)',
+    officerOffice: 'Khadakwasla Circle Office, Haveli',
+    purpose: 'Digital Land Extract & Bank Loan Verification',
     extractedFields: {
       ownerName: {
         label: 'Owner Name',
@@ -199,6 +204,13 @@ export const INITIAL_APPLICATIONS: CitizenApplication[] = [
     },
     identityVerified: true,
     mobileNumber: '+91 98220 12345',
+    verifiedByOfficer: true,
+    officerName: 'Smt. Anjali Patil',
+    officerDesignation: 'Taluka Executive Magistrate & Tehsildar',
+    officerOffice: 'Haveli Revenue Division, Pune',
+    officerActionDate: '02 Sep 2026',
+    digitalSignatureId: 'DSC-MAHA-REV-2026-98124',
+    purpose: 'Title Regularization & Digital Mutation Record',
     verificationDate: '02 Sep 2026',
     officerRemarks: 'Sanctioned and digitally signed by Tehsildar (Haveli Division). Title authenticated.',
     timeline: [
@@ -286,6 +298,11 @@ export const INITIAL_APPLICATIONS: CitizenApplication[] = [
     },
     identityVerified: true,
     mobileNumber: '+91 98220 12345',
+    verifiedByOfficer: false,
+    officerName: 'Shri Mahesh Kulkarni',
+    officerDesignation: 'Deputy Superintendent of Land Records (DSLR)',
+    officerOffice: 'Haveli Cadastral Survey Division',
+    purpose: 'Property Registration & Title Mutation',
     discrepancies: [
       {
         field: 'Survey Number',
@@ -379,6 +396,10 @@ export const INITIAL_LAND_RECORDS: CitizenLandRecord[] = [
     recordStatus: 'VERIFIED',
     status: 'VERIFIED',
     verifiedDate: '02 Sep 2026',
+    verifiedByOfficer: true,
+    officerName: 'Smt. Anjali Patil',
+    officerDesignation: 'Taluka Executive Magistrate & Tehsildar',
+    digitalSignatureId: 'DSC-MAHA-REV-2026-98124',
     mutationHistory: [
       {
         mutationNo: 'MTR-2025-88',
@@ -414,6 +435,9 @@ export const INITIAL_LAND_RECORDS: CitizenLandRecord[] = [
     recordStatus: 'UNDER_REVIEW',
     status: 'UNDER_REVIEW',
     verifiedDate: 'Pending Verification',
+    verifiedByOfficer: false,
+    officerName: 'Shri Suresh Deshmukh',
+    officerDesignation: 'Circle Revenue Officer (Mandal Adhikari)',
     mutationHistory: [
       {
         mutationNo: 'MTR-2026-012',

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher';
 import { authService } from '../../../services/auth.service';
+import { emailjsService } from '../../../services/emailjs.service';
 
 export default function CitizenRegisterPage() {
   const { t, i18n } = useTranslation();
@@ -99,7 +100,8 @@ export default function CitizenRegisterPage() {
     setIsLoading(true);
 
     try {
-      await authService.registerCitizen({
+      // 1. Register with backend and generate secure verification OTP
+      const regRes = await authService.registerCitizen({
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
@@ -108,6 +110,19 @@ export default function CitizenRegisterPage() {
         phone: formData.phone.trim() || undefined,
         acceptTerms: true,
       });
+
+      // 2. Dispatch EmailJS notification with real OTP directly to citizen email
+      await emailjsService.sendCitizenWelcomeEmail({
+        to_name: formData.name.trim(),
+        to_email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim() || undefined,
+        otp: regRes.otp,
+      });
+
+      // Store pending OTP in session for verification screen convenience
+      if (regRes.otp) {
+        sessionStorage.setItem('pending_registration_otp', regRes.otp);
+      }
 
       // Navigate to verification screen
       router.push(`/register/citizen/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`);

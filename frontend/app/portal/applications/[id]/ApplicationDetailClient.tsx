@@ -135,13 +135,90 @@ export default function ApplicationDetailClient() {
           {application.status === 'VERIFIED' && (
             <button
               onClick={() =>
-                alert('Downloading Digitally Signed 7/12 Extract (PDF)...')
+                alert(`Downloading Digitally Signed ${application.documentType} (PDF)...`)
               }
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{t('applications.downloadSigned')}</span>
             </button>
+          )}
+        </div>
+      </div>
+
+      {/* OFFICER VERIFICATION STATUS BANNER */}
+      <div
+        className={`rounded-xl border p-5 sm:p-6 shadow-xs ${
+          application.verifiedByOfficer
+            ? 'bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-900 text-white border-emerald-800'
+            : application.status === 'ACTION_REQUIRED'
+            ? 'bg-gradient-to-r from-amber-950 via-slate-900 to-amber-900 text-white border-amber-800'
+            : 'bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 text-white border-blue-800'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              {application.verifiedByOfficer ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  Verified & Authenticated by Revenue Officer
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  Under Officer Verification & Cadastral Scrutiny
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                {application.verifiedByOfficer
+                  ? 'Revenue Authority Sanction Complete'
+                  : 'Assigned for Circle Officer & Talathi Verification'}
+              </h2>
+              <p className="text-xs text-slate-300 max-w-2xl mt-0.5 leading-relaxed">
+                {application.verifiedByOfficer
+                  ? `This record was thoroughly scrutinized, validated against Mahabhunaksha cadastral geometry, and digitally signed under the Maharashtra Land Revenue Code.`
+                  : `Your land record document is currently under statutory review by the Circle Revenue Officer. Boundary coordinates, ownership history, and mutation logs are being reconciled.`}
+              </p>
+            </div>
+
+            {/* Officer Details Pills */}
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-300 pt-1">
+              <span>
+                Assigned Officer: <strong className="text-white">{application.officerName || 'Shri Suresh Deshmukh'}</strong>
+              </span>
+              <span>&bull;</span>
+              <span>
+                Designation: <span className="text-slate-200">{application.officerDesignation || 'Circle Revenue Officer (Haveli Division)'}</span>
+              </span>
+              {application.digitalSignatureId && (
+                <>
+                  <span>&bull;</span>
+                  <span className="font-mono text-amber-300 font-semibold">
+                    DSC #{application.digitalSignatureId}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {application.verifiedByOfficer && (
+            <div className="flex-shrink-0 self-start md:self-center">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() =>
+                  alert(`Downloading Official Digitally Signed ${application.documentType} (PDF)...`)
+                }
+                className="gap-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold border-0 shadow-md cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-slate-950" />
+                <span>Download Signed Extract</span>
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -390,11 +467,68 @@ export default function ApplicationDetailClient() {
                   {application.village}, Taluka {application.taluka}, Dist {application.district}
                 </span>
               </div>
+              {application.aadharNumber && (
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500">Aadhaar e-KYC:</span>
+                  <span className="font-mono font-bold text-slate-900 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    {application.aadharNumber}
+                  </span>
+                </div>
+              )}
+              {application.aadharFileName && (
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500">Aadhaar Document:</span>
+                  <span className="font-mono text-slate-700 text-right truncate max-w-[180px]">
+                    {application.aadharFileName}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between py-1.5">
                 <span className="text-slate-500">Original File:</span>
                 <span className="font-mono text-slate-700 text-right truncate max-w-[180px]">
                   {application.fileName}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Official Officer Verification Seal Card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-xs font-bold text-slate-900 uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-blue-900" />
+              <span>Officer Verification & DSC Seal</span>
+            </div>
+
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 text-center space-y-2">
+              <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-blue-950 text-amber-400 font-serif font-bold text-sm border-2 border-amber-400/60 shadow-xs">
+                MAHA
+              </div>
+              <div className="text-xs font-bold text-slate-900">
+                Government of Maharashtra
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Revenue & Forest Department &bull; Haveli Division
+              </div>
+              <div className="pt-2 border-t border-slate-200/80 text-[11px] text-slate-600 space-y-1.5 text-left">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Officer Verification:</span>
+                  <span className={`font-bold ${application.verifiedByOfficer ? 'text-emerald-700' : 'text-blue-900'}`}>
+                    {application.verifiedByOfficer ? 'Verified & Approved' : 'Under Officer Scrutiny'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Inspecting Officer:</span>
+                  <span className="font-semibold text-slate-800">{application.officerName || 'Circle Officer'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Designation:</span>
+                  <span className="text-slate-700">{application.officerDesignation || 'Mandal Adhikari'}</span>
+                </div>
+                <div className="flex justify-between font-mono text-[10px]">
+                  <span className="text-slate-400">Digital Seal:</span>
+                  <span className="text-slate-800 font-bold">{application.digitalSignatureId || 'PENDING-APPROVAL'}</span>
+                </div>
               </div>
             </div>
           </div>

@@ -123,27 +123,29 @@ export const authService = {
   },
 
   // Dedicated Citizen & Officer Registration APIs
-  registerCitizen: async (data: any): Promise<{ email: string; expiresIn: number; resendAvailableIn: number; message: string }> => {
+  registerCitizen: async (data: any): Promise<{ email: string; expiresIn: number; resendAvailableIn: number; message: string; otp?: string }> => {
     const response = await apiClient.post<
-      ApiResponse<{ email: string; expiresIn: number; resendAvailableIn: number }>
+      ApiResponse<{ email: string; expiresIn: number; resendAvailableIn: number; otp?: string }>
     >('/auth/register/citizen', data);
     return {
       email: response.data.data.email,
       expiresIn: response.data.data.expiresIn,
       resendAvailableIn: response.data.data.resendAvailableIn,
+      otp: response.data.data.otp,
       message: response.data.message,
     };
   },
 
-  registerOfficer: async (data: any): Promise<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number; message: string }> => {
+  registerOfficer: async (data: any): Promise<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number; message: string; otp?: string }> => {
     const response = await apiClient.post<
-      ApiResponse<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number }>
+      ApiResponse<{ email: string; employeeId: string; expiresIn: number; resendAvailableIn: number; otp?: string }>
     >('/auth/register/officer', data);
     return {
       email: response.data.data.email,
       employeeId: response.data.data.employeeId,
       expiresIn: response.data.data.expiresIn,
       resendAvailableIn: response.data.data.resendAvailableIn,
+      otp: response.data.data.otp,
       message: response.data.message,
     };
   },

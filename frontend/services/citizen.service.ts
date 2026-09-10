@@ -18,19 +18,22 @@ import {
 export const citizenService = {
   // Auth state
   isAuthenticated(): boolean {
-    if (typeof window === 'undefined') return true;
-    const token = localStorage.getItem('token');
+    if (typeof window === 'undefined') return false;
     const citizenLoggedIn = localStorage.getItem('ilrdvs_citizen_logged_in') === 'true';
+    if (!citizenLoggedIn) return false;
+
     const userRaw = localStorage.getItem('user');
     if (userRaw) {
       try {
         const u = JSON.parse(userRaw);
-        if (u.role === 'CITIZEN' && (token || citizenLoggedIn)) return true;
+        if (u.role && u.role !== 'CITIZEN') {
+          return false;
+        }
       } catch {
-        // ignore
+        return false;
       }
     }
-    return citizenLoggedIn || !!token;
+    return true;
   },
 
   login(userOrContact: string | Partial<CitizenProfile>, name?: string): CitizenProfile {
@@ -188,6 +191,131 @@ export const citizenService = {
     this.addNotification({
       title: `Application Submitted: ${newId}`,
       message: `Your application for ${newApp.documentType} (Survey ${newApp.surveyNumber}) has been submitted for automated cadastral validation.`,
+      type: 'INFO',
+      link: `/portal/applications/${newId}`,
+    });
+
+    return newApp;
+  },
+
+  submitDigitalDocumentApplication(input: {
+    documentType: any;
+    surveyNumber: string;
+    village: string;
+    taluka?: string;
+    district?: string;
+    purpose?: string;
+    applicantNotes?: string;
+    aadharNumber?: string;
+    aadharFileName?: string;
+    isAadharVerified?: boolean;
+    mobileNumber?: string;
+  }): CitizenApplication {
+    const list = getStoredApplications();
+    const count = list.length + 130;
+    const newId = `ILRDVS-2026-000${count}`;
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const maskedAadhaar = input.aadharNumber
+      ? input.aadharNumber.replace(/\s/g, '').replace(/(\d{4})\d{4}(\d{4})/, '$1 XXXX $2')
+      : 'XXXX XXXX 1045';
+
+    const newApp: CitizenApplication = {
+      id: newId,
+      documentType: input.documentType,
+      fileName: `${input.documentType.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${input.surveyNumber.replace(/[^a-z0-9]/g, '_')}.pdf`,
+      fileSize: 1450000,
+      submittedDate: today,
+      status: 'UNDER_REVIEW',
+      surveyNumber: input.surveyNumber,
+      village: input.village || 'Khadakwasla',
+      taluka: input.taluka || 'Haveli',
+      district: input.district || 'Pune',
+      landArea: '1.85 Hectare',
+      landType: 'Agricultural (Jirayat)',
+      ownerName: 'Rahul Patil',
+      ocrConfidence: 0.99,
+      identityVerified: true,
+      mobileNumber: input.mobileNumber || '+91 98220 12345',
+      aadharNumber: maskedAadhaar,
+      aadharFileName: input.aadharFileName || 'aadhaar_card_front_back.pdf',
+      isAadharVerified: input.isAadharVerified ?? true,
+      officerName: 'Shri Suresh Deshmukh',
+      officerDesignation: 'Taluka Revenue Officer',
+      officerOffice: 'Haveli Tehsil Office, Pune',
+      verifiedByOfficer: false,
+      purpose: input.purpose || 'Official Legal & Verification Record',
+      officerRemarks: 'Application received for digital document issuance. Assigned to Circle Revenue Officer for statutory verification.',
+      extractedFields: {
+        documentType: {
+          label: 'Document Requested',
+          value: input.documentType,
+          confidence: 0.99,
+          confidenceLevel: 'High',
+        },
+        surveyNumber: {
+          label: 'Survey / Gat No.',
+          value: input.surveyNumber,
+          confidence: 0.99,
+          confidenceLevel: 'High',
+        },
+        village: {
+          label: 'Village',
+          value: input.village || 'Khadakwasla',
+          confidence: 0.99,
+          confidenceLevel: 'High',
+        },
+      },
+      timeline: [
+        {
+          step: 1,
+          title: 'Aadhaar e-KYC Verified & Ingested',
+          date: `${today}, ${nowTime}`,
+          status: 'COMPLETED',
+          description: `Citizen identity verified via Aadhaar OTP (${maskedAadhaar}). Uploaded Aadhaar file: ${input.aadharFileName || 'aadhaar_document.pdf'}. Applied for ${input.documentType} on Survey ${input.surveyNumber}.`,
+        },
+        {
+          step: 2,
+          title: 'Cadastral Database Cross-Check',
+          date: `${today}, ${nowTime}`,
+          status: 'COMPLETED',
+          description: 'Automated validation against Maharashtra Revenue Land Registry repository.',
+        },
+        {
+          step: 3,
+          title: 'Officer Inspection & Verification',
+          date: 'In Progress',
+          status: 'CURRENT',
+          description: 'Assigned to Circle Revenue Officer (Shri Suresh Deshmukh) for statutory title cross-verification.',
+        },
+        {
+          step: 4,
+          title: 'Officer Sanction & Order',
+          date: 'Pending Officer Review',
+          status: 'PENDING',
+          description: 'Revenue authority review and verification sanction.',
+        },
+        {
+          step: 5,
+          title: 'Digital Signature & Certificate Delivery',
+          date: 'Pending Officer Signature',
+          status: 'PENDING',
+          description: 'Digitally signed official extract with secure QR code.',
+        },
+      ],
+    };
+
+    list.unshift(newApp);
+    saveStoredApplications(list);
+
+    this.addNotification({
+      title: `Digital Document Applied: ${newId}`,
+      message: `Your application for ${newApp.documentType} (Survey ${newApp.surveyNumber}) has been submitted to the Taluka Revenue Officer for verification.`,
       type: 'INFO',
       link: `/portal/applications/${newId}`,
     });

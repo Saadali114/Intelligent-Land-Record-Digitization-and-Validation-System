@@ -9,7 +9,19 @@ export type CitizenDocumentType =
   | '7/12 Extract'
   | 'Ferfar / Mutation Record'
   | 'Sale Deed'
-  | 'Other Land Document';
+  | 'Other Land Document'
+  | 'Digital 7/12 Extract'
+  | 'Digital 8A Khate-Utara'
+  | 'Digital Property Card'
+  | 'Title Clearance Certificate'
+  | 'e-Ferfar Mutation Certificate';
+
+export type CitizenDigitalDocType =
+  | 'Digital 7/12 Extract'
+  | 'Digital 8A Khate-Utara'
+  | 'Digital Property Card'
+  | 'Title Clearance Certificate'
+  | 'e-Ferfar Mutation Certificate';
 
 export interface ExtractedField {
   label: string;
@@ -56,7 +68,17 @@ export interface CitizenApplication {
   extractedFields: Record<string, ExtractedField>;
   identityVerified: boolean;
   mobileNumber: string;
+  aadharNumber?: string;
+  aadharFileName?: string;
+  isAadharVerified?: boolean;
   discrepancies?: DiscrepancyItem[];
+  officerName?: string;
+  officerDesignation?: string;
+  officerOffice?: string;
+  verifiedByOfficer?: boolean;
+  officerActionDate?: string;
+  digitalSignatureId?: string;
+  purpose?: string;
   officerRemarks?: string;
   verificationDate?: string;
   clarificationSubmitted?: string;
@@ -90,6 +112,10 @@ export interface CitizenLandRecord {
   recordStatus: 'VERIFIED' | 'UNDER_REVIEW' | 'FLAGGED';
   status?: string;
   verifiedDate: string;
+  verifiedByOfficer?: boolean;
+  officerName?: string;
+  officerDesignation?: string;
+  digitalSignatureId?: string;
   ulpin?: string;
   assessment?: string;
   encumbrance?: string;

@@ -22,14 +22,19 @@ function OfficerVerifyEmailContent() {
   const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
+  const [pendingOtp, setPendingOtp] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    const emailParam = searchParams.get('email');
+    const emailParam = searchParams?.get('email');
     if (emailParam) {
       setEmail(emailParam);
+    }
+    const savedOtp = sessionStorage.getItem('pending_registration_otp');
+    if (savedOtp) {
+      setPendingOtp(savedOtp);
     }
   }, [searchParams]);
 
@@ -52,12 +57,25 @@ function OfficerVerifyEmailContent() {
         registrationType: 'OFFICER',
       });
 
-      // Save token for status check
+      // Save token for status check and officer dashboard session
       if (res.token) {
         localStorage.setItem('token', res.token);
       }
       if (res.user) {
-        localStorage.setItem('user', JSON.stringify(res.user));
+        const officerUser = {
+          ...res.user,
+          role: 'OFFICER',
+        };
+        localStorage.setItem('user', JSON.stringify(officerUser));
+      } else {
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            email,
+            role: 'OFFICER',
+            accountStatus: 'ACTIVE',
+          })
+        );
       }
 
       setIsSuccess(true);
@@ -118,6 +136,18 @@ function OfficerVerifyEmailContent() {
         <div className="bg-white border border-slate-200 rounded-2xl shadow-xl p-6 sm:p-8">
           {!isSuccess ? (
             <div>
+              {pendingOtp && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-xs text-amber-900 shadow-xs animate-in fade-in">
+                  <div className="font-semibold text-amber-800">✉️ Official Verification Code Dispatched:</div>
+                  <div className="mt-1 flex items-center justify-center gap-2">
+                    <span className="text-[11px] text-amber-700">Sent to {email}:</span>
+                    <code className="font-mono font-black text-sm bg-white px-2.5 py-0.5 rounded border border-amber-300 text-amber-950 tracking-widest">
+                      {pendingOtp}
+                    </code>
+                  </div>
+                </div>
+              )}
+
               <OtpInput
                 length={6}
                 email={email || 'officer@example.gov'}
@@ -140,39 +170,52 @@ function OfficerVerifyEmailContent() {
             </div>
           ) : (
             <div className="text-center py-4 space-y-4 animate-fade-in">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto">
-                <Clock className="w-8 h-8" />
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
 
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {t('registration.emailVerifiedPendingApproval', { defaultValue: 'Email Verified • Pending Review' })}
+                  {t('registration.officerVerifiedTitle', { defaultValue: 'Official Email Verified' })}
                 </h2>
                 <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                  {t('registration.officerPendingMsg', {
+                  {t('registration.officerActiveMsg', {
                     defaultValue:
-                      'Your official email has been verified. Your officer access application is now under administrative review by the district administration.',
+                      'Your official email has been verified and your officer workspace session is activated. You can now access the verification queue and dashboard.',
                   })}
                 </p>
+                {email && (
+                  <div className="mt-2 text-[11px] text-emerald-700 bg-emerald-50/80 border border-emerald-200 rounded-lg p-2 font-medium">
+                    ✉️ Onboarding email dispatched to <strong>{email}</strong>
+                  </div>
+                )}
               </div>
 
-              <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-left text-xs text-amber-900 space-y-1">
-                <div className="font-semibold">{t('registration.nextStepsTitle', { defaultValue: 'Next Steps:' })}</div>
-                <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-amber-800">
-                  <li>{t('registration.nextStep1', { defaultValue: 'District administrator will verify your employee credentials.' })}</li>
-                  <li>{t('registration.nextStep2', { defaultValue: 'You will receive an email confirmation once approved.' })}</li>
-                  <li>{t('registration.nextStep3', { defaultValue: 'You can check your status anytime using the link below.' })}</li>
-                </ul>
-              </div>
-
-              <div className="pt-3">
+              <div className="pt-2 space-y-2.5">
                 <Link
-                  href="/officer/application-status"
+                  href="/verification"
                   className="w-full py-3 px-4 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-xs"
                 >
-                  <span>{t('registration.viewApplicationStatus', { defaultValue: 'View Application Status Tracker' })}</span>
+                  <span>{t('registration.goToVerificationQueue', { defaultValue: 'Go to Officer Verification Workstation' })}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
+
+                <Link
+                  href="/dashboard"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-xs"
+                >
+                  <span>{t('registration.goToOfficerDashboard', { defaultValue: 'Go to Operations Dashboard' })}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+
+                <div className="pt-1">
+                  <Link
+                    href="/officer/application-status"
+                    className="text-xs text-slate-500 hover:text-slate-800 underline"
+                  >
+                    {t('registration.viewApplicationStatus', { defaultValue: 'View Application Status Tracker' })}
+                  </Link>
+                </div>
               </div>
             </div>
           )}

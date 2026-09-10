@@ -177,7 +177,20 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
       viewers.push(viewer);
     }
 
-    console.log(`Created ${1 + officers.length + verifiers.length + viewers.length} users.`);
+    // 1 Demo Citizen
+    await User.create({
+      name: 'Rahul Shankar Patil',
+      email: 'rahul.patil@example.com',
+      password: SEED_PASSWORD,
+      role: 'CITIZEN',
+      department: 'Citizen & Landowner Services',
+      district: 'Pune',
+      status: 'ACTIVE',
+      accountStatus: 'ACTIVE',
+      emailVerified: true,
+    });
+
+    console.log(`Created ${2 + officers.length + verifiers.length + viewers.length} users (including demo citizen).`);
 
     // Seed Documents
     console.log('Creating realistic land documents...');

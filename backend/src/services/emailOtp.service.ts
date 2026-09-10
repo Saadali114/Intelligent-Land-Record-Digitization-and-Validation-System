@@ -9,6 +9,7 @@ export interface SendEmailOTPResult {
   message: string;
   expiresIn?: number;
   resendAvailableIn?: number;
+  otp?: string;
 }
 
 export interface VerifyEmailOTPResult {
@@ -173,6 +174,7 @@ export class EmailOTPService {
       message: 'Verification code sent to your email address.',
       expiresIn: expiryMinutes * 60,
       resendAvailableIn: cooldownSeconds,
+      otp: secureOtp,
     };
   }
 

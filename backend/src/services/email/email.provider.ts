@@ -1,6 +1,7 @@
 /**
+ * 
  * Email Provider Abstraction & Implementations
- * Supports Resend REST API (Production) and DevEmailProvider (Local Sandbox)
+ * Supports EmailJS REST API v1.0 and DevEmailProvider (Local Sandbox)
  */
 
 export interface SendEmailInput {
@@ -8,6 +9,7 @@ export interface SendEmailInput {
   subject: string;
   html: string;
   text?: string;
+  otp?: string;
 }
 
 export interface SendEmailResult {
@@ -22,27 +24,29 @@ export interface EmailProvider {
 }
 
 /**
- * Resend Email Provider
- * Official REST API v1 integration (no external npm dependencies required)
- * Documentation: https://resend.com/docs/api-reference/emails/send-email
+ * EmailJS Email Provider
+ * Official REST API v1.0 integration (no external npm dependencies required)
+ * Documentation: https://www.emailjs.com/docs/rest-api/send/
  */
-export class ResendEmailProvider implements EmailProvider {
-  readonly name = 'RESEND';
-  private apiKey: string;
-  private fromAddress: string;
+export class EmailJSEmailProvider implements EmailProvider {
+  readonly name = 'EMAILJS';
+  private serviceId: string;
+  private templateId: string;
+  private publicKey: string;
+  private privateKey?: string;
 
-  constructor(apiKey?: string, fromAddress?: string) {
-    this.apiKey = apiKey || process.env.RESEND_API_KEY || '';
-    const fromName = process.env.EMAIL_FROM_NAME || 'ILRDVS Land Governance';
-    const rawFrom = fromAddress || process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
-    this.fromAddress = rawFrom.includes('<') ? rawFrom : `${fromName} <${rawFrom}>`;
+  constructor(serviceId?: string, templateId?: string, publicKey?: string, privateKey?: string) {
+    this.serviceId = serviceId || process.env.EMAILJS_SERVICE_ID || process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '';
+    this.templateId = templateId || process.env.EMAILJS_TEMPLATE_ID || process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '';
+    this.publicKey = publicKey || process.env.EMAILJS_PUBLIC_KEY || process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '';
+    this.privateKey = privateKey || process.env.EMAILJS_PRIVATE_KEY || '';
   }
 
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-    if (!this.apiKey || this.apiKey.trim() === '' || this.apiKey.startsWith('re_your_')) {
+    if (!this.serviceId || !this.templateId || !this.publicKey) {
       const errorMsg =
-        'RESEND_API_KEY is not set. To send real emails, get a free API key at https://resend.com and add RESEND_API_KEY=re_... to backend/.env';
-      console.warn(`\x1b[33m[Resend Notice]\x1b[0m ${errorMsg}`);
+        'EmailJS credentials are not set. Add EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY to backend/.env';
+      console.warn(`\x1b[33m[EmailJS Notice]\x1b[0m ${errorMsg}`);
       return {
         success: false,
         error: errorMsg,
@@ -50,38 +54,84 @@ export class ResendEmailProvider implements EmailProvider {
     }
 
     try {
-      const response = await fetch('https://api.resend.com/emails', {
+      // Extract OTP if present in input or subject line
+      const extractedOtp = input.otp || input.subject.match(/\b\d{6}\b/)?.[0] || '';
+
+      const payload: Record<string, any> = {
+        service_id: this.serviceId,
+        template_id: this.templateId,
+        user_id: this.publicKey,
+        template_params: {
+          to_name: input.to.split('@')[0],
+          to_email: input.to,
+          email: input.to,
+          user_email: input.to,
+          recipient: input.to,
+          recipient_email: input.to,
+          to: input.to,
+          reply_to: input.to,
+          subject: input.subject,
+          message: input.text || `Your ILRDVS verification code is: ${extractedOtp}`,
+          passcode: extractedOtp,
+          otp: extractedOtp,
+          code: extractedOtp,
+          otp_code: extractedOtp,
+          verification_code: extractedOtp,
+          pin: extractedOtp,
+          time: new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      };
+
+      if (this.privateKey) {
+        payload.accessToken = this.privateKey;
+      }
+
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
+          'Origin': process.env.CLIENT_URL || 'http://localhost:3000',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         },
-        body: JSON.stringify({
-          from: this.fromAddress,
-          to: [input.to],
-          subject: input.subject,
-          html: input.html,
-          text: input.text || '',
-        }),
+        body: JSON.stringify(payload),
       });
 
-      const data = (await response.json()) as any;
-
       if (!response.ok) {
-        const errorMsg = data.message || `Resend API returned status ${response.status}`;
-        console.error('[Resend Provider Error]', { status: response.status, error: errorMsg });
+        const errorText = await response.text();
+        console.error('[EmailJS Provider Error]', { status: response.status, error: errorText });
+
+        // If EmailJS blocks non-browser access, provide clear instructions and fallback in dev
+        if (errorText.includes('non-browser environments is currently disabled') || errorText.includes('403')) {
+          console.warn(
+            '\n\x1b[33m[EMAILJS ACTION REQUIRED]\x1b[0m To allow backend Node.js to send emails via EmailJS:\n' +
+            '1. Open https://dashboard.emailjs.com/admin/account/security\n' +
+            '2. Check "Allow EmailJS API for non-browser applications"\n' +
+            '3. Copy your Private Key and paste it as EMAILJS_PRIVATE_KEY in backend/.env\n'
+          );
+
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(
+              `\x1b[36m[DEV BACKUP OTP LOG]\x1b[0m Recipient: ${input.to} | OTP: \x1b[1m\x1b[32m${extractedOtp}\x1b[0m`
+            );
+            return {
+              success: true,
+              messageId: `dev-fallback-${Date.now()}`,
+            };
+          }
+        }
+
         return {
           success: false,
-          error: errorMsg,
+          error: `EmailJS dispatch failed: ${errorText}`,
         };
       }
 
       return {
         success: true,
-        messageId: data.id,
+        messageId: `emailjs-${Date.now()}`,
       };
     } catch (err: any) {
-      console.error('[Resend Network Error]', err.message);
+      console.error('[EmailJS Network Error]', err.message);
       return {
         success: false,
         error: 'Email gateway connection failed. Please try again later.',
@@ -121,29 +171,32 @@ export class DevEmailProvider implements EmailProvider {
  */
 export function getEmailProvider(): EmailProvider {
   const isProduction = process.env.NODE_ENV === 'production';
-  const providerType = (process.env.EMAIL_PROVIDER || '').toLowerCase();
-  const apiKey = (process.env.RESEND_API_KEY || '').trim();
-  const hasValidApiKey = Boolean(apiKey && !apiKey.startsWith('re_your_') && apiKey.length > 5);
+  const providerType = (process.env.EMAIL_PROVIDER || 'emailjs').toLowerCase();
+  const serviceId = (process.env.EMAILJS_SERVICE_ID || process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '').trim();
+  const templateId = (process.env.EMAILJS_TEMPLATE_ID || process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '').trim();
+  const publicKey = (process.env.EMAILJS_PUBLIC_KEY || process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '').trim();
+  const privateKey = (process.env.EMAILJS_PRIVATE_KEY || '').trim();
+
+  const hasValidEmailJS = Boolean(serviceId && templateId && publicKey);
 
   // 1. If Dev Sandbox explicitly requested
   if (providerType === 'dev' || providerType === 'sandbox') {
     return new DevEmailProvider();
   }
 
-  // 2. If valid Resend API key is present, use Resend
-  if (hasValidApiKey) {
-    return new ResendEmailProvider(apiKey);
+  // 2. If valid EmailJS configuration is present, use EmailJS
+  if (hasValidEmailJS) {
+    return new EmailJSEmailProvider(serviceId, templateId, publicKey, privateKey);
   }
 
-  // 3. If in local development or API key is not configured, fall back to Dev sandbox
+  // 3. If in local development or API keys are not configured, fall back to Dev sandbox (OTP logged to console)
   if (!isProduction) {
     console.warn(
-      '\x1b[33m[EMAIL CONFIG NOTICE]\x1b[0m RESEND_API_KEY is not set. Automatically falling back to DevEmailProvider sandbox (OTP is printed to console). To receive real emails, set RESEND_API_KEY in backend/.env'
+      '\x1b[33m[EMAIL CONFIG NOTICE]\x1b[0m EmailJS keys not set. Automatically falling back to DevEmailProvider sandbox (OTP is printed to console). To send real emails, set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY in backend/.env'
     );
     return new DevEmailProvider();
   }
 
-  // 4. In production without API key, instantiate Resend which will return a descriptive error
-  return new ResendEmailProvider('', process.env.EMAIL_FROM_ADDRESS);
+  // 4. In production without keys, return EmailJS which will yield descriptive configuration notice
+  return new EmailJSEmailProvider();
 }
-

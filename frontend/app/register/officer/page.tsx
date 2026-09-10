@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher';
 import { authService } from '../../../services/auth.service';
+import { emailjsService } from '../../../services/emailjs.service';
 
 export default function OfficerRegisterPage() {
   const { t, i18n } = useTranslation();
@@ -130,7 +131,8 @@ export default function OfficerRegisterPage() {
     setIsLoading(true);
 
     try {
-      await authService.registerOfficer({
+      // 1. Register with backend and generate secure verification OTP
+      const regRes = await authService.registerOfficer({
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         employeeId: formData.employeeId.trim(),
@@ -146,6 +148,24 @@ export default function OfficerRegisterPage() {
         acceptTerms: true,
         confirmOfficerApplication: true,
       });
+
+      // 2. Dispatch EmailJS confirmation with real OTP to officer email
+      await emailjsService.sendOfficerWelcomeEmail({
+        to_name: formData.name.trim(),
+        to_email: formData.email.trim().toLowerCase(),
+        employee_id: formData.employeeId.trim(),
+        department: formData.department.trim(),
+        designation: formData.designation.trim(),
+        office: formData.office.trim(),
+        district: formData.district.trim(),
+        taluka: formData.taluka.trim() || undefined,
+        otp: regRes.otp,
+      });
+
+      // Store pending OTP in session for verification screen convenience
+      if (regRes.otp) {
+        sessionStorage.setItem('pending_registration_otp', regRes.otp);
+      }
 
       router.push(`/register/officer/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`);
     } catch (err: any) {

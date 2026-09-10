@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
   FileText,
-  UploadCloud,
   Layers,
   Bell,
   UserCheck,
@@ -30,7 +29,14 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   const { t } = useTranslation();
   const pathname = usePathname();
 
-  const navigation = [
+  const navigation: {
+    name: string;
+    href: string;
+    icon: any;
+    exact?: boolean;
+    highlight?: boolean;
+    badge?: string;
+  }[] = [
     {
       name: t('navbar.dashboard'),
       href: '/portal',
@@ -38,32 +44,14 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       exact: true,
     },
     {
-      name: t('dashboard.uploadCta').replace('+', '').trim(),
-      href: '/portal/upload',
-      icon: UploadCloud,
-    },
-    {
-      name: t('sidebar.verifyLandRecord', { defaultValue: 'Verify Land Record' }),
-      href: '/portal/verify',
-      icon: ShieldCheck,
-      highlight: true,
-      badge: 'AI',
-    },
-    {
-      name: t('sidebar.aiVerifications', { defaultValue: 'AI Verifications' }),
-      href: '/citizen/verifications',
-      icon: FileText,
-      badge: t('status.active', { defaultValue: 'Active' }),
+      name: t('landRecords.title'),
+      href: '/portal/land-records',
+      icon: Layers,
     },
     {
       name: t('applications.title'),
       href: '/portal/applications',
       icon: FileText,
-    },
-    {
-      name: t('landRecords.title'),
-      href: '/portal/land-records',
-      icon: Layers,
     },
     {
       name: t('notifications.title'),
@@ -81,7 +69,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
     if (exact) {
       return pathname === itemHref;
     }
-    return pathname.startsWith(itemHref);
+    return !!pathname?.startsWith(itemHref);
   };
 
   const content = (
