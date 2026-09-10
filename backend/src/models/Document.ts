@@ -35,6 +35,8 @@ export interface IDocument {
   pageCount: number;
   isReuploaded: boolean;
   reuploadedFromId?: string | null;
+  isLegacyRecord?: boolean;
+  mrrCategory?: string | null;
   uploadedAt: Date;
   metadata: Record<string, any>;
   createdAt: Date;
@@ -91,6 +93,8 @@ export function enrichDocument(raw: any): IDocument | null {
         pageCount: this.pageCount,
         isReuploaded: this.isReuploaded,
         reuploadedFromId: this.reuploadedFromId,
+        isLegacyRecord: this.isLegacyRecord ?? false,
+        mrrCategory: this.mrrCategory,
         metadata: this.metadata,
       },
       include: {

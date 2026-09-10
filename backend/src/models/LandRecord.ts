@@ -8,6 +8,7 @@ export interface ILandRecord {
   id: string;
   _id: string;
   recordId?: string | null;
+  ulpin?: string | null;
   ownerName: string;
   surveyNumber: string;
   gatNumber?: string | null;
@@ -26,6 +27,17 @@ export interface ILandRecord {
   sourceDocumentId?: string | null;
   sourceType?: string | null;
   verificationStatus: VerificationStatus;
+  isAadhaarSeeded?: boolean;
+  aadhaarMasked?: string | null;
+  hasActiveDispute?: boolean;
+  rccmsCaseNumber?: string | null;
+  disputeDetails?: any;
+  hasBankCharge?: boolean;
+  bankChargeDetails?: any;
+  circleRatePerSqm?: number | null;
+  calculatedValuation?: number | null;
+  isLegacyRecord?: boolean;
+  mrrCategory?: string | null;
   createdBy: any;
   createdById: string;
   verifiedBy?: any;
@@ -110,6 +122,7 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
       where: { id: this.id },
       data: {
         recordId: this.recordId,
+        ulpin: this.ulpin,
         ownerName: this.ownerName,
         surveyNumber: this.surveyNumber,
         gatNumber: this.gatNumber,
@@ -126,6 +139,17 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
         registrationNumber: this.registrationNumber,
         sourceType: this.sourceType || 'DEMO_REFERENCE_RECORD',
         verificationStatus: this.verificationStatus,
+        isAadhaarSeeded: this.isAadhaarSeeded ?? false,
+        aadhaarMasked: this.aadhaarMasked,
+        hasActiveDispute: this.hasActiveDispute ?? false,
+        rccmsCaseNumber: this.rccmsCaseNumber,
+        disputeDetails: this.disputeDetails,
+        hasBankCharge: this.hasBankCharge ?? false,
+        bankChargeDetails: this.bankChargeDetails,
+        circleRatePerSqm: this.circleRatePerSqm,
+        calculatedValuation: this.calculatedValuation,
+        isLegacyRecord: this.isLegacyRecord ?? false,
+        mrrCategory: this.mrrCategory,
         verifiedById: cleanVerifiedById || null,
         confidenceScore: this.confidenceScore,
         remarks: this.remarks,

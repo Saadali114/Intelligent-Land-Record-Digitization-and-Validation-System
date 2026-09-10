@@ -6,6 +6,9 @@ import {
   updateLandRecord,
   deleteLandRecord,
   getFilterMetadata,
+  getLandStack,
+  seedAadhaar,
+  updateBankCharge,
 } from '../controllers/land-record.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { authorize } from '../middleware/role.middleware.js';
@@ -22,7 +25,10 @@ router.use(authenticate);
 
 router.get('/meta/filters', getFilterMetadata);
 router.get('/', validateQuery(LandRecordQuerySchema), getLandRecords);
+router.get('/:id/land-stack', getLandStack);
 router.get('/:id', getLandRecordById);
+router.post('/:id/seed-aadhaar', seedAadhaar);
+router.post('/:id/bank-charge', authorize(['ADMIN', 'OFFICER']), updateBankCharge);
 
 // Create: ADMIN, OFFICER
 router.post(

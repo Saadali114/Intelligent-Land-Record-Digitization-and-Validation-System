@@ -95,7 +95,14 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
                 {records.map((rec) => (
                   <tr key={rec._id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-5 py-3.5">
-                      <div className="font-semibold text-slate-900">{rec.ownerName}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-900">{rec.ownerName}</span>
+                        {rec.ulpin && (
+                          <span className="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-900 border border-amber-300/80">
+                            ULPIN: {rec.ulpin}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3 h-3 text-slate-400" />
                         <span>
@@ -103,6 +110,23 @@ export const LandRecordsTable: React.FC<LandRecordsTableProps> = ({
                         </span>
                         <span className="text-slate-300">•</span>
                         <span className="text-emerald-700 font-medium">{rec.plotArea}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        {rec.hasActiveDispute && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 border border-rose-200">
+                            ⚠️ RCCMS Dispute
+                          </span>
+                        )}
+                        {rec.hasBankCharge && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                            🏦 ULI Mortgage
+                          </span>
+                        )}
+                        {rec.isLegacyRecord && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                            📜 Pre-1947 MRR
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3.5 font-mono text-[11px]">

@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import { LandRecord, Pagination, ApiResponse } from '../types';
+import { LandRecord, Pagination, ApiResponse, LandStackResponse } from '../types';
 import { LandRecordFormData } from '../schemas/land-record.schema';
 
 export interface LandRecordQueryParams {
@@ -13,6 +13,10 @@ export interface LandRecordQueryParams {
   landClassification?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  ulpin?: string;
+  hasActiveDispute?: boolean;
+  hasBankCharge?: boolean;
+  isLegacyRecord?: boolean;
 }
 
 export const landRecordsService = {
@@ -28,6 +32,34 @@ export const landRecordsService = {
 
   getLandRecordById: async (id: string): Promise<LandRecord> => {
     const response = await apiClient.get<ApiResponse<LandRecord>>(`/land-records/${id}`);
+    return response.data.data;
+  },
+
+  getLandStack: async (id: string): Promise<LandStackResponse> => {
+    const response = await apiClient.get<ApiResponse<LandStackResponse>>(`/land-records/${id}/land-stack`);
+    return response.data.data;
+  },
+
+  seedAadhaar: async (id: string, aadhaarNumber: string, mobileNumber: string, consent: boolean) => {
+    const response = await apiClient.post<ApiResponse<any>>(`/land-records/${id}/seed-aadhaar`, {
+      aadhaarNumber,
+      mobileNumber,
+      consent,
+    });
+    return response.data.data;
+  },
+
+  updateBankCharge: async (
+    id: string,
+    chargeData: {
+      hasBankCharge: boolean;
+      bankName?: string;
+      branch?: string;
+      loanAmount?: number;
+      chargeType?: string;
+    }
+  ) => {
+    const response = await apiClient.post<ApiResponse<any>>(`/land-records/${id}/bank-charge`, chargeData);
     return response.data.data;
   },
 

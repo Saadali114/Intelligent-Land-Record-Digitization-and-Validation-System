@@ -170,6 +170,8 @@ model Document {
   isReuploaded     Boolean                  @default(false)
   reuploadedFromId String?
   uploadedAt       DateTime                 @default(now())
+  isLegacyRecord   Boolean                  @default(false)
+  mrrCategory      String?
   metadata         Json                     @default("{}")
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
@@ -184,38 +186,51 @@ model Document {
   @@index([checksum])
   @@index([isReuploaded])
   @@index([reuploadedFromId])
+  @@index([isLegacyRecord])
   @@map("documents")
 }
 
 model LandRecord {
-  id                 String             @id @default(cuid())
-  recordId           String?
-  ownerName          String
-  surveyNumber       String
-  gatNumber          String?
-  khasraNumber       String
-  khataNumber        String
-  plotArea           String
-  village            String
-  tehsil             String
-  district           String
-  email              String?
-  landClassification String             @default("Agricultural")
-  ownershipType      String             @default("Single Owner")
-  mutationNumber     String?
-  registrationNumber String?
-  sourceDocumentId   String?
-  sourceDocument     Document?          @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
-  sourceType         String?            @default("DEMO_REFERENCE_RECORD")
-  verificationStatus VerificationStatus @default(PENDING)
-  createdById        String
-  createdBy          User               @relation("CreatedLandRecords", fields: [createdById], references: [id], onDelete: Cascade)
-  verifiedById       String?
-  verifiedBy         User?              @relation("VerifiedLandRecords", fields: [verifiedById], references: [id], onDelete: SetNull)
-  confidenceScore    Float              @default(0.9)
-  remarks            String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id                  String              @id @default(cuid())
+  recordId            String?
+  ulpin               String?             @unique
+  ownerName           String
+  surveyNumber        String
+  gatNumber           String?
+  khasraNumber        String
+  khataNumber         String
+  plotArea            String
+  village             String
+  tehsil              String
+  district            String
+  email               String?
+  landClassification  String              @default("Agricultural")
+  ownershipType       String              @default("Single Owner")
+  mutationNumber      String?
+  registrationNumber  String?
+  sourceDocumentId    String?
+  sourceDocument      Document?           @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  sourceType          String?             @default("DEMO_REFERENCE_RECORD")
+  verificationStatus  VerificationStatus  @default(PENDING)
+  isAadhaarSeeded     Boolean             @default(false)
+  aadhaarMasked       String?
+  hasActiveDispute    Boolean             @default(false)
+  rccmsCaseNumber     String?
+  disputeDetails      Json?
+  hasBankCharge       Boolean             @default(false)
+  bankChargeDetails   Json?
+  circleRatePerSqm    Float?
+  calculatedValuation Float?
+  isLegacyRecord      Boolean             @default(false)
+  mrrCategory         String?
+  createdById         String
+  createdBy           User                @relation("CreatedLandRecords", fields: [createdById], references: [id], onDelete: Cascade)
+  verifiedById        String?
+  verifiedBy          User?               @relation("VerifiedLandRecords", fields: [verifiedById], references: [id], onDelete: SetNull)
+  confidenceScore     Float               @default(0.9)
+  remarks             String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
   // Relationships
   verificationRecords VerificationRecord[]

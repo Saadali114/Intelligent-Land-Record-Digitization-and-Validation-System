@@ -33,8 +33,11 @@ import {
   Building,
   QrCode,
   Camera,
+  Layers,
 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
+import { Modal } from '../ui/Modal';
+import { LandStackMultiLayerViewer } from '../land-stack/LandStackMultiLayerViewer';
 import { QrScannerModal } from './QrScannerModal';
 import { generateQrDataUrl, computeDocumentSecretCode } from '../../lib/qr-barcode';
 
@@ -72,6 +75,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const [notification, setNotification] = useState<string | null>(null);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [isLandStackOpen, setIsLandStackOpen] = useState(false);
 
   useEffect(() => {
     fetchDocuments();
@@ -248,8 +252,19 @@ export const UserDocumentVerificationWorkstation: React.FC<
     district: extractedDistrict,
     landClassification: extractedClassification,
     tenureType: lr?.ownershipType || 'Occupant Class 1 / Freehold (वर्ग १ - पूर्ण मालकी)',
-    encumbranceStatus: 'Nil (निरंक / भारमुक्त मिळकत - Clean Title)',
+    encumbranceStatus: lr?.hasActiveDispute
+      ? `Contested (RCCMS: ${lr.rccmsCaseNumber || 'Active Dispute'})`
+      : lr?.hasBankCharge
+      ? `Mortgaged (ULI Lien: ${lr.bankChargeDetails?.bankName || 'Bank Charge'})`
+      : 'Nil (निरंक / भारमुक्त मिळकत - Clean Title)',
     mutationNumber: extractedMutation,
+    ulpin: lr?.ulpin || '81LVQLD9407JH0',
+    hasActiveDispute: lr?.hasActiveDispute || false,
+    rccmsCaseNumber: lr?.rccmsCaseNumber,
+    hasBankCharge: lr?.hasBankCharge || false,
+    circleRatePerSqm: lr?.circleRatePerSqm || 4200,
+    calculatedValuation: lr?.calculatedValuation || 5250000,
+    isAadhaarSeeded: lr?.isAadhaarSeeded || false,
     lastSanctionDate: '18/02/2024',
     subRegistrarOffice: `Sub-Registrar Office Haveli No. 4, Pune`,
   };
@@ -524,6 +539,17 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   >
                     <Camera className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Scan QR</span>
+                  </button>
+
+                  {/* DILRMP 3.0 Land Stack Viewer Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLandStackOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shadow-xs transition-colors border border-indigo-700 cursor-pointer"
+                    title="Inspect 8-layer DILRMP 3.0 Land Stack & GIS Registry"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Land Stack (8 Layers)</span>
                   </button>
 
                   {/* Generate Verification Report Button */}
@@ -863,9 +889,25 @@ export const UserDocumentVerificationWorkstation: React.FC<
                           <span className="text-[10px] text-slate-500 block uppercase">Title Tenure</span>
                           <span className="text-slate-800 text-[11px]">{govRecord.tenureType}</span>
                         </div>
+                        <div className="col-span-2 flex items-center justify-between pt-1 border-t border-emerald-100">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block uppercase">Bhu-Aadhaar (ULPIN)</span>
+                            <span className="font-mono text-xs font-bold text-amber-900 bg-amber-100/80 px-1.5 py-0.2 rounded border border-amber-300">
+                              {govRecord.ulpin}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-500 block uppercase">Govt Assessed Valuation</span>
+                            <span className="font-mono text-xs font-bold text-emerald-800">
+                              ₹{govRecord.calculatedValuation.toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                        </div>
                         <div className="col-span-2">
                           <span className="text-[10px] text-slate-500 block uppercase">Encumbrance / Dispute Status</span>
-                          <span className="text-emerald-700 font-semibold text-[11px]">{govRecord.encumbranceStatus}</span>
+                          <span className={`font-semibold text-[11px] ${govRecord.hasActiveDispute ? 'text-rose-700' : govRecord.hasBankCharge ? 'text-amber-700' : 'text-emerald-700'}`}>
+                            {govRecord.encumbranceStatus}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1128,6 +1170,56 @@ export const UserDocumentVerificationWorkstation: React.FC<
           }
         }}
       />
+
+      {/* DILRMP 3.0 8-Layer Land Stack Modal */}
+      {isLandStackOpen && (
+        <Modal
+          isOpen={isLandStackOpen}
+          onClose={() => setIsLandStackOpen(false)}
+          title="DILRMP 3.0 Land Stack Inspection (8 Layers)"
+          description={`Bhu-Aadhaar ULPIN: ${govRecord.ulpin} • Survey No: ${govRecord.surveyNumber}`}
+          maxWidth="4xl"
+        >
+          <div className="space-y-4">
+            <LandStackMultiLayerViewer
+              record={{
+                _id: (lr?._id || govRecord.recordId) as string,
+                ownerName: govRecord.ownerName,
+                surveyNumber: govRecord.surveyNumber,
+                khasraNumber: govRecord.khasraNumber,
+                khataNumber: govRecord.khataNumber,
+                plotArea: govRecord.plotArea,
+                village: govRecord.village,
+                tehsil: govRecord.tehsil,
+                district: govRecord.district,
+                landClassification: govRecord.landClassification,
+                ownershipType: govRecord.tenureType,
+                ulpin: govRecord.ulpin,
+                hasActiveDispute: govRecord.hasActiveDispute,
+                rccmsCaseNumber: govRecord.rccmsCaseNumber,
+                hasBankCharge: govRecord.hasBankCharge,
+                circleRatePerSqm: govRecord.circleRatePerSqm,
+                calculatedValuation: govRecord.calculatedValuation,
+                isAadhaarSeeded: govRecord.isAadhaarSeeded,
+                verificationStatus: (selectedDoc?.processingStatus === 'VERIFIED' ? 'VERIFIED' : 'PENDING') as any,
+                confidenceScore: 0.98,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                createdBy: 'OFFICER' as any,
+              }}
+            />
+            <div className="flex justify-end pt-2 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={() => setIsLandStackOpen(false)}
+                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold"
+              >
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

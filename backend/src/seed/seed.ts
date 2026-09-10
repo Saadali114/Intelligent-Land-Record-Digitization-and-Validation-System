@@ -10,6 +10,7 @@ import { LandRecord } from '../models/LandRecord.js';
 import { VerificationRecord } from '../models/VerificationRecord.js';
 import { AuditLog } from '../models/AuditLog.js';
 import { connectDB } from '../config/db.js';
+import { generateULPIN } from '../services/ulpin.service.js';
 
 const SEED_PASSWORD = 'Password123!';
 
@@ -198,6 +199,7 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
       ];
       const processingStatus = statusChoices[i % statusChoices.length];
 
+      const isLegacy = i % 4 === 0;
       const doc = await DocumentModel.create({
         documentId: `DOC-MH-2026-${1000 + i}`,
         fileName: i % 2 === 0 ? 'sample-7-12-extract.pdf' : 'sample-sale-deed.pdf',
@@ -210,8 +212,10 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         uploadedBy: uploader._id,
         processingStatus,
         uploadedAt: uploadDate,
+        isLegacyRecord: isLegacy,
+        mrrCategory: isLegacy ? 'PRE_1947' : (i % 3 === 0 ? 'INTERMEDIATE' : 'MODERN'),
         metadata: {
-          scannedDPI: 300,
+          scannedDPI: isLegacy ? 400 : 300,
           originalLanguage: lang,
           docType,
           documentType: docType.includes('Sale Deed')
@@ -254,6 +258,7 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
     const demoReferenceRecords = [
       {
         recordId: 'LR-001',
+        ulpin: '81LVQLD9407JH0', // Standard 14-digit ULPIN from DILRMP 3.0 Cover
         ownerName: 'Shankar Ganpat Patil',
         surveyNumber: '145/2A',
         gatNumber: '145/2A',
@@ -270,12 +275,21 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         registrationNumber: 'MH-PUN-HAV-2024-001',
         sourceType: 'DEMO_REFERENCE_RECORD' as const,
         verificationStatus: 'VERIFIED' as const,
+        isAadhaarSeeded: true,
+        aadhaarMasked: 'XXXX-XXXX-9124',
+        hasActiveDispute: false,
+        hasBankCharge: false,
+        circleRatePerSqm: 4200,
+        calculatedValuation: 5250000,
+        isLegacyRecord: false,
+        mrrCategory: 'MODERN',
         createdBy: admin._id,
         confidenceScore: 0.98,
-        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+        remarks: 'Official Cadastral Reference Record (DILRMP 3.0 Demo Reference with Bhu-Aadhaar).',
       },
       {
         recordId: 'LR-002',
+        ulpin: '81LVQLD9408JH1',
         ownerName: 'Meena Rajendra Kulkarni',
         surveyNumber: '88/3',
         gatNumber: '88/3',
@@ -292,12 +306,36 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         registrationNumber: 'MH-NSK-DIN-2023-002',
         sourceType: 'DEMO_REFERENCE_RECORD' as const,
         verificationStatus: 'VERIFIED' as const,
+        isAadhaarSeeded: true,
+        aadhaarMasked: 'XXXX-XXXX-3819',
+        hasActiveDispute: true,
+        rccmsCaseNumber: 'RCCMS-MH-2026-0412',
+        disputeDetails: {
+          courtName: 'Court of Sub-Divisional Officer (SDO), Dindori',
+          caseType: 'Section 247 MLRC Title Partition Dispute',
+          hearingDate: '15/11/2026',
+          stayOrder: true,
+        },
+        hasBankCharge: true,
+        bankChargeDetails: {
+          bankName: 'State Bank of India',
+          branch: 'Dindori Main Branch',
+          loanAmount: 450000,
+          chargeType: 'KCC Agricultural Hypothecation',
+          sanctionDate: '12/03/2024',
+          status: 'ACTIVE',
+        },
+        circleRatePerSqm: 3800,
+        calculatedValuation: 3230000,
+        isLegacyRecord: false,
+        mrrCategory: 'MODERN',
         createdBy: admin._id,
         confidenceScore: 0.96,
-        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+        remarks: 'Official Cadastral Reference Record (Demo Reference with Active RCCMS Dispute & Bank Lien).',
       },
       {
         recordId: 'LR-003',
+        ulpin: '81LVQLD9409JH2',
         ownerName: 'Rahul Shankar Patil',
         surveyNumber: '211/4',
         gatNumber: '211/4',
@@ -308,15 +346,23 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         tehsil: 'Haveli',
         district: 'Pune',
         email: 'rahul.patil@example.com',
-        landClassification: 'Agricultural (Jirayat)',
+        landClassification: 'Residential Plot',
         ownershipType: 'Single Owner',
         mutationNumber: 'MUT-2025-9921',
         registrationNumber: 'MH-PUN-HAV-2025-003',
         sourceType: 'DEMO_REFERENCE_RECORD' as const,
         verificationStatus: 'VERIFIED' as const,
+        isAadhaarSeeded: true,
+        aadhaarMasked: 'XXXX-XXXX-4491',
+        hasActiveDispute: false,
+        hasBankCharge: false,
+        circleRatePerSqm: 6500,
+        calculatedValuation: 13650000,
+        isLegacyRecord: false,
+        mrrCategory: 'MODERN',
         createdBy: admin._id,
         confidenceScore: 0.99,
-        remarks: 'Official Cadastral Reference Record (Demo Reference).',
+        remarks: 'Official Cadastral Reference Record (Urban Residential Plot under NAKSHA).',
       },
     ];
 
@@ -355,6 +401,15 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
       const khataNumber = `KT-${500 + i * 3}`;
       const plotArea = `${((i % 5) + 1) * 0.75 + 0.25} Hectares`;
 
+      const ulpin = generateULPIN({ district, village, surveyNumber });
+      const isAadhaarSeeded = i % 2 === 0;
+      const hasActiveDispute = i % 5 === 0;
+      const hasBankCharge = i % 4 === 0;
+      const circleRatePerSqm = 2800 + (i % 8) * 450;
+      const areaHectares = ((i % 5) + 1) * 0.75 + 0.25;
+      const calculatedValuation = Math.round(circleRatePerSqm * areaHectares * 10000);
+      const isLegacyRecord = i % 6 === 0;
+
       const record = await LandRecord.create({
         ownerName,
         surveyNumber,
@@ -364,6 +419,34 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
         village,
         tehsil,
         district,
+        ulpin,
+        isAadhaarSeeded,
+        aadhaarMasked: isAadhaarSeeded ? `XXXX-XXXX-${1000 + ((i * 389) % 9000)}` : undefined,
+        hasActiveDispute,
+        rccmsCaseNumber: hasActiveDispute ? `RCCMS-MH-2026-${5000 + i}` : undefined,
+        disputeDetails: hasActiveDispute
+          ? {
+              courtName: 'Revenue Court of Sub-Divisional Officer (SDO)',
+              caseType: 'Boundary Demarcation & Succession Contest (Sec 247 MLRC)',
+              hearingDate: '24/11/2026',
+              stayOrder: i % 10 === 0,
+            }
+          : undefined,
+        hasBankCharge,
+        bankChargeDetails: hasBankCharge
+          ? {
+              bankName: 'Bank of Maharashtra',
+              branch: `${district} Central Branch`,
+              loanAmount: 400000 + i * 25000,
+              chargeType: 'Unified Lending Interface (ULI) Agri Mortgage',
+              sanctionDate: '10/01/2025',
+              status: 'ACTIVE',
+            }
+          : undefined,
+        circleRatePerSqm,
+        calculatedValuation,
+        isLegacyRecord,
+        mrrCategory: isLegacyRecord ? 'PRE_1947' : (i % 3 === 0 ? 'INTERMEDIATE' : 'MODERN'),
         landClassification: classifications[i % classifications.length],
         ownershipType: ownershipTypes[i % ownershipTypes.length],
         mutationNumber: `MUT-2025-${9000 + i}`,

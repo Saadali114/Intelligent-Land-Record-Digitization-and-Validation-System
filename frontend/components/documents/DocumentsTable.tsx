@@ -107,8 +107,15 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                         </div>
                         <div>
                           <div className="font-semibold text-slate-900">{doc.originalName}</div>
-                          <div className="text-[10px] text-slate-400">
-                            {formatFileSize(doc.fileSize)}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-slate-400">
+                              {formatFileSize(doc.fileSize)}
+                            </span>
+                            {doc.isLegacyRecord && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 border border-purple-200">
+                                📜 Pre-1947 MRR
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

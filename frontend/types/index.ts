@@ -91,6 +91,8 @@ export interface DocumentRecord {
   reuploadedFromId?: string;
   metadata?: Record<string, any>;
   fileUrl?: string;
+  isLegacyRecord?: boolean;
+  mrrCategory?: 'PRE_1947' | 'INTERMEDIATE' | 'MODERN';
   landRecord?: LandRecord;
   createdAt: string;
   updatedAt: string;
@@ -100,6 +102,8 @@ export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'NEEDS_RE
 
 export interface LandRecord {
   _id: string;
+  recordId?: string;
+  ulpin?: string;
   ownerName: string;
   surveyNumber: string;
   gatNumber?: string;
@@ -113,6 +117,29 @@ export interface LandRecord {
   ownershipType: string;
   mutationNumber?: string;
   registrationNumber?: string;
+  isAadhaarSeeded?: boolean;
+  aadhaarMasked?: string;
+  hasActiveDispute?: boolean;
+  rccmsCaseNumber?: string;
+  disputeDetails?: {
+    courtName?: string;
+    caseType?: string;
+    hearingDate?: string;
+    stayOrder?: boolean;
+  };
+  hasBankCharge?: boolean;
+  bankChargeDetails?: {
+    bankName?: string;
+    branch?: string;
+    loanAmount?: number;
+    chargeType?: string;
+    sanctionDate?: string;
+    status?: string;
+  };
+  circleRatePerSqm?: number;
+  calculatedValuation?: number;
+  isLegacyRecord?: boolean;
+  mrrCategory?: 'PRE_1947' | 'INTERMEDIATE' | 'MODERN';
   sourceDocument?: DocumentRecord | string;
   verificationStatus: VerificationStatus;
   createdBy: User | string;
@@ -121,6 +148,44 @@ export interface LandRecord {
   remarks?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LandStackLayer {
+  layerId: string;
+  layerName: string;
+  description: string;
+  authority: string;
+  status: 'ACTIVE' | 'FLAGGED' | 'CLEARED' | 'AVAILABLE';
+  data: Record<string, any>;
+}
+
+export interface LandStackResponse {
+  ulpin: string;
+  recordId: string;
+  cadastralSummary: {
+    ownerName: string;
+    surveyNumber: string;
+    plotArea: string;
+    village: string;
+    tehsil: string;
+    district: string;
+    landClassification: string;
+  };
+  layers: LandStackLayer[];
+  valuation: {
+    circleRatePerSqm: number;
+    calculatedValuation: number;
+  };
+  disputes: {
+    hasActiveDispute: boolean;
+    rccmsCaseNumber?: string;
+    disputeDetails?: any;
+  };
+  bankCharge: {
+    hasBankCharge: boolean;
+    bankChargeDetails?: any;
+  };
+  generatedAt: string;
 }
 
 export type VerificationAction = 'APPROVED' | 'REJECTED' | 'CORRECTED';
