@@ -9,7 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
-import { Building2, Shield, AlertCircle, Sparkles } from 'lucide-react';
+import { Building2, Shield, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -30,8 +30,8 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@landrecord.gov.in',
-      password: 'Password123!',
+      email: '',
+      password: '',
     },
   });
 
@@ -64,11 +64,6 @@ export default function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleQuickFill = (roleEmail: string) => {
-    setValue('email', roleEmail);
-    setValue('password', 'Password123!');
   };
 
   return (
@@ -134,52 +129,6 @@ export default function LoginPage() {
               </Button>
             </div>
           </form>
-
-          {/* Quick Demo Switcher */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>{t('auth.demoQuickFill', { defaultValue: 'Demo Account Quick Fill:' })}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin@landrecord.gov.in')}
-                className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
-              >
-                <div className="font-bold text-slate-900">{t('auth.roles.admin', { defaultValue: 'Admin' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.adminDesc', { defaultValue: 'Super administrator' })}</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('officer@landrecord.gov.in')}
-                className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
-              >
-                <div className="font-bold text-slate-900">{t('auth.roles.officer', { defaultValue: 'Officer' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.officerDesc', { defaultValue: 'Digital signing & verification' })}</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('verifier@landrecord.gov.in')}
-                className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
-              >
-                <div className="font-bold text-slate-900">{t('auth.roles.verifier', { defaultValue: 'Verifier' })}</div>
-                <div className="text-slate-500 text-[10px]">{t('auth.roles.verifierDesc', { defaultValue: 'Upload & initial review' })}</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('officer1@landrecord.gov.in')}
-                className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[11px] transition-colors"
-              >
-                <div className="font-bold text-slate-900">Officer 1 (Tehsildar)</div>
-                <div className="text-slate-500 text-[10px]">District Revenue Division</div>
-              </button>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-2 text-center">
-              {t('auth.seedPasswordPrefix', { defaultValue: 'Standard seed password:' })}{' '}
-              <span className="font-mono text-slate-600 font-semibold">Password123!</span>
-            </p>
-          </div>
         </div>
 
         {/* Register / Account Request Box */}

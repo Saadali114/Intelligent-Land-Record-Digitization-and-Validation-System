@@ -13,7 +13,6 @@ import {
   EyeOff,
   ArrowRight,
   AlertCircle,
-  Sparkles,
   UserCheck,
 } from 'lucide-react';
 
@@ -83,7 +82,7 @@ export default function CitizenLoginPage() {
         localStorage.setItem(
           'user',
           JSON.stringify({
-            name: 'Rahul Patil',
+            name: 'Citizen User',
             email: cleanEmail,
             role: 'CITIZEN',
           })
@@ -93,30 +92,6 @@ export default function CitizenLoginPage() {
 
       router.push('/portal');
     } catch (err: any) {
-      // Graceful fallback for demo citizen if backend is unavailable or unseeded
-      if (
-        (cleanEmail === 'rahul.patil@example.com' && password === 'Password123!') ||
-        (cleanEmail === 'rahul.patil@example.com' && !err?.response)
-      ) {
-        localStorage.setItem(
-          'user',
-          JSON.stringify({
-            name: 'Rahul Shankar Patil',
-            email: cleanEmail,
-            role: 'CITIZEN',
-          })
-        );
-        citizenService.login({
-          name: 'Rahul Shankar Patil',
-          email: cleanEmail,
-          district: 'Pune',
-          taluka: 'Haveli',
-          village: 'Khadakwasla',
-        });
-        router.push('/portal');
-        return;
-      }
-
       const serverMsg = err?.message || '';
       if (
         serverMsg.toLowerCase().includes('network error') ||
@@ -142,12 +117,6 @@ export default function CitizenLoginPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleQuickFillDemo = () => {
-    setEmail('rahul.patil@example.com');
-    setPassword('Password123!');
-    setError(null);
   };
 
   return (
@@ -285,18 +254,6 @@ export default function CitizenLoginPage() {
               <span>Sign In to Citizen Portal</span>
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
-
-            {/* Quick Demo Fill Button */}
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={handleQuickFillDemo}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Quick Fill: Demo Citizen (Rahul Patil)</span>
-              </button>
-            </div>
 
             {/* Registration & Other Links */}
             <div className="pt-3 text-center space-y-2 text-xs border-t border-slate-100">
