@@ -36,6 +36,16 @@ services:
         sync: false           # Set to https://your-frontend-site.onrender.com after frontend deploys
       - key: GEMINI_API_KEY
         sync: false           # Google Gemini Multimodal Vision API Key
+      - key: EMAIL_PROVIDER
+        value: emailjs
+      - key: EMAILJS_SERVICE_ID
+        value: service_u2dyh2v
+      - key: EMAILJS_TEMPLATE_ID
+        value: template_bntua1h
+      - key: EMAILJS_PUBLIC_KEY
+        value: GBd2TCv59gGvB302P
+      - key: EMAILJS_PRIVATE_KEY
+        value: DjFMOLRG2WfYmUmT1-PRx
 
   # ─────────────────────────────────────────────────────
   #  Next.js Frontend — Render Static Site
@@ -56,3 +66,9 @@ services:
     envVars:
       - key: NEXT_PUBLIC_API_URL
         sync: false           # Set to https://your-backend.onrender.com/api after backend deploys
+      - key: NEXT_PUBLIC_EMAILJS_SERVICE_ID
+        value: service_u2dyh2v
+      - key: NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+        value: template_bntua1h
+      - key: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+        value: GBd2TCv59gGvB302P
