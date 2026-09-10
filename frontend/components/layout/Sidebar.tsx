@@ -33,19 +33,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       label: t('navbar.dashboard'),
       href: '/dashboard',
       icon: LayoutDashboard,
-      roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
       label: t('navbar.landRecords'),
       href: '/land-records',
       icon: FileSpreadsheet,
-      roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
       label: t('navbar.documentRepository'),
       href: '/documents',
       icon: Files,
-      roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
       label: t('navbar.verificationQueue'),
@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       label: t('navbar.myProfile'),
       href: '/profile',
       icon: UserCheck,
-      roles: ['ADMIN', 'OFFICER', 'VERIFIER', 'VIEWER'],
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
   ];
 

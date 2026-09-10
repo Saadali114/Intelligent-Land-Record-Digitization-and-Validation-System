@@ -39,7 +39,9 @@ export const Badge: React.FC<BadgeProps> = ({
       resolvedVariant = 'info';
     } else if (s === 'ADMIN' || s === 'NEEDS_REVIEW' || s === 'CORRECTED') {
       resolvedVariant = 'purple';
-    } else if (s === 'VIEWER' || s === 'INACTIVE') {
+    } else if (s === 'PENDING_OFFICER_REVIEW') {
+      resolvedVariant = 'info';
+    } else if (s === 'INACTIVE') {
       resolvedVariant = 'neutral';
     }
   }

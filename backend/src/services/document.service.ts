@@ -226,8 +226,10 @@ export const deleteDocumentService = async (id: string, userId: string, ip?: str
 
 export const verifyUserDocumentService = async (
   documentId: string,
-  input: { action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW'; remarks: string; correctedData?: any },
+  input: { action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW'; remarks: string; correctedData?: any; digitalSignature?: any },
   verifierId: string,
+  verifierRole: string = 'VERIFIER',
+  verifierName: string = 'Authorized Official',
   ip?: string
 ) => {
   const doc = await DocumentModel.findById(documentId);
@@ -235,15 +237,78 @@ export const verifyUserDocumentService = async (
     throw new Error('Document not found');
   }
 
-  const targetStatus: DocumentProcessingStatus =
-    input.action === 'APPROVED'
-      ? 'VERIFIED'
-      : input.action === 'REJECTED'
-      ? 'REJECTED'
-      : 'NEEDS_REVIEW';
+  if (!doc.metadata) doc.metadata = {};
+
+  let targetStatus: DocumentProcessingStatus;
+  let auditDescription = '';
+  let digitalSignatureObj: any = null;
+
+  if (input.action === 'APPROVED') {
+    if (verifierRole === 'OFFICER' || verifierRole === 'ADMIN') {
+      // Final Statutory Officer Sign-off
+      targetStatus = 'VERIFIED';
+      const sigId = `DSC-OFF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      digitalSignatureObj = {
+        signatureId: sigId,
+        signerId: verifierId,
+        signerName: verifierName,
+        signerRole: verifierRole,
+        signedAt: new Date().toISOString(),
+        issuer: 'State Revenue & Cadastral Title Authority (Maharashtra Land Revenue Code Sec 149)',
+        certificateStatus: 'FINAL_STATUTORY_SEAL',
+        digest: crypto.createHash('sha256').update(`${doc.documentId}:OFFICER_FINAL:${verifierId}:${Date.now()}`).digest('hex'),
+        remarks: input.remarks,
+      };
+
+      doc.metadata.officerSignature = digitalSignatureObj;
+      doc.metadata.finalVerifiedBy = verifierId;
+      doc.metadata.finalOfficerName = verifierName;
+      doc.metadata.finalVerifiedAt = new Date();
+      doc.metadata.finalVerificationRemarks = input.remarks;
+      doc.metadata.digitalSignatureId = sigId;
+
+      auditDescription = `Officer ${verifierName} executed final statutory verification with digital signature (${sigId}). Document permanently certified and sealed as VERIFIED. Remarks: ${input.remarks}`;
+    } else {
+      // Verifier Initial Review & Sign-off -> Transitions to PENDING_OFFICER_REVIEW
+      targetStatus = 'PENDING_OFFICER_REVIEW';
+      const sigId = `DSC-VER-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      digitalSignatureObj = {
+        signatureId: sigId,
+        signerId: verifierId,
+        signerName: verifierName,
+        signerRole: 'VERIFIER',
+        signedAt: new Date().toISOString(),
+        issuer: 'National Land Record Verification Authority (ILRDVS)',
+        certificateStatus: 'AUTHENTICATED_INITIAL_VERIFICATION',
+        digest: crypto.createHash('sha256').update(`${doc.documentId}:VERIFIER:${verifierId}:${Date.now()}`).digest('hex'),
+        remarks: input.remarks,
+      };
+
+      doc.metadata.verifierSignature = digitalSignatureObj;
+      doc.metadata.initialVerifiedBy = verifierId;
+      doc.metadata.initialVerifierName = verifierName;
+      doc.metadata.initialVerifiedAt = new Date();
+      doc.metadata.initialVerificationRemarks = input.remarks;
+
+      auditDescription = `Verifier ${verifierName} completed initial verification with digital signature (${sigId}). Document forwarded to Officer review queue (PENDING_OFFICER_REVIEW). Remarks: ${input.remarks}`;
+    }
+  } else if (input.action === 'REJECTED') {
+    targetStatus = 'REJECTED';
+    auditDescription = `${verifierRole} ${verifierName} rejected document ${doc.documentId}. Remarks: ${input.remarks}`;
+    doc.metadata.rejectedBy = verifierId;
+    doc.metadata.rejectedByName = verifierName;
+    doc.metadata.rejectedAt = new Date();
+    doc.metadata.rejectionRemarks = input.remarks;
+  } else {
+    targetStatus = 'NEEDS_REVIEW';
+    auditDescription = `${verifierRole} ${verifierName} marked document ${doc.documentId} for clarification/needs review. Remarks: ${input.remarks}`;
+    doc.metadata.clarificationRequestedBy = verifierId;
+    doc.metadata.clarificationRequestedByName = verifierName;
+    doc.metadata.clarificationRequestedAt = new Date();
+    doc.metadata.clarificationRemarks = input.remarks;
+  }
 
   doc.processingStatus = targetStatus;
-  if (!doc.metadata) doc.metadata = {};
   doc.metadata.verificationRemarks = input.remarks;
   doc.metadata.verifiedBy = verifierId;
   doc.metadata.verifiedAt = new Date();
@@ -252,8 +317,15 @@ export const verifyUserDocumentService = async (
   // Also update linked LandRecord if exists
   const linkedRecord = await LandRecord.findOne({ sourceDocument: doc._id });
   if (linkedRecord) {
-    linkedRecord.verificationStatus =
-      input.action === 'APPROVED' ? 'VERIFIED' : input.action === 'REJECTED' ? 'REJECTED' : 'NEEDS_REVIEW';
+    if (targetStatus === 'VERIFIED') {
+      linkedRecord.verificationStatus = 'VERIFIED';
+    } else if (targetStatus === 'PENDING_OFFICER_REVIEW') {
+      linkedRecord.verificationStatus = 'NEEDS_REVIEW';
+    } else if (targetStatus === 'REJECTED') {
+      linkedRecord.verificationStatus = 'REJECTED';
+    } else {
+      linkedRecord.verificationStatus = 'NEEDS_REVIEW';
+    }
     linkedRecord.verifiedBy = verifierId as any;
     linkedRecord.remarks = input.remarks;
     if (input.correctedData) {
@@ -264,10 +336,17 @@ export const verifyUserDocumentService = async (
 
   await logAudit({
     userId: verifierId as any,
-    action: input.action === 'APPROVED' ? 'RECORD_VERIFIED' : input.action === 'REJECTED' ? 'RECORD_REJECTED' : 'RECORD_CORRECTED',
+    action:
+      targetStatus === 'VERIFIED'
+        ? 'RECORD_VERIFIED'
+        : targetStatus === 'PENDING_OFFICER_REVIEW'
+        ? 'RECORD_CORRECTED'
+        : targetStatus === 'REJECTED'
+        ? 'RECORD_REJECTED'
+        : 'RECORD_CORRECTED',
     resourceType: 'Document',
     resourceId: doc._id.toString(),
-    description: `User document ${doc.originalName} (${doc.documentId}) verified with verdict: ${input.action}. Remarks: ${input.remarks}`,
+    description: auditDescription,
     ipAddress: ip,
   });
 

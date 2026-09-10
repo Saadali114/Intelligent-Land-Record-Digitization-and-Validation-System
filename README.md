@@ -21,7 +21,7 @@ Land administration across India relies heavily on decades-old paper archives, h
 1. **Preserving Archival Heritage**: Ingesting scanned historical documents (in Marathi, Hindi, English, Gujarati, etc.) alongside rich provenance metadata.
 2. **Precision Cadastral Indexing**: Cataloging survey numbers, khasra numbers, khata numbers, plot areas (hectares/acres), and tenure classifications.
 3. **Human-in-the-Loop Verification**: Providing a dedicated dual-pane workstation where authorized inspectors cross-reference original scans with extracted structured data, submit remarks, and generate immutable audit logs.
-4. **Transparent Governance**: Implementing Role-Based Access Control (**ADMIN**, **OFFICER**, **VERIFIER**, **VIEWER**) and operational analytics dashboards.
+4. **Transparent Governance**: Implementing Role-Based Access Control (**ADMIN**, **OFFICER**, **VERIFIER**, **CITIZEN**) and operational analytics dashboards.
 
 ---
 
@@ -242,12 +242,12 @@ All pre-seeded demo accounts share the password: `Password123!`
 
 | Role | Demo Email | Permissions |
 | :--- | :--- | :--- |
-| **ADMIN** | `admin@landrecord.gov.in` | Full system control, User management, Role assignment, Document management, Land Record CRUD, Verification override, System Audit logs. |
-| **OFFICER** | `officer1@landrecord.gov.in` | Upload archival documents, create/edit land records, view verification status, access dashboard. |
-| **VERIFIER** | `verifier1@landrecord.gov.in` | Access verification workstation, review extracted fields against scans, approve/reject records, submit corrections with mandatory remarks. |
-| **VIEWER** | `viewer1@landrecord.gov.in` | Read-only citizen access to certified land records and document repository. Cannot edit, verify, or provision users. |
+| **ADMIN** | `admin@landrecord.gov.in` | Full system control, User management, Role assignment, Document management, Land Record CRUD, System Audit logs. |
+| **OFFICER** | `officer1@landrecord.gov.in` | Final statutory document verification & approval using digital signature (`DSC-OFF`). Cannot upload documents. |
+| **VERIFIER** | `verifier1@landrecord.gov.in` | Upload documents, perform initial inspection & digital signature (`DSC-VER`), forwarding documents to Officer review queue (`PENDING_OFFICER_REVIEW`). |
+| **CITIZEN** | `rahul.patil@example.com` | View personal land records, submit mutation/verification applications, track statutory application status. |
 
-*Tip: The `/login` page includes a **One-Click Demo Account Quick Fill** toolbar to switch between all 4 roles instantly.*
+*Tip: The `/login` page includes a **One-Click Demo Account Quick Fill** toolbar to switch between roles instantly.*
 
 ---
 

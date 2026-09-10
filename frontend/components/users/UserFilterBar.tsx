@@ -44,7 +44,6 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
           <option value="ADMIN">Admin</option>
           <option value="OFFICER">Officer</option>
           <option value="VERIFIER">Verifier</option>
-          <option value="VIEWER">Viewer</option>
         </select>
 
         <select

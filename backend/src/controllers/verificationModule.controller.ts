@@ -24,6 +24,11 @@ export class VerificationModuleController {
         return;
       }
 
+      if (req.user.role === 'OFFICER') {
+        sendError(res, 'Officers are not authorized to upload documents. Officers can only verify documents with final digital signature.', 403);
+        return;
+      }
+
       const file = req.file;
       const declaredDocType = req.body.documentType || '7/12';
       const casePreset = req.body.casePreset;

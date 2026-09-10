@@ -14,7 +14,6 @@ interface AuthContextType {
   isAdmin: boolean;
   isOfficer: boolean;
   isVerifier: boolean;
-  isViewer: boolean;
   isCitizen: boolean;
   hasRole: (roles: UserRole[]) => boolean;
   login: (credentials: LoginFormData) => Promise<void>;
@@ -111,7 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = role === 'ADMIN';
   const isOfficer = role === 'OFFICER';
   const isVerifier = role === 'VERIFIER';
-  const isViewer = role === 'VIEWER';
   const isCitizen = role === 'CITIZEN';
 
   const hasRole = (roles: UserRole[]): boolean => {
@@ -128,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin,
         isOfficer,
         isVerifier,
-        isViewer,
         isCitizen,
         hasRole,
         login,

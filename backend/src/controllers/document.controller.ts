@@ -66,6 +66,11 @@ export const uploadDocument = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
+    if (req.user.role === 'OFFICER') {
+      sendError(res, 'Officers are not authorized to upload documents. Officers can only verify documents with final digital signature.', 403);
+      return;
+    }
+
     const { language, fileType } = req.body;
     const document = await createDocumentRecord(
       req.file,
@@ -147,6 +152,8 @@ export const verifyUserDocument = async (req: AuthenticatedRequest, res: Respons
       req.params.id,
       { action, remarks: remarks.trim(), correctedData },
       req.user._id.toString(),
+      req.user.role,
+      req.user.name,
       req.ip
     );
 

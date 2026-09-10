@@ -79,7 +79,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
             options={[
               { value: 'OFFICER', label: 'Officer' },
               { value: 'VERIFIER', label: 'Verifier' },
-              { value: 'VIEWER', label: 'Viewer' },
               { value: 'ADMIN', label: 'Admin' },
             ]}
             error={errors.role?.message}

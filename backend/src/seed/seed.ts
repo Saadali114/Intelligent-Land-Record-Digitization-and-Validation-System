@@ -161,22 +161,6 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
       verifiers.push(verifier);
     }
 
-    // 20 Viewers
-    const viewers: IUser[] = [];
-    for (let i = 1; i <= 20; i++) {
-      const dist = DISTRICTS[i % DISTRICTS.length];
-      const viewer = await User.create({
-        name: `Citizen / Public Auditor ${i}`,
-        email: `viewer${i}@landrecord.gov.in`,
-        password: SEED_PASSWORD,
-        role: 'VIEWER',
-        department: 'Public Grievances & Citizen Services',
-        district: dist,
-        status: i === 20 ? 'INACTIVE' : 'ACTIVE',
-      });
-      viewers.push(viewer);
-    }
-
     // 1 Demo Citizen
     await User.create({
       name: 'Rahul Shankar Patil',
@@ -190,7 +174,7 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
       emailVerified: true,
     });
 
-    console.log(`Created ${2 + officers.length + verifiers.length + viewers.length} users (including demo citizen).`);
+    console.log(`Created ${2 + officers.length + verifiers.length + 1} users (including demo citizen).`);
 
     // Seed Documents
     console.log('Creating realistic land documents...');
@@ -199,7 +183,7 @@ export const seedDatabase = async (dropExisting: boolean = true) => {
     const languages = ['Marathi', 'Marathi', 'Marathi', 'Hindi', 'English'];
 
     for (let i = 1; i <= 15; i++) {
-      const uploader = officers[i % officers.length];
+      const uploader = verifiers[i % verifiers.length];
       const lang = languages[i % languages.length];
       const docType = docTypes[i % docTypes.length];
       const dateOffset = (15 - i) * 2; // spaced over past 30 days

@@ -12,7 +12,7 @@ export const getRegisterSchema = (t: (key: string, options?: any) => string = (k
     name: z.string().min(2, t('validation.nameMinLength', { defaultValue: 'Name must be at least 2 characters' })),
     email: z.string().email(t('validation.validEmail', { defaultValue: 'Please enter a valid email address' })),
     password: z.string().min(6, t('validation.passwordMinLength', { defaultValue: 'Password must be at least 6 characters' })),
-    role: z.enum(['OFFICER', 'VERIFIER', 'VIEWER']),
+    role: z.enum(['OFFICER', 'VERIFIER']),
     department: z.string().min(2, t('validation.departmentRequired', { defaultValue: 'Department is required' })),
     district: z.string().min(2, t('validation.districtRequired', { defaultValue: 'District is required' })),
   });

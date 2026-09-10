@@ -46,7 +46,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
   UserDocumentVerificationWorkstationProps
 > = ({ canVerify = true }) => {
   const { t } = useTranslation();
-  const { user: authUser } = useAuth();
+  const { user: authUser, isOfficer, isVerifier, isAdmin } = useAuth();
 
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,12 +127,15 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const handleOpenDecision = (action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW') => {
     setActionModal({ isOpen: true, action });
     if (action === 'APPROVED') {
-      setRemarks(
-        t('officerVerification.defaultApprovedRemarks', {
-          defaultValue:
-            'Verified against official cadastral registry & revenue records. Document authenticated under MLRC Sec 149.',
-        })
-      );
+      if (isOfficer) {
+        setRemarks(
+          'Final statutory verification completed under MLRC Sec 149. Parcel records authenticated and permanent DSC seal applied.'
+        );
+      } else {
+        setRemarks(
+          'Initial verification completed against official cadastral records. Signed with Verifier digital signature and forwarded for final Officer sign-off.'
+        );
+      }
     } else if (action === 'NEEDS_REVIEW') {
       setRemarks(
         t('officerVerification.defaultClarifyRemarks', {
@@ -172,20 +175,20 @@ export const UserDocumentVerificationWorkstation: React.FC<
         prev.map((d) => (d._id === selectedDoc._id ? { ...d, ...updated } : d))
       );
 
-      const actionText =
-        actionModal.action === 'APPROVED'
-          ? t('status.approved', { defaultValue: 'approved and verified' })
-          : actionModal.action === 'REJECTED'
-          ? t('status.rejected', { defaultValue: 'rejected' })
-          : t('status.needsReview', { defaultValue: 'marked for clarification' });
+      let successMsg = '';
+      if (actionModal.action === 'APPROVED') {
+        if (isOfficer) {
+          successMsg = `Document #${selectedDoc.documentId} granted final statutory verification with Officer Digital Signature (Status: VERIFIED)!`;
+        } else {
+          successMsg = `Document #${selectedDoc.documentId} verified with Verifier Digital Signature and forwarded to Officer queue (Status: PENDING_OFFICER_REVIEW)!`;
+        }
+      } else if (actionModal.action === 'REJECTED') {
+        successMsg = `Document #${selectedDoc.documentId} has been rejected.`;
+      } else {
+        successMsg = `Document #${selectedDoc.documentId} marked for clarification.`;
+      }
 
-      setNotification(
-        t('officerVerification.docActionSuccess', {
-          defaultValue: 'Document #{{docId}} has been {{action}} successfully!',
-          docId: selectedDoc.documentId,
-          action: actionText,
-        })
-      );
+      setNotification(successMsg);
       setActionModal({ isOpen: false, action: null });
       setRemarks('');
       setTimeout(() => setNotification(null), 5000);
@@ -350,6 +353,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:bg-white font-medium"
               >
                 <option value="">{t('officerDocuments.allStatuses', { defaultValue: 'All Queue Statuses' })}</option>
+                <option value="PENDING_OFFICER_REVIEW">Pending Officer Review (Verifier Signed ✓)</option>
                 <option value="PROCESSED">{t('status.processed', { defaultValue: 'Processed (Ready for Review)' })}</option>
                 <option value="NEEDS_REVIEW">{t('status.needsReview', { defaultValue: 'Needs Review' })}</option>
                 <option value="UPLOADED">{t('status.uploaded', { defaultValue: 'Uploaded' })}</option>
@@ -415,6 +419,8 @@ export const UserDocumentVerificationWorkstation: React.FC<
                           className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
                             status === 'VERIFIED'
                               ? 'bg-emerald-100 text-emerald-800'
+                              : status === 'PENDING_OFFICER_REVIEW'
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold'
                               : status === 'REJECTED'
                               ? 'bg-red-100 text-red-800'
                               : status === 'NEEDS_REVIEW' || status === 'ACTION_REQUIRED'
@@ -424,7 +430,11 @@ export const UserDocumentVerificationWorkstation: React.FC<
                               : 'bg-amber-100 text-amber-800'
                           }`}
                         >
-                          {status === 'PROCESSED' ? 'PROCESSED' : formatStatus(status, t)}
+                          {status === 'PROCESSED'
+                            ? 'PROCESSED'
+                            : status === 'PENDING_OFFICER_REVIEW'
+                            ? 'Awaiting Officer Sign'
+                            : formatStatus(status, t)}
                         </span>
                       </div>
 
@@ -531,7 +541,12 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   {selectedDoc.processingStatus === 'VERIFIED' ? (
                     <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-black uppercase bg-emerald-700 text-white border border-emerald-500 shadow-xs">
                       <QrCode className="w-3.5 h-3.5 text-white" />
-                      <span>✓ QR SCANNED &amp; VERIFIED</span>
+                      <span>✓ FINAL VERIFIED &amp; SEALED</span>
+                    </span>
+                  ) : selectedDoc.processingStatus === 'PENDING_OFFICER_REVIEW' ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-black uppercase bg-amber-500 text-slate-950 border border-amber-600 shadow-xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-slate-950" />
+                      <span>AWAITING OFFICER SIGN (VERIFIER SIGNED ✓)</span>
                     </span>
                   ) : (
                     <span
@@ -560,6 +575,42 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   )}
                 </div>
               </div>
+
+              {/* Digital Signature Audit Chain Banner */}
+              {(selectedDoc.metadata?.verifierSignature || selectedDoc.metadata?.officerSignature) && (
+                <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-emerald-950 text-white rounded-xl p-3.5 shadow-sm border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold flex items-center gap-2">
+                        <span>Digital Signature Audit Trail (Information Technology Act Compliant)</span>
+                        <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                          {selectedDoc.processingStatus === 'VERIFIED' ? 'Official Final Seal' : 'Verifier Initial Seal'}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-300 mt-0.5 space-x-2">
+                        {selectedDoc.metadata?.verifierSignature && (
+                          <span>
+                            Verifier: <strong>{selectedDoc.metadata.verifierSignature.signerName}</strong> (
+                            <code className="text-emerald-300">{selectedDoc.metadata.verifierSignature.signatureId}</code>)
+                          </span>
+                        )}
+                        {selectedDoc.metadata?.officerSignature && (
+                          <span>
+                            • Officer: <strong>{selectedDoc.metadata.officerSignature.signerName}</strong> (
+                            <code className="text-emerald-300">{selectedDoc.metadata.officerSignature.signatureId}</code>)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-[10px] font-mono text-emerald-400 bg-black/40 px-2.5 py-1 rounded border border-emerald-500/30">
+                    HASH: {(selectedDoc.metadata?.officerSignature?.digest || selectedDoc.metadata?.verifierSignature?.digest || '').substring(0, 16)}...
+                  </div>
+                </div>
+              )}
 
               {/* SPLIT SCREEN: Left = Extracted Data, Right = Government Records */}
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -863,19 +914,21 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 </div>
               </div>
 
-              {/* Official Officer Statutory Action Bar */}
+              {/* Official Statutory Action Bar */}
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-blue-900" />
                     <div>
                       <h3 className="text-sm font-bold text-slate-900">
-                        {t('officerVerification.officialDecisionTitle', {
-                          defaultValue: 'Official Statutory Verification Verdict',
-                        })}
+                        {isOfficer
+                          ? 'Official Statutory Final Verification Verdict'
+                          : 'Verifier Scrutiny & Digital Sign-off'}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        Record statutory inspection verdict under Section 149 of Maharashtra Land Revenue Code, 1966.
+                        {isOfficer
+                          ? 'Execute final statutory verification and apply Official Digital Signature under Section 149 of Maharashtra Land Revenue Code, 1966.'
+                          : 'Verify cadastral consistency, sign with Verifier Digital Signature, and forward to Officer review queue.'}
                       </p>
                     </div>
                   </div>
@@ -885,10 +938,16 @@ export const UserDocumentVerificationWorkstation: React.FC<
                   <button
                     type="button"
                     onClick={() => handleOpenDecision('APPROVED')}
-                    className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    className={`flex-1 min-w-[190px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white font-bold text-xs shadow-xs transition-colors cursor-pointer ${
+                      isOfficer ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-blue-800 hover:bg-blue-900'
+                    }`}
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{t('officerVerification.verifyApproveButton', { defaultValue: 'Verify & Approve Document' })}</span>
+                    <span>
+                      {isOfficer
+                        ? 'Final Statutory Verification (Officer Digital Sign)'
+                        : 'Verify & Forward to Officer (Digital Sign)'}
+                    </span>
                   </button>
 
                   <button
@@ -940,10 +999,14 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 ) : (
                   <AlertTriangle className="w-5 h-5 text-purple-600" />
                 )}
-                {t('officerVerification.confirmVerdict', {
-                  defaultValue: 'Confirm Verdict: {{action}}',
-                  action: actionModal.action ? formatStatus(actionModal.action, t) : '',
-                })}
+                {actionModal.action === 'APPROVED'
+                  ? isOfficer
+                    ? 'Final Statutory Verification & Officer Signature'
+                    : 'Initial Verification & Verifier Signature'
+                  : t('officerVerification.confirmVerdict', {
+                      defaultValue: 'Confirm Verdict: {{action}}',
+                      action: actionModal.action ? formatStatus(actionModal.action, t) : '',
+                    })}
               </h3>
               <button
                 onClick={() => setActionModal({ isOpen: false, action: null })}
@@ -966,6 +1029,30 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 ({uploader?.email || 'N/A'})
               </p>
             </div>
+
+            {actionModal.action === 'APPROVED' && (
+              <div
+                className={`p-3 rounded-lg border text-xs ${
+                  isOfficer
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                    : 'bg-blue-50 border-blue-200 text-blue-950'
+                }`}
+              >
+                <div className="font-bold flex items-center gap-1.5 mb-1">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    {isOfficer
+                      ? 'Officer Statutory Digital Signature (DSC-OFF)'
+                      : 'Verifier Digital Signature (DSC-VER)'}
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed opacity-90">
+                  {isOfficer
+                    ? 'You are executing final statutory verification. The document will be permanently certified and sealed with status VERIFIED under MLRC Sec 149.'
+                    : 'You are completing initial verification. The document will be digitally signed and transitioned to PENDING_OFFICER_REVIEW for final sign-off by the Officer.'}
+                </p>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
@@ -1000,7 +1087,9 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 onClick={handleExecuteDecision}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer ${
                   actionModal.action === 'APPROVED'
-                    ? 'bg-emerald-700 hover:bg-emerald-800'
+                    ? isOfficer
+                      ? 'bg-emerald-700 hover:bg-emerald-800'
+                      : 'bg-blue-800 hover:bg-blue-900'
                     : actionModal.action === 'REJECTED'
                     ? 'bg-red-700 hover:bg-red-800'
                     : 'bg-purple-700 hover:bg-purple-800'
@@ -1009,6 +1098,10 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 <Send className="w-3.5 h-3.5" />
                 {isSubmitting
                   ? t('common.recording', { defaultValue: 'Recording...' })
+                  : actionModal.action === 'APPROVED'
+                  ? isOfficer
+                    ? 'Apply Officer Seal & Approve'
+                    : 'Digitally Sign & Forward to Officer'
                   : t('officerVerification.confirmAction', {
                       defaultValue: 'Record Official Verdict',
                     })}

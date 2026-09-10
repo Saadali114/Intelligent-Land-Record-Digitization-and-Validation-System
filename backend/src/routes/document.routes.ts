@@ -25,10 +25,10 @@ router.use(authenticate);
 router.get('/', validateQuery(DocumentQuerySchema), getDocuments);
 router.get('/:id', getDocumentById);
 
-// Upload: ADMIN, OFFICER
+// Upload: ADMIN, VERIFIER (Officers cannot upload documents)
 router.post(
   '/',
-  authorize(['ADMIN', 'OFFICER']),
+  authorize(['ADMIN', 'VERIFIER']),
   upload.single('file'),
   uploadDocument
 );
