@@ -27,7 +27,8 @@ export class RegistrationService {
       existingUser.password = input.password;
       existingUser.preferredLanguage = input.preferredLanguage || 'en';
       if (input.phone) existingUser.mobile = input.phone.trim();
-      existingUser.accountStatus = 'PENDING_VERIFICATION';
+      existingUser.status = 'ACTIVE';
+      existingUser.accountStatus = 'ACTIVE';
       await existingUser.save();
     } else {
       await User.create({
@@ -37,8 +38,8 @@ export class RegistrationService {
         role: 'CITIZEN',
         department: 'Citizen Services',
         district: 'Maharashtra',
-        status: 'INACTIVE',
-        accountStatus: 'PENDING_VERIFICATION',
+        status: 'ACTIVE',
+        accountStatus: 'ACTIVE',
         emailVerified: false,
         preferredLanguage: input.preferredLanguage || 'en',
         mobile: input.phone ? input.phone.trim() : undefined,
