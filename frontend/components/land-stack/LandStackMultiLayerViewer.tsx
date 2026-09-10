@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Layers,
@@ -70,7 +70,7 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
   };
 
   const copyULPIN = () => {
-    const ulpin = stackData?.ulpin || record.ulpin || '81LVQLD9407JH0';
+    const ulpin = stackData?.ulpin || record?.ulpin || '81LVQLD9407JH0';
     navigator.clipboard.writeText(ulpin);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -94,10 +94,143 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
     LAYER_8_VALUATION: <DollarSign className="w-4 h-4 text-emerald-700" />,
   };
 
-  const ulpinDisplay = stackData?.ulpin || record.ulpin || '81LVQLD9407JH0';
-  const hasDispute = stackData?.disputes?.hasActiveDispute ?? record.hasActiveDispute;
-  const hasBankCharge = stackData?.bankCharge?.hasBankCharge ?? record.hasBankCharge;
-  const isAadhaarSeeded = record.isAadhaarSeeded;
+  // Safe layer list normalizing Array or Object or Fallback
+  const layersList: LandStackLayer[] = useMemo(() => {
+    if (stackData && Array.isArray(stackData.layers) && stackData.layers.length > 0) {
+      return stackData.layers;
+    }
+    if (stackData && typeof stackData.layers === 'object' && stackData.layers !== null) {
+      return Object.entries(stackData.layers).map(([key, val]: [string, any]) => ({
+        layerId: val.layerId || key.toUpperCase(),
+        layerName: val.layerName || val.name || key,
+        description: val.description || 'Geospatial Cadastral Layer',
+        authority: val.authority || 'State Revenue Department',
+        status: val.status || (val.hasDispute || val.hasActiveCharge ? 'FLAGGED' : 'ACTIVE'),
+        data: val.data || val,
+      }));
+    }
+
+    // Default fallback 8 layers built from record props
+    return [
+      {
+        layerId: 'LAYER_1_CADASTRAL',
+        layerName: 'Cadastral Parcel Map (Bhu-Aadhaar)',
+        description: 'Geospatial boundary coordinates, survey lines, and centroid',
+        authority: 'Survey of India & Revenue Dept',
+        status: 'ACTIVE',
+        data: {
+          ulpin: record?.ulpin || '81LVQLD9407JH0',
+          surveyNumber: record?.surveyNumber || '145/2A',
+          gatNumber: record?.gatNumber || `GAT-${record?.surveyNumber || '145/2A'}`,
+          village: record?.village || 'Khadakwasla',
+          tehsil: record?.tehsil || 'Haveli',
+          district: record?.district || 'Pune',
+          coordinates: '18.5204° N, 73.8567° E',
+          georeferenced: 'WGS-84 Cadastral Grid',
+        },
+      },
+      {
+        layerId: 'LAYER_2_ROR',
+        layerName: 'Record of Rights (7/12 & 8A)',
+        description: 'Primary titleholder, tenancy, and cultivation register',
+        authority: 'Department of Land Resources',
+        status: record?.verificationStatus === 'VERIFIED' ? 'ACTIVE' : 'AVAILABLE',
+        data: {
+          ownerName: record?.ownerName || 'Titleholder',
+          plotArea: record?.plotArea || '1.25 Hectares',
+          khataNumber: record?.khataNumber || 'KT-304',
+          khasraNumber: record?.khasraNumber || 'KH-1452',
+          tenureType: record?.ownershipType || 'Occupant Class 1 (Freehold)',
+          aadhaarSeeded: record?.isAadhaarSeeded ? 'Seeded & Verified' : 'Pending Verification',
+        },
+      },
+      {
+        layerId: 'LAYER_3_REGISTRATION',
+        layerName: 'Registration Repository (NGDRS / SRO)',
+        description: 'Paperless deed conveyance and stamp duty register',
+        authority: 'Inspector General of Registration',
+        status: 'ACTIVE',
+        data: {
+          registrationNumber: record?.registrationNumber || `REG-MH-PUN-2026-991`,
+          sroOffice: `${record?.tehsil || 'Haveli'} Sub-Registrar Office`,
+          lastMutationNumber: record?.mutationNumber || 'MUT-2026-00125',
+          deedType: 'Absolute Conveyance / Sale Deed',
+        },
+      },
+      {
+        layerId: 'LAYER_4_LAND_USE',
+        layerName: 'Land Use & Master Plan Zoning',
+        description: 'Statutory zoning status and ecological restrictions',
+        authority: 'Town & Country Planning Directorate',
+        status: 'ACTIVE',
+        data: {
+          classification: record?.landClassification || 'Agricultural (Jirayat)',
+          zoningStatus: record?.landClassification?.toLowerCase().includes('residential')
+            ? 'Urban Residential Zone (R-Zone)'
+            : 'Green Zone / Agricultural Priority Area',
+          soilType: 'Medium Black Clay (Medium Jirayat)',
+          irrigationStatus: 'Canal / Perennial Borewell Irrigated',
+        },
+      },
+      {
+        layerId: 'LAYER_5_URBAN_NAKSHA',
+        layerName: 'Building Plan & Urban NAKSHA Footprint',
+        description: 'High-resolution drone survey & building footprints',
+        authority: 'Urban Local Bodies / NAKSHA Portal',
+        status: record?.landClassification?.toLowerCase().includes('residential') ? 'ACTIVE' : 'AVAILABLE',
+        data: {
+          hasUrbanPropertyCard: record?.landClassification?.toLowerCase().includes('residential') ? 'Yes (UrPro Card Active)' : 'Not Applicable (Rural/Agri)',
+          urProCardId: `URPRO-${record?.ulpin || '81LVQLD9407JH0'}`,
+          buildingHeightLimit: 'G+2 Floors / 12 Meters (Municipal Limit)',
+          farPermissible: '1.5 FSI',
+        },
+      },
+      {
+        layerId: 'LAYER_6_BANK_CHARGE',
+        layerName: 'Bank Mortgage & Encumbrance (ULI)',
+        description: 'Unified Lending Interface financial lien registry',
+        authority: 'Reserve Bank of India / Commercial Banks',
+        status: record?.hasBankCharge ? 'FLAGGED' : 'CLEARED',
+        data: {
+          mortgageStatus: record?.hasBankCharge ? 'Active Bank Charge Registered' : 'Clean Title (No Active Liens)',
+          bankName: record?.hasBankCharge ? (record.bankChargeDetails?.bankName || 'Bank of Maharashtra') : 'Nil',
+          loanAmount: record?.hasBankCharge ? `₹${(record.bankChargeDetails?.loanAmount || 450000).toLocaleString('en-IN')}` : 'Nil',
+          chargeType: record?.hasBankCharge ? (record.bankChargeDetails?.chargeType || 'Agricultural Crop Hypothecation') : 'None',
+        },
+      },
+      {
+        layerId: 'LAYER_7_RCCMS',
+        layerName: 'Revenue Court Case Management (RCCMS)',
+        description: 'Dispute status, mutation appeals, and stay injunctions',
+        authority: 'Revenue Court of Tehsildar / SDO',
+        status: record?.hasActiveDispute ? 'FLAGGED' : 'CLEARED',
+        data: {
+          disputeStatus: record?.hasActiveDispute ? 'ACTIVE LITIGATION WARNING' : 'No Active Disputes Recorded',
+          caseNumber: record?.hasActiveDispute ? (record.rccmsCaseNumber || 'RCCMS-MH-2026-0812') : 'Nil',
+          courtName: record?.hasActiveDispute ? (record.disputeDetails?.courtName || `Court of SDO, ${record.tehsil || 'District'}`) : 'Nil',
+          stayOrder: record?.hasActiveDispute ? (record.disputeDetails?.stayOrder ? 'Stay Order Active (Mutation Frozen)' : 'No Stay Injunction') : 'Nil',
+        },
+      },
+      {
+        layerId: 'LAYER_8_VALUATION',
+        layerName: 'Circle Rate & Statutory Valuation',
+        description: 'Annual Statement of Rates (ASR) government valuation',
+        authority: 'Directorate of Enforcement & Valuation',
+        status: 'ACTIVE',
+        data: {
+          circleRatePerSqm: `₹${(record?.circleRatePerSqm || 4200).toLocaleString('en-IN')}/sq.m`,
+          parcelPlotArea: record?.plotArea || '1.25 Hectares',
+          computedGovtValuation: `₹${(record?.calculatedValuation || 5250000).toLocaleString('en-IN')}`,
+          valuationCurrency: 'INR (₹)',
+        },
+      },
+    ];
+  }, [stackData, record]);
+
+  const ulpinDisplay = stackData?.ulpin || record?.ulpin || '81LVQLD9407JH0';
+  const hasDispute = stackData?.disputes?.hasActiveDispute ?? record?.hasActiveDispute ?? false;
+  const hasBankCharge = stackData?.bankCharge?.hasBankCharge ?? record?.hasBankCharge ?? false;
+  const isAadhaarSeeded = record?.isAadhaarSeeded ?? false;
 
   return (
     <div className="space-y-4">
@@ -176,19 +309,19 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
         <div className="mt-3 pt-3 border-t border-slate-700/60 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <div>
             <span className="text-slate-400 text-[10px] uppercase">Owner:</span>
-            <p className="font-semibold text-white truncate">{record.ownerName}</p>
+            <p className="font-semibold text-white truncate">{record?.ownerName || 'N/A'}</p>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase">Survey / Gat:</span>
-            <p className="font-semibold text-white">{record.surveyNumber}</p>
+            <p className="font-semibold text-white">{record?.surveyNumber || 'N/A'}</p>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase">Area / Class:</span>
-            <p className="font-semibold text-emerald-300">{record.plotArea}</p>
+            <p className="font-semibold text-emerald-300">{record?.plotArea || 'N/A'}</p>
           </div>
           <div>
             <span className="text-slate-400 text-[10px] uppercase">Jurisdiction:</span>
-            <p className="font-semibold text-white truncate">{record.village}, {record.district}</p>
+            <p className="font-semibold text-white truncate">{record?.village || 'N/A'}, {record?.district || 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -204,12 +337,12 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
                   RCCMS Active Revenue Court Dispute Detected
                 </span>
                 <span className="px-1.5 py-0.5 rounded bg-rose-200 text-rose-900 text-[10px] font-bold">
-                  {stackData?.disputes?.rccmsCaseNumber || record.rccmsCaseNumber || 'ACTIVE CASE'}
+                  {stackData?.disputes?.rccmsCaseNumber || record?.rccmsCaseNumber || 'ACTIVE CASE'}
                 </span>
               </div>
               <p className="mt-0.5 text-rose-800">
-                {record.disputeDetails?.caseType || 'Contested title or demarcation appeal currently pending before the Sub-Divisional Officer.'}
-                {record.disputeDetails?.stayOrder && ' (Stay order in effect - mutations restricted)'}
+                {record?.disputeDetails?.caseType || 'Contested title or demarcation appeal currently pending before the Sub-Divisional Officer.'}
+                {record?.disputeDetails?.stayOrder && ' (Stay order in effect - mutations restricted)'}
               </p>
             </div>
           </div>
@@ -228,9 +361,9 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
                 </span>
               </div>
               <p className="mt-0.5 text-amber-800">
-                {record.bankChargeDetails?.bankName || 'Scheduled Commercial Bank'} • 
-                Loan Amount: ₹{(record.bankChargeDetails?.loanAmount || 450000).toLocaleString('en-IN')} • 
-                Charge Type: {record.bankChargeDetails?.chargeType || 'Agricultural Hypothecation'}
+                {record?.bankChargeDetails?.bankName || 'Scheduled Commercial Bank'} • 
+                Loan Amount: ₹{(record?.bankChargeDetails?.loanAmount || 450000).toLocaleString('en-IN')} • 
+                Charge Type: {record?.bankChargeDetails?.chargeType || 'Agricultural Hypothecation'}
               </p>
             </div>
           </div>
@@ -250,8 +383,8 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
           </div>
 
           <div className="space-y-1.5">
-            {stackData?.layers.map((layer) => {
-              const isEnabled = activeLayers[layer.layerId];
+            {layersList.map((layer) => {
+              const isEnabled = activeLayers[layer.layerId] ?? true;
               const isSelected = selectedLayer === layer.layerId;
 
               return (
@@ -367,10 +500,10 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
 
                 {/* Center Label */}
                 <text x="180" y="110" fill="#ffffff" fontSize="11" fontWeight="bold" textAnchor="middle">
-                  Survey No. {record.surveyNumber}
+                  Survey No. {record?.surveyNumber || '145/2A'}
                 </text>
                 <text x="180" y="126" fill="#6ee7b7" fontSize="9" textAnchor="middle">
-                  {record.plotArea}
+                  {record?.plotArea || '1.25 Hectares'}
                 </text>
                 <text x="180" y="142" fill="#94a3b8" fontSize="8" textAnchor="middle">
                   ULPIN: {ulpinDisplay}
@@ -412,7 +545,7 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
 
           {/* Selected Layer Inspection Card */}
           {(() => {
-            const currentLayer = stackData?.layers.find((l) => l.layerId === selectedLayer);
+            const currentLayer = layersList.find((l) => l.layerId === selectedLayer) || layersList[0];
             if (!currentLayer) return null;
 
             return (
@@ -434,7 +567,7 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
 
                 {/* Layer specific metadata view */}
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                  {Object.entries(currentLayer.data).map(([key, value]) => {
+                  {Object.entries(currentLayer.data || {}).map(([key, value]) => {
                     if (typeof value === 'object' && value !== null) return null;
                     return (
                       <div key={key} className="bg-white p-2 rounded border border-slate-200">
@@ -442,7 +575,7 @@ export const LandStackMultiLayerViewer: React.FC<LandStackMultiLayerViewerProps>
                           {key.replace(/([A-Z])/g, ' $1').trim()}
                         </span>
                         <span className="font-semibold text-slate-800 text-xs truncate block">
-                          {String(value)}
+                          {String(value ?? 'N/A')}
                         </span>
                       </div>
                     );

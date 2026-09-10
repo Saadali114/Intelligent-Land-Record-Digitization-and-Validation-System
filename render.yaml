@@ -59,10 +59,6 @@ services:
       - path: /*
         name: Cache-Control
         value: no-cache
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
     envVars:
       - key: NEXT_PUBLIC_API_URL
         sync: false           # Set to https://your-backend.onrender.com/api after backend deploys
