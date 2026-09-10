@@ -13,7 +13,8 @@ export const validateBody = (schema: ZodSchema) => {
           field: err.path.join('.'),
           message: err.message,
         }));
-        sendError(res, 'Validation failed for request body', 400, errors);
+        const summary = error.errors.map((err) => err.message).join('; ');
+        sendError(res, summary || 'Validation failed for request body', 400, errors);
         return;
       }
       next(error);

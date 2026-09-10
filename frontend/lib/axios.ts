@@ -38,10 +38,16 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ success: boolean; message: string; error?: any }>) => {
     // Standardize error message extraction
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      'An unexpected error occurred. Please try again.';
+    let message = error.response?.data?.message;
+    if (error.response?.data?.error && Array.isArray(error.response.data.error)) {
+      const details = error.response.data.error.map((e: any) => e.message || `${e.field}: invalid`).filter(Boolean).join('. ');
+      if (details && !message?.includes(details)) {
+        message = message ? `${message} (${details})` : details;
+      }
+    }
+    if (!message) {
+      message = error.message || 'An unexpected error occurred. Please try again.';
+    }
 
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       // Clear credentials if token expired
