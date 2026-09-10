@@ -48,7 +48,14 @@ export const registerUserService = async (input: RegisterInput, ipAddress?: stri
 
 export const loginUserService = async (input: LoginInput, ipAddress?: string) => {
   const email = input.email.toLowerCase().trim();
-  const user = await User.findOne({ email }).select('+password');
+  let user: IUser | null = null;
+  try {
+    user = await User.findOne({ email }).select('+password');
+  } catch (err: any) {
+    console.error('Database connection error during login:', err?.message);
+    throw new Error('Database server is currently connecting or waking up. Please retry in 5–10 seconds.');
+  }
+
   if (!user) {
     throw new Error('Invalid email or password.');
   }

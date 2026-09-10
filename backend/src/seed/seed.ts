@@ -162,6 +162,17 @@ export const ensureDefaultAccounts = async () => {
       accountStatus: 'ACTIVE' as const,
       emailVerified: true,
     },
+    {
+      name: 'Chahat Officer',
+      email: 'chahatg783@gmail.com',
+      password: SEED_PASSWORD,
+      role: 'OFFICER' as const,
+      department: 'District Revenue & Survey Office',
+      district: 'Pune',
+      status: 'ACTIVE' as const,
+      accountStatus: 'ACTIVE' as const,
+      emailVerified: true,
+    },
   ];
 
   for (const u of defaultUsers) {
