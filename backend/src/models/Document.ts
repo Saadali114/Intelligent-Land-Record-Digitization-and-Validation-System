@@ -96,7 +96,7 @@ export function enrichDocument(raw: any): IDocument | null {
         isLegacyRecord: this.isLegacyRecord ?? false,
         mrrCategory: this.mrrCategory,
         metadata: this.metadata,
-      },
+      } as any,
       include: {
         uploadedBy: true,
       },

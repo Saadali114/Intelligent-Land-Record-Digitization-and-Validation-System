@@ -153,7 +153,7 @@ export function enrichLandRecord(raw: any): ILandRecord | null {
         verifiedById: cleanVerifiedById || null,
         confidenceScore: this.confidenceScore,
         remarks: this.remarks,
-      },
+      } as any,
       include: defaultLandRecordInclude,
     });
     return enrichLandRecord(updated)!;
@@ -230,6 +230,7 @@ export const LandRecord = {
     const created = await prisma.landRecord.create({
       data: {
         recordId: data.recordId || null,
+        ulpin: data.ulpin || null,
         ownerName: data.ownerName,
         surveyNumber: data.surveyNumber,
         gatNumber: data.gatNumber || null,
@@ -247,11 +248,22 @@ export const LandRecord = {
         sourceDocumentId,
         sourceType: data.sourceType || 'DEMO_REFERENCE_RECORD',
         verificationStatus: data.verificationStatus || 'PENDING',
+        isAadhaarSeeded: Boolean(data.isAadhaarSeeded),
+        aadhaarMasked: data.aadhaarMasked || null,
+        hasActiveDispute: Boolean(data.hasActiveDispute),
+        rccmsCaseNumber: data.rccmsCaseNumber || null,
+        disputeDetails: data.disputeDetails || null,
+        hasBankCharge: Boolean(data.hasBankCharge),
+        bankChargeDetails: data.bankChargeDetails || null,
+        circleRatePerSqm: data.circleRatePerSqm || null,
+        calculatedValuation: data.calculatedValuation || null,
+        isLegacyRecord: Boolean(data.isLegacyRecord),
+        mrrCategory: data.mrrCategory || 'MODERN',
         createdById,
         verifiedById,
         confidenceScore: Number(data.confidenceScore) || 0.9,
         remarks: data.remarks || null,
-      },
+      } as any,
       include: defaultLandRecordInclude,
     });
 
