@@ -46,7 +46,7 @@ export const SubNavbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+      <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
