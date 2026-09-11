@@ -276,11 +276,11 @@
         "actionText": "Launch Workstation"
       },
       "gisMaps": {
-        "title": "Cadastral GIS & Tippan Survey Maps",
-        "titleAlt": "भूमापन नकाशा व टिप्पण रेखांकन",
-        "description": "High-resolution spatial parcel overlays, Gat survey boundaries, village road alignments, and drone aerial orthophoto maps.",
-        "badge": "Spatial GIS Mapping",
-        "actionText": "Explore Cadastral GIS"
+        "title": "8-Layer Land Stack & Cadastral GIS",
+        "titleAlt": "८-स्तरीय भूमी स्टॅक व भूमापन नकाशा",
+        "description": "Multi-registry spatial parcel stack linking WGS-84 vector boundaries, 14-digit Bhu-Aadhaar (ULPIN), bank liens, and RCCMS stay orders under DILRMP 3.0.",
+        "badge": "8-Layer Land Stack",
+        "actionText": "Explore 8-Layer Stack"
       },
       "titleSearch": {
         "title": "Online Title Search & Encumbrance Check",

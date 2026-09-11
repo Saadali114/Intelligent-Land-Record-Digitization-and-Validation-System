@@ -16,6 +16,8 @@ import {
   TrendingUp,
   MapPin,
   FileText,
+  Layers,
+  Database,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -71,6 +73,20 @@ export const HeroSlider: React.FC = () => {
     },
     {
       id: 2,
+      tag: 'DILRMP 3.0 Operational Guidelines (2026-2031)',
+      tagIcon: <Layers className="w-4 h-4 text-cyan-400" />,
+      title: 'Unified Multi-Registry',
+      highlight: '8-Layer Land Stack & ULPIN',
+      description: 'Connecting Survey boundaries, Record of Rights, NGDRS deeds, town zoning, urban property cards, bank liens, and RCCMS court disputes to a deterministic 14-digit Bhu-Aadhaar.',
+      primaryBtnText: 'Explore 8-Layer Land Stack',
+      primaryBtnLink: '#land-stack',
+      secondaryBtnText: 'Search Parcel Registry',
+      secondaryBtnLink: '/land-records',
+      badge: '14-Digit Bhu-Aadhaar (ULPIN)',
+      theme: 'from-slate-950 via-blue-950 to-indigo-950',
+    },
+    {
+      id: 3,
       tag: t('home.slider.slide3Tag'),
       tagIcon: <Sparkles className="w-4 h-4 text-cyan-400" />,
       title: t('home.slider.slide3Title'),
@@ -287,6 +303,60 @@ export const HeroSlider: React.FC = () => {
             )}
 
             {currentSlide === 2 && (
+              <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl backdrop-blur-md space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-bold">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs text-white">8-Layer Land Stack Architecture</div>
+                      <div className="text-[10px] text-cyan-400">DILRMP 3.0 Standard Integration</div>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[10px] border border-cyan-800">
+                    ULPIN: 81LVQLD9407JH0
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L1: Cadastral Map</span>
+                    <div className="text-[11px] text-emerald-400 font-bold truncate">WGS-84 Polygon Verified</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L2: Record of Rights</span>
+                    <div className="text-[11px] text-blue-400 font-bold truncate">Aadhaar Seeded Title</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L3: Registration</span>
+                    <div className="text-[11px] text-purple-400 font-bold truncate">NGDRS e-Deed Clear</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L4: Statutory Zoning</span>
+                    <div className="text-[11px] text-amber-400 font-bold truncate">Residential R-1 / No CRZ</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L5: NAKSHA Urban</span>
+                    <div className="text-[11px] text-indigo-400 font-bold truncate">CTS Property Card Active</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                    <span className="text-[10px] text-slate-400">L6: Bank Mortgage</span>
+                    <div className="text-[11px] text-emerald-400 font-bold truncate">RBI ULI Unencumbered</div>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-blue-950/60 border border-blue-800/50 flex items-center justify-between text-[11px] text-blue-200">
+                  <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    L7 Court Disputes & L8 Valuation
+                  </span>
+                  <span className="font-mono font-bold text-emerald-400">0 Disputes / ₹4.2k/sqm</span>
+                </div>
+              </div>
+            )}
+
+            {currentSlide === 3 && (
               <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl backdrop-blur-md space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="font-bold text-xs text-white flex items-center gap-2">

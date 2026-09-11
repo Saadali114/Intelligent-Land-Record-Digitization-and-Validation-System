@@ -52,7 +52,7 @@ export const ServicesSection: React.FC = () => {
       key: 'gisMaps',
       icon: <Compass className="w-6 h-6 text-cyan-700" />,
       badgeColor: 'bg-cyan-100 text-cyan-900 border-cyan-200',
-      link: '/land-records',
+      link: '#land-stack',
     },
     {
       key: 'titleSearch',

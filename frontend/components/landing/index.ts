@@ -3,7 +3,7 @@ export { SubNavbar } from './SubNavbar';
 export { HeroSlider } from './HeroSlider';
 export { AboutUsSection } from './AboutUsSection';
 export { ServicesSection } from './ServicesSection';
-export { NewsNoticesSection } from './NewsNoticesSection';
+export { LandStackSection } from './LandStackSection';
 export { FaqSection } from './FaqSection';
 export { ContactSection } from './ContactSection';
 export { LandingFooter } from './LandingFooter';

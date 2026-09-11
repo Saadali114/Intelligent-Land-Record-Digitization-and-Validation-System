@@ -48,14 +48,24 @@ export const AboutUsSection: React.FC = () => {
               {t('about.challengeP2')}
             </p>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-blue-950 font-mono">100%</div>
+                <div className="text-xl font-black text-blue-950 font-mono">8 Layers</div>
+                <div className="text-xs font-bold text-slate-800 mt-0.5">DILRMP 3.0</div>
+                <div className="text-[11px] text-slate-500">Unified Land Stack</div>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-xl font-black text-indigo-900 font-mono">14 Digits</div>
+                <div className="text-xs font-bold text-slate-800 mt-0.5">Bhu-Aadhaar</div>
+                <div className="text-[11px] text-slate-500">Spatial ULPIN Anchor</div>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-xl font-black text-emerald-800 font-mono">100%</div>
                 <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.auditTrailTitle')}</div>
                 <div className="text-[11px] text-slate-500">{t('about.auditTrailDesc')}</div>
               </div>
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-emerald-800 font-mono">98.4%</div>
+                <div className="text-xl font-black text-purple-800 font-mono">98.4%</div>
                 <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.accuracyTitle')}</div>
                 <div className="text-[11px] text-slate-500">{t('about.accuracyDesc')}</div>
               </div>

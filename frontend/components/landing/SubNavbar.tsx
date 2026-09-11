@@ -237,11 +237,11 @@ export const SubNavbar: React.FC = () => {
               {openDropdown === 'schemes' && (
                 <div className="absolute top-full left-0 w-72 rounded-xl bg-white border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1 text-slate-800">
                   <Link
-                    href="#about"
+                    href="#land-stack"
                     className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
                   >
-                    <div className="font-bold text-xs">{t('schemes.scheme1', 'DILRMP 3.0 Modernization')}</div>
-                    <div className="text-[10px] text-slate-500">{t('navbar.dilrmpSubtitle', 'DILRMP, NLRMP, SVAMITVA Integrated')}</div>
+                    <div className="font-bold text-xs">{t('schemes.scheme1', 'DILRMP 3.0 8-Layer Land Stack')}</div>
+                    <div className="text-[10px] text-slate-500">Unified 8-Registry Model & Bhu-Aadhaar ULPIN</div>
                   </Link>
                   <Link
                     href="#about"
