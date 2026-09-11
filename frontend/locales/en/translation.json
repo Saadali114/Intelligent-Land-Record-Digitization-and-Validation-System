@@ -90,6 +90,7 @@
     "employeeLogin": "Officer Login",
     "officerPortal": "Officer Portal",
     "citizenPortal": "Citizen Portal",
+    "portalShort": "Portal",
     "documentRepository": "Document Repository",
     "verificationQueue": "Verification Queue",
     "userManagement": "User Management",
