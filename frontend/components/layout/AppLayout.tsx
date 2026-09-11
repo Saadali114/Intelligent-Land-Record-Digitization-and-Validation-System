@@ -100,7 +100,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, allowedRoles }) 
         <main
           className={cn(
             'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-            isSidebarCollapsed ? 'md:pl-0' : 'md:pl-64'
+            isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
           )}
         >
           <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">

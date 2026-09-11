@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
-import { LogOut, User as UserIcon, Shield, Menu, Building2, PanelLeft, PanelLeftClose } from 'lucide-react';
+import { User as UserIcon, Shield, Menu, Building2, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface TopbarProps {
@@ -22,7 +21,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onToggleSidebar,
 }) => {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-xs">
@@ -117,23 +116,10 @@ export const Topbar: React.FC<TopbarProps> = ({
             </div>
 
             <Link href="/profile">
-              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer" title={t('navbar.myProfile', 'My Profile')}>
                 <UserIcon className="w-4 h-4" />
               </div>
             </Link>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="text-slate-500 hover:text-rose-600 hover:bg-rose-50"
-              title={t('common.logout')}
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1 text-xs font-medium">
-                {t('common.logout')}
-              </span>
-            </Button>
           </>
         )}
       </div>
