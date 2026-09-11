@@ -24,12 +24,9 @@ import {
   ExternalLink,
   ShieldCheck,
   UserPlus,
-  Search,
   Home,
   Info,
-  Compass,
 } from 'lucide-react';
-import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export const SubNavbar: React.FC = () => {
   const { t } = useTranslation();
@@ -78,10 +75,8 @@ export const SubNavbar: React.FC = () => {
             </div>
           </Link>
 
-          {/* Right: Quick Action CTAs & Language Switcher (Desktop) */}
+          {/* Right: Quick Action CTAs (Desktop) */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
-            <LanguageSwitcher variant="header" />
-
             {/* Register Account */}
             <Link
               href="/register"
@@ -111,9 +106,8 @@ export const SubNavbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Mobile Right Controls: Language, Mini CTAs & Hamburger Toggle */}
+          {/* Mobile Right Controls: Mini CTAs & Hamburger Toggle */}
           <div className="flex lg:hidden items-center gap-2">
-            <LanguageSwitcher variant="header" />
             <Link
               href="/portal"
               onClick={handleCitizenPortalClick}
@@ -136,10 +130,10 @@ export const SubNavbar: React.FC = () => {
       {/* ========================================================================= */}
       {/* TIER 2: Dedicated Sticky Sub-Navbar (Official Deep Navy Menu Bar)        */}
       {/* ========================================================================= */}
-      <div className="sticky top-0 z-40 bg-blue-950 text-white border-b border-blue-900 shadow-md">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-12">
+      <div className="hidden lg:block sticky top-0 z-40 bg-blue-950 text-white border-b border-blue-900 shadow-md">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-12">
           {/* Desktop Navigation Menu Links */}
-          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+          <nav className="flex items-center gap-1 text-xs font-semibold">
             {/* Home */}
             <Link
               href="/"
@@ -391,28 +385,6 @@ export const SubNavbar: React.FC = () => {
               <span>{t('navbar.contact', 'Contact Us')}</span>
             </Link>
           </nav>
-
-          {/* Right Sub-Navbar Shortcut: Search Land Records Action */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/land-records"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-amber-300 hover:text-amber-200 font-bold text-xs border border-blue-800 transition-all shadow-2xs"
-            >
-              <Search className="w-3.5 h-3.5 text-amber-400" />
-              <span>Search Cadastral Records</span>
-            </Link>
-          </div>
-
-          {/* Mobile indicator on Sub-Navbar */}
-          <div className="flex lg:hidden items-center justify-between w-full text-xs font-semibold text-slate-300">
-            <span className="text-[11px] text-amber-400 flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5" />
-              <span>Navigation Menu</span>
-            </span>
-            <Link href="/land-records" className="text-[11px] text-slate-200 underline hover:text-white">
-              Search Land Records &rarr;
-            </Link>
-          </div>
         </div>
       </div>
 

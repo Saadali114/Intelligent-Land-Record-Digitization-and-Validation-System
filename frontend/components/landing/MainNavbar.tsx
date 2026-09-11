@@ -13,7 +13,6 @@ import {
   PhoneCall,
   Eye,
 } from 'lucide-react';
-import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export type FontSize = 'small' | 'normal' | 'large';
 
@@ -148,9 +147,6 @@ export const MainNavbar: React.FC = () => {
               <Eye className="w-3 h-3 text-slate-400" />
               <span className="text-slate-300">{t('navbar.screenReader')}</span>
             </div>
-
-            {/* Language Switcher in Top Bar */}
-            <LanguageSwitcher variant="dark" />
           </div>
         </div>
       </div>
