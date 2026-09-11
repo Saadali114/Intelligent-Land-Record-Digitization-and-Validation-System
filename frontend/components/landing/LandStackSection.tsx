@@ -292,7 +292,7 @@ export const LandStackSection: React.FC = () => {
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 rounded text-[9px] font-extrabold font-mono uppercase tracking-wider border shrink-0 ${layer.badgeClass}`}
+                    className={`px-2 py-0.5 rounded text-[9px] font-extrabold font-mono uppercase tracking-wider border shrink-0 whitespace-nowrap ${layer.badgeClass}`}
                   >
                     {layer.status}
                   </span>
@@ -304,24 +304,25 @@ export const LandStackSection: React.FC = () => {
           {/* Right Column: Dynamic Deep Dive Layer Inspector Card */}
           <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
             {/* Card Header with Icon, Authority & Status */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
-              <div className="flex items-start gap-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="flex items-start gap-3.5 min-w-0 flex-1">
                 <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${current.iconBg}`}>
                   {current.icon}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-blue-700 font-bold">
                     DILRMP 3.0 Architectural Component
                   </span>
-                  <h3 className="text-lg font-black text-slate-900 mt-0.5">{current.fullName}</h3>
+                  <h3 className="text-lg font-black text-slate-900 mt-0.5 leading-snug">{current.fullName}</h3>
                   <p className="text-xs text-indigo-700 font-semibold mt-0.5">{current.authority}</p>
                 </div>
               </div>
 
               <span
-                className={`px-3 py-1 rounded-full text-xs font-black uppercase font-mono tracking-wider border self-start sm:self-auto ${current.badgeClass}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase font-mono tracking-wider border whitespace-nowrap shrink-0 self-start sm:self-center ${current.badgeClass}`}
               >
-                ● {current.status}
+                <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+                <span>{current.status}</span>
               </span>
             </div>
 
