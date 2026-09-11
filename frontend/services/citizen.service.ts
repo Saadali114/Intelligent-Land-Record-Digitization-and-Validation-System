@@ -372,6 +372,63 @@ export const citizenService = {
     return true;
   },
 
+  updateApplicationVerdict(
+    id: string,
+    action: 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW',
+    remarks: string,
+    officerName?: string
+  ): boolean {
+    const list = getStoredApplications();
+    const index = list.findIndex((a) => a.id.toLowerCase() === id.toLowerCase());
+    if (index === -1) return false;
+
+    const app = list[index];
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    if (action === 'APPROVED') {
+      app.status = 'VERIFIED';
+      app.verifiedByOfficer = true;
+      app.officerName = officerName || app.officerName || 'Circle Revenue Officer';
+      app.officerRemarks = remarks;
+      app.timeline = app.timeline.map((t) => ({
+        ...t,
+        status: 'COMPLETED',
+      }));
+      this.addNotification({
+        title: `Document Verified & Sealed: ${id}`,
+        message: `Your application for ${app.documentType} (Survey ${app.surveyNumber}) has been approved and sealed under MLRC Sec 149.`,
+        type: 'SUCCESS',
+        link: `/portal/applications/${id}`,
+      });
+    } else if (action === 'REJECTED') {
+      app.status = 'REJECTED';
+      app.officerRemarks = remarks;
+      this.addNotification({
+        title: `Application Rejected: ${id}`,
+        message: `Your application for ${app.documentType} was rejected. Reason: ${remarks}`,
+        type: 'ALERT',
+        link: `/portal/applications/${id}`,
+      });
+    } else {
+      app.status = 'ACTION_REQUIRED';
+      app.officerRemarks = remarks;
+      this.addNotification({
+        title: `Clarification Required: ${id}`,
+        message: `The revenue verifier requested clarification: ${remarks}`,
+        type: 'WARNING',
+        link: `/portal/applications/${id}`,
+      });
+    }
+
+    list[index] = app;
+    saveStoredApplications(list);
+    return true;
+  },
+
   // Land records
   getLandRecords(): CitizenLandRecord[] {
     return getStoredLandRecords();

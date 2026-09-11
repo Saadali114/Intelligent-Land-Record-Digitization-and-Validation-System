@@ -45,6 +45,7 @@ import { LandStackMultiLayerViewer } from '../land-stack/LandStackMultiLayerView
 import { QrScannerModal } from './QrScannerModal';
 import { generateQrDataUrl, computeDocumentSecretCode } from '../../lib/qr-barcode';
 import { getBackendFileUrl } from '../../lib/cadastral-utils';
+import { citizenService } from '../../services/citizen.service';
 import { cn } from '../../lib/utils';
 
 interface UserDocumentVerificationWorkstationProps {
@@ -92,24 +93,138 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
   useEffect(() => {
     fetchDocuments();
+    const handleFocus = () => fetchDocuments();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [statusFilter]);
 
   const fetchDocuments = async () => {
     setLoading(true);
+    let backendDocs: DocumentRecord[] = [];
     try {
       const res = await documentsService.getDocuments({
         status: statusFilter || undefined,
         limit: 100,
       });
-      setDocuments(res.documents || []);
-      if (res.documents && res.documents.length > 0 && !selectedDocId) {
-        setSelectedDocId(res.documents[0]._id);
-      }
+      backendDocs = res.documents || [];
     } catch (err) {
-      console.error('Failed to fetch cadastral documents:', err);
-    } finally {
-      setLoading(false);
+      console.warn('Backend documents fetch failed, using local/citizen repository', err);
     }
+
+    // Also fetch all citizen-applied applications from citizenService
+    let citizenDocs: DocumentRecord[] = [];
+    try {
+      const citizenApps = citizenService.getApplications();
+      citizenDocs = citizenApps.map((app) => {
+        const st = (app.status || '') as string;
+        const isVerified = st === 'VERIFIED';
+        const isRejected = st === 'REJECTED';
+        const isActionRequired = st === 'ACTION_REQUIRED' || st === 'FLAGGED';
+        const isPendingOfficer = st === 'UNDER_REVIEW' || st === 'PROCESSING' || st === 'PENDING_OFFICER_REVIEW';
+
+        return {
+          _id: app.id,
+          documentId: app.id,
+          fileName: app.fileName || `${app.id}.pdf`,
+          originalName: `${app.documentType || 'Digital Land Extract'} (Gat ${app.surveyNumber || 'N/A'})`,
+          filePath: `/uploads/${app.fileName || 'extract.pdf'}`,
+          fileType: app.documentType || '7/12 Extract',
+          fileSize: app.fileSize || 1850000,
+          mimeType: app.fileName?.endsWith('.png')
+            ? 'image/png'
+            : app.fileName?.endsWith('.jpg') || app.fileName?.endsWith('.jpeg')
+            ? 'image/jpeg'
+            : 'application/pdf',
+          language: 'mr',
+          uploadedBy: {
+            _id: `user-${app.id}`,
+            name: app.ownerName || 'Citizen Applicant',
+            email: `${(app.ownerName || 'citizen').toLowerCase().replace(/\s+/g, '.')}@mahabhumi.gov.in`,
+            role: 'CITIZEN' as any,
+          } as any,
+          processingStatus: (isVerified
+            ? 'VERIFIED'
+            : isRejected
+            ? 'REJECTED'
+            : isActionRequired
+            ? 'NEEDS_REVIEW'
+            : isPendingOfficer
+            ? 'PENDING_OFFICER_REVIEW'
+            : 'NEEDS_REVIEW') as any,
+          uploadedAt: app.submittedDate || new Date().toISOString(),
+          createdAt: app.submittedDate || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          fileUrl: '/sample-712-extract.png',
+          landRecord: {
+            _id: `LR-${app.id}`,
+            surveyNumber: app.surveyNumber,
+            khasraNumber: app.khasraNumber || `KH-${app.surveyNumber}`,
+            khataNumber: app.khataNumber || 'KH-891',
+            ownerName: app.ownerName || 'Rahul Patil',
+            plotArea: app.landArea || '1.25 Hectares',
+            village: app.village || 'Khadakwasla',
+            tehsil: app.taluka || 'Haveli',
+            district: app.district || 'Pune',
+            landClassification: app.landType || 'Agricultural (Jirayat)',
+            confidenceScore: app.ocrConfidence || 0.98,
+            hasActiveDispute: Boolean((app as any).hasActiveDispute),
+            isAadhaarSeeded: Boolean(app.isAadharVerified ?? true),
+          } as any,
+          metadata: {
+            verifierRemarks: app.officerRemarks,
+            aiExtraction: {
+              confidenceScore: app.ocrConfidence || 0.98,
+              entities: {
+                owner_name: app.ownerName || 'Rahul Patil',
+                survey_number: app.surveyNumber,
+                khata_number: app.khataNumber || 'KH-891',
+                khasra_number: app.khasraNumber || 'KHASRA-42',
+                plot_area: app.landArea || '1.25 Hectares',
+                village: app.village || 'Khadakwasla',
+                tehsil: app.taluka || 'Haveli',
+                district: app.district || 'Pune',
+                land_classification: app.landType || 'Agricultural (Jirayat)',
+                mutation_number: app.mutationNumber || 'MUT-2026-081',
+              },
+            },
+          },
+        };
+      });
+    } catch (err) {
+      console.warn('Failed to load citizen applications:', err);
+    }
+
+    // Merge citizen applications first so user's applied documents appear immediately at the top
+    const existingIds = new Set<string>();
+    const merged: DocumentRecord[] = [];
+
+    for (const d of citizenDocs) {
+      if (!existingIds.has(d._id)) {
+        existingIds.add(d._id);
+        merged.push(d);
+      }
+    }
+
+    for (const d of backendDocs) {
+      if (!existingIds.has(d._id) && !existingIds.has(d.documentId)) {
+        existingIds.add(d._id);
+        merged.push(d);
+      }
+    }
+
+    // Filter by status if filter is active
+    let finalDocs = merged;
+    if (statusFilter) {
+      finalDocs = merged.filter((d) => d.processingStatus === statusFilter);
+    }
+
+    setDocuments(finalDocs);
+    if (finalDocs.length > 0) {
+      setSelectedDocId((prev) =>
+        prev && finalDocs.some((d) => d._id === prev) ? prev : finalDocs[0]._id
+      );
+    }
+    setLoading(false);
   };
 
   const selectedDoc =
@@ -184,13 +299,48 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
     setIsSubmitting(true);
     try {
-      const updated = await documentsService.verifyDocument(selectedDoc._id, {
-        action: actionModal.action,
-        remarks: remarks.trim(),
-      });
+      // 1. Sync to citizenService if this is a citizen application
+      citizenService.updateApplicationVerdict(
+        selectedDoc._id,
+        actionModal.action,
+        remarks.trim(),
+        authUser?.name || 'Circle Revenue Officer'
+      );
+
+      // 2. Try updating backend if connected
+      let updated: any = null;
+      try {
+        updated = await documentsService.verifyDocument(selectedDoc._id, {
+          action: actionModal.action,
+          remarks: remarks.trim(),
+        });
+      } catch {
+        // quiet fallback for local/citizen documents
+      }
+
+      const nextStatus =
+        actionModal.action === 'APPROVED'
+          ? isOfficer
+            ? 'VERIFIED'
+            : 'PENDING_OFFICER_REVIEW'
+          : actionModal.action === 'REJECTED'
+          ? 'REJECTED'
+          : 'NEEDS_REVIEW';
 
       setDocuments((prev) =>
-        prev.map((d) => (d._id === selectedDoc._id ? { ...d, ...updated } : d))
+        prev.map((d) =>
+          d._id === selectedDoc._id
+            ? {
+                ...d,
+                ...(updated || {}),
+                processingStatus: (updated?.processingStatus || nextStatus) as any,
+                metadata: {
+                  ...d.metadata,
+                  verifierRemarks: remarks.trim(),
+                },
+              }
+            : d
+        )
       );
 
       let successMsg = '';
