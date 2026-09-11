@@ -35,12 +35,16 @@ import {
   Layers,
   ListFilter,
   CheckCheck,
+  Loader2,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import { Modal } from '../ui/Modal';
 import { LandStackMultiLayerViewer } from '../land-stack/LandStackMultiLayerViewer';
 import { QrScannerModal } from './QrScannerModal';
 import { generateQrDataUrl, computeDocumentSecretCode } from '../../lib/qr-barcode';
+import { getBackendFileUrl } from '../../lib/cadastral-utils';
 import { cn } from '../../lib/utils';
 
 interface UserDocumentVerificationWorkstationProps {
@@ -78,6 +82,13 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [isLandStackOpen, setIsLandStackOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  useEffect(() => {
+    setImageError(false);
+    setImageLoading(true);
+  }, [selectedDocId]);
 
   useEffect(() => {
     fetchDocuments();
@@ -224,8 +235,11 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
   const uploader =
     typeof selectedDoc?.uploadedBy === 'object' ? (selectedDoc.uploadedBy as User) : null;
+  const fileUrl = getBackendFileUrl(selectedDoc);
   const isPdf =
-    selectedDoc?.mimeType === 'application/pdf' || selectedDoc?.originalName?.endsWith('.pdf');
+    selectedDoc?.mimeType === 'application/pdf' ||
+    Boolean(selectedDoc?.originalName?.toLowerCase().endsWith('.pdf')) ||
+    Boolean(selectedDoc?.fileName?.toLowerCase().endsWith('.pdf'));
   const lr = selectedDoc?.landRecord;
   const entities = selectedDoc?.metadata?.aiExtraction?.entities || {};
 
@@ -634,7 +648,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
                             <a
-                              href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
+                              href={fileUrl || `/uploads/${selectedDoc.fileName}`}
                               target="_blank"
                               rel="noreferrer"
                               className="p-1 hover:bg-slate-200 rounded text-blue-900"
@@ -646,7 +660,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                         </div>
 
                         {/* Document Canvas */}
-                        <div className="h-[280px] bg-slate-100/70 border border-slate-200 rounded-xl overflow-auto flex items-center justify-center p-3">
+                        <div className="relative min-h-[300px] max-h-[360px] bg-slate-100/70 border border-slate-200 rounded-xl overflow-auto flex items-center justify-center p-3">
                           {isPdf ? (
                             <div className="text-center p-4">
                               <FileText className="w-12 h-12 text-blue-900 mx-auto mb-2" />
@@ -655,7 +669,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
                                 PDF Archival Extract ({(selectedDoc.fileSize / 1024).toFixed(0)} KB)
                               </div>
                               <a
-                                href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
+                                href={fileUrl || `/uploads/${selectedDoc.fileName}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-900 text-white font-bold text-xs hover:bg-blue-800 transition-colors shadow-2xs"
@@ -665,15 +679,76 @@ export const UserDocumentVerificationWorkstation: React.FC<
                               </a>
                             </div>
                           ) : (
-                            <img
-                              src={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
-                              alt={selectedDoc.originalName}
-                              style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
-                              className="max-h-[260px] object-contain rounded-lg shadow-xs transition-transform duration-200"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/sample-712-extract.png';
-                              }}
-                            />
+                            <div className="relative w-full h-full min-h-[280px] flex items-center justify-center overflow-hidden">
+                              {imageLoading && !imageError && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-xs z-10 text-slate-500 gap-2">
+                                  <Loader2 className="w-6 h-6 animate-spin text-blue-900" />
+                                  <span className="text-xs font-semibold">Loading cadastral scan...</span>
+                                </div>
+                              )}
+
+                              {imageError ? (
+                                <div className="flex flex-col items-center justify-center p-4 text-center max-w-sm space-y-2.5">
+                                  <div className="p-2.5 bg-amber-50 rounded-full border border-amber-200 text-amber-600">
+                                    <AlertCircle className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-bold text-xs text-slate-800">Scan File Unavailable</h4>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                      Archival scan file could not be retrieved from backend server.
+                                    </p>
+                                    <div className="mt-1.5 text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200 break-all">
+                                      {selectedDoc.fileName || selectedDoc.originalName}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 pt-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setImageError(false);
+                                        setImageLoading(true);
+                                      }}
+                                      className="px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                                    >
+                                      <RefreshCw className="w-3 h-3" />
+                                      <span>Retry</span>
+                                    </button>
+                                    {fileUrl && (
+                                      <a
+                                        href={fileUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 flex items-center gap-1.5"
+                                      >
+                                        <ExternalLink className="w-3 h-3 text-slate-500" />
+                                        <span>Direct Link</span>
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                  src={fileUrl || '/sample-712-extract.png'}
+                                  alt={selectedDoc.originalName}
+                                  onLoad={() => setImageLoading(false)}
+                                  onError={(e) => {
+                                    setImageLoading(false);
+                                    const target = e.currentTarget;
+                                    if (!target.src.includes('sample-712-extract')) {
+                                      target.src = '/sample-712-extract.png';
+                                    } else {
+                                      setImageError(true);
+                                    }
+                                  }}
+                                  style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+                                  className={cn(
+                                    'max-h-[280px] w-auto max-w-full object-contain rounded-lg shadow-xs transition-transform duration-200',
+                                    imageLoading ? 'opacity-0' : 'opacity-100'
+                                  )}
+                                />
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
