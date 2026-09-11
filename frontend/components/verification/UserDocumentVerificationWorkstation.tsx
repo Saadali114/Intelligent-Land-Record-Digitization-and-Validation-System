@@ -28,18 +28,20 @@ import {
   Printer,
   ChevronLeft,
   ChevronRight,
-  Eye,
   Check,
   Building,
   QrCode,
   Camera,
   Layers,
+  ListFilter,
+  CheckCheck,
 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import { Modal } from '../ui/Modal';
 import { LandStackMultiLayerViewer } from '../land-stack/LandStackMultiLayerViewer';
 import { QrScannerModal } from './QrScannerModal';
 import { generateQrDataUrl, computeDocumentSecretCode } from '../../lib/qr-barcode';
+import { cn } from '../../lib/utils';
 
 interface UserDocumentVerificationWorkstationProps {
   canVerify?: boolean;
@@ -59,7 +61,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const [zoom, setZoom] = useState(1);
   const [viewMode, setViewMode] = useState<'preview' | 'data'>('preview');
 
-  // Hideable queue state
+  // Collapsible queue state
   const [isQueueVisible, setIsQueueVisible] = useState(true);
 
   // Decision Modal State
@@ -93,7 +95,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
         setSelectedDocId(res.documents[0]._id);
       }
     } catch (err) {
-      console.error('Failed to fetch user uploaded documents:', err);
+      console.error('Failed to fetch cadastral documents:', err);
     } finally {
       setLoading(false);
     }
@@ -106,8 +108,10 @@ export const UserDocumentVerificationWorkstation: React.FC<
     if (!selectedDoc) return;
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const secret = computeDocumentSecretCode(selectedDoc.documentId);
-    const verifUrl = `${origin}/verify-document?id=${encodeURIComponent(selectedDoc.documentId)}&sec=${encodeURIComponent(secret)}`;
-    generateQrDataUrl(verifUrl, { width: 220, margin: 1 }).then((url) => {
+    const verifUrl = `${origin}/verify-document?id=${encodeURIComponent(
+      selectedDoc.documentId
+    )}&sec=${encodeURIComponent(secret)}`;
+    generateQrDataUrl(verifUrl, { width: 160, margin: 1 }).then((url) => {
       setQrCodeDataUrl(url);
     });
   }, [selectedDoc?.documentId]);
@@ -133,25 +137,24 @@ export const UserDocumentVerificationWorkstation: React.FC<
     if (action === 'APPROVED') {
       if (isOfficer) {
         setRemarks(
-          'Final statutory verification completed under MLRC Sec 149. Parcel records authenticated and permanent DSC seal applied.'
+          'Verified against official cadastral records and survey maps. Approved under Section 149 MLRC.'
         );
       } else {
         setRemarks(
-          'Initial verification completed against official cadastral records. Signed with Verifier digital signature and forwarded for final Officer sign-off.'
+          'Initial cadastral scrutiny completed. Signed with Verifier digital signature and forwarded for final Officer approval.'
         );
       }
     } else if (action === 'NEEDS_REVIEW') {
       setRemarks(
         t('officerVerification.defaultClarifyRemarks', {
-          defaultValue:
-            'Clarification required: Legibility or surveyor seal verification needed.',
+          defaultValue: 'Clarification required: Legibility or surveyor seal verification needed.',
         })
       );
     } else if (action === 'REJECTED') {
       setRemarks(
         t('officerVerification.defaultRejectedRemarks', {
           defaultValue:
-            'Discrepancy found: Document does not match official government cadastral records. Rejection recorded.',
+            'Discrepancy identified: Parcel attributes do not match official government cadastral records.',
         })
       );
     }
@@ -181,11 +184,9 @@ export const UserDocumentVerificationWorkstation: React.FC<
 
       let successMsg = '';
       if (actionModal.action === 'APPROVED') {
-        if (isOfficer) {
-          successMsg = `Document #${selectedDoc.documentId} granted final statutory verification with Officer Digital Signature (Status: VERIFIED)!`;
-        } else {
-          successMsg = `Document #${selectedDoc.documentId} verified with Verifier Digital Signature and forwarded to Officer queue (Status: PENDING_OFFICER_REVIEW)!`;
-        }
+        successMsg = isOfficer
+          ? `Document #${selectedDoc.documentId} verified with Officer Statutory Seal (VERIFIED)!`
+          : `Document #${selectedDoc.documentId} verified and forwarded to Officer review!`;
       } else if (actionModal.action === 'REJECTED') {
         successMsg = `Document #${selectedDoc.documentId} has been rejected.`;
       } else {
@@ -221,12 +222,14 @@ export const UserDocumentVerificationWorkstation: React.FC<
     });
   };
 
-  const uploader = typeof selectedDoc?.uploadedBy === 'object' ? (selectedDoc.uploadedBy as User) : null;
-  const isPdf = selectedDoc?.mimeType === 'application/pdf' || selectedDoc?.originalName?.endsWith('.pdf');
+  const uploader =
+    typeof selectedDoc?.uploadedBy === 'object' ? (selectedDoc.uploadedBy as User) : null;
+  const isPdf =
+    selectedDoc?.mimeType === 'application/pdf' || selectedDoc?.originalName?.endsWith('.pdf');
   const lr = selectedDoc?.landRecord;
   const entities = selectedDoc?.metadata?.aiExtraction?.entities || {};
 
-  // Extracted data values
+  // Extracted values
   const extractedOwner = entities.owner_name || lr?.ownerName || 'Shankar Ganpat Patil';
   const extractedSurvey = entities.survey_number || lr?.surveyNumber || '145/2A';
   const extractedKhata = entities.khata_number || lr?.khataNumber || 'KH-891';
@@ -235,11 +238,12 @@ export const UserDocumentVerificationWorkstation: React.FC<
   const extractedVillage = entities.village || lr?.village || 'Khadakwasla';
   const extractedTehsil = entities.tehsil || lr?.tehsil || 'Haveli';
   const extractedDistrict = entities.district || lr?.district || 'Pune';
-  const extractedClassification = entities.land_classification || lr?.landClassification || 'Agricultural (Jirayat)';
+  const extractedClassification =
+    entities.land_classification || lr?.landClassification || 'Agricultural (Jirayat)';
   const extractedMutation = entities.mutation_number || lr?.mutationNumber || 'MUT-2024-8812';
   const confidenceScore = Math.round((lr?.confidenceScore || 0.96) * 100);
 
-  // Official Government Master Cadastral Record
+  // Government Official Master Cadastral Record
   const govRecord = {
     recordId: lr?._id || `CADASTRAL-MH-${extractedSurvey.replace('/', '-')}`,
     ownerName: extractedOwner,
@@ -265,154 +269,231 @@ export const UserDocumentVerificationWorkstation: React.FC<
     circleRatePerSqm: lr?.circleRatePerSqm || 4200,
     calculatedValuation: lr?.calculatedValuation || 5250000,
     isAadhaarSeeded: lr?.isAadhaarSeeded || false,
-    lastSanctionDate: '18/02/2024',
-    subRegistrarOffice: `Sub-Registrar Office Haveli No. 4, Pune`,
   };
 
   // Field by field audit comparisons
   const auditComparisons = [
-    {
-      field: t('common.ownerName', { defaultValue: 'Owner / Khatedar' }),
-      extracted: extractedOwner,
-      gov: govRecord.ownerName,
-      isMatch: true,
-    },
-    {
-      field: t('common.surveyNumber', { defaultValue: 'Survey / Gat No.' }),
-      extracted: extractedSurvey,
-      gov: govRecord.surveyNumber,
-      isMatch: true,
-    },
-    {
-      field: t('common.khataNumber', { defaultValue: 'Khata Number' }),
-      extracted: extractedKhata,
-      gov: govRecord.khataNumber,
-      isMatch: true,
-    },
-    {
-      field: t('documents.affectedLandArea', { defaultValue: 'Plot Area' }),
-      extracted: extractedArea,
-      gov: govRecord.plotArea,
-      isMatch: true,
-    },
-    {
-      field: t('common.village', { defaultValue: 'Village' }),
-      extracted: `${extractedVillage}, ${extractedTehsil}`,
-      gov: `${govRecord.village}, ${govRecord.tehsil}`,
-      isMatch: true,
-    },
-    {
-      field: t('common.landType', { defaultValue: 'Classification' }),
-      extracted: extractedClassification,
-      gov: govRecord.landClassification,
-      isMatch: true,
-    },
-    {
-      field: t('documents.latestMutation', { defaultValue: 'Mutation (Ferfar)' }),
-      extracted: extractedMutation,
-      gov: govRecord.mutationNumber,
-      isMatch: true,
-    },
+    { field: 'Owner / Khatedar', extracted: extractedOwner, gov: govRecord.ownerName, isMatch: true },
+    { field: 'Survey / Gat No.', extracted: extractedSurvey, gov: govRecord.surveyNumber, isMatch: true },
+    { field: 'Khata Number', extracted: extractedKhata, gov: govRecord.khataNumber, isMatch: true },
+    { field: 'Plot Area', extracted: extractedArea, gov: govRecord.plotArea, isMatch: true },
+    { field: 'Village & Tehsil', extracted: `${extractedVillage}, ${extractedTehsil}`, gov: `${govRecord.village}, ${govRecord.tehsil}`, isMatch: true },
+    { field: 'Classification', extracted: extractedClassification, gov: govRecord.landClassification, isMatch: true },
+    { field: 'Mutation (Ferfar)', extracted: extractedMutation, gov: govRecord.mutationNumber, isMatch: true },
   ];
 
   return (
     <div className="space-y-4">
-      {/* Success Notification Alert */}
+      {/* Toast Notification */}
       {notification && (
-        <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-3 rounded-xl flex items-center justify-between text-sm shadow-xs animate-in fade-in">
-          <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-950 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{notification}</span>
           </div>
           <button
             onClick={() => setNotification(null)}
-            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold px-2 py-1"
+            className="text-emerald-700 hover:text-emerald-950 text-xs font-bold"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Main Layout: Hideable Queue on Left + Split Screen on Right */}
-      <div className="flex flex-col lg:flex-row items-start gap-4">
-        {/* Left Column: Hideable Queue Panel */}
-        {isQueueVisible ? (
-          <div className="w-full lg:w-80 shrink-0 flex flex-col space-y-3 transition-all duration-200">
-            {/* Queue Header & Hide Button */}
-            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                  <FileCheck className="w-4 h-4 text-blue-900" />
-                  <span>{t('officerVerification.verificationQueue', { defaultValue: 'Verification Queue' })}</span>
-                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-900 font-bold">
-                    {filteredDocs.length}
-                  </span>
-                </span>
+      {/* ========================================================================= */}
+      {/* 1. CLEAN WORKSTATION HEADER                                               */}
+      {/* ========================================================================= */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Left: Emblem, Title & Current Application Meta */}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-blue-900 flex items-center justify-center text-amber-400 font-bold shadow-xs shrink-0">
+            <CheckCheck className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <h1 className="text-lg font-black tracking-tight text-slate-900">
+                Cadastral Verification Workstation
+              </h1>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-50 text-blue-900 border border-blue-200">
+                DILRMP 3.0
+              </span>
+            </div>
+            {selectedDoc ? (
+              <p className="text-xs text-slate-500 truncate">
+                Case <strong className="text-slate-800 font-mono">#{selectedDoc.documentId}</strong> • Applicant:{' '}
+                <strong className="text-slate-800">{uploader?.name || 'Citizen'}</strong> (
+                {uploader?.email || 'N/A'}) • {selectedDoc.originalName}
+              </p>
+            ) : (
+              <p className="text-xs text-slate-400">
+                Select a land parcel record from the queue to start statutory inspection.
+              </p>
+            )}
+          </div>
+        </div>
 
-                {/* Hide Queue Toggle Button */}
+        {/* Right: Quick Actions Toolbar */}
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {/* Toggle Queue Button */}
+          <button
+            type="button"
+            onClick={() => setIsQueueVisible(!isQueueVisible)}
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-2xs',
+              isQueueVisible
+                ? 'bg-blue-50 text-blue-950 border-blue-200 hover:bg-blue-100'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            )}
+            title="Toggle Queue Panel"
+          >
+            <ListFilter className="w-3.5 h-3.5 text-blue-900" />
+            <span>Queue ({filteredDocs.length})</span>
+          </button>
+
+          {/* Scan QR Button */}
+          <button
+            type="button"
+            onClick={() => setIsQrScannerOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors shadow-2xs cursor-pointer"
+            title="Scan Physical Deed QR Code"
+          >
+            <Camera className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="hidden sm:inline">Scan QR</span>
+          </button>
+
+          {/* 8-Layer Land Stack Button */}
+          <button
+            type="button"
+            onClick={() => setIsLandStackOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 transition-colors shadow-2xs cursor-pointer"
+            title="Inspect 8-Layer DILRMP 3.0 Land Stack"
+          >
+            <Layers className="w-3.5 h-3.5 text-indigo-700" />
+            <span className="hidden sm:inline">8-Layer Stack</span>
+          </button>
+
+          {/* PDF Report Export */}
+          {selectedDoc && (
+            <button
+              type="button"
+              onClick={handleGenerateReport}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors cursor-pointer"
+              title="Generate Official Statutory Verification Report PDF"
+            >
+              <Printer className="w-3.5 h-3.5 text-amber-400" />
+              <span>Report</span>
+            </button>
+          )}
+
+          {/* Current Status Pill */}
+          {selectedDoc && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl font-black uppercase tracking-wide border shadow-2xs',
+                selectedDoc.processingStatus === 'VERIFIED'
+                  ? 'bg-emerald-500 text-white border-emerald-600'
+                  : selectedDoc.processingStatus === 'PENDING_OFFICER_REVIEW'
+                  ? 'bg-amber-400 text-slate-950 border-amber-500'
+                  : selectedDoc.processingStatus === 'REJECTED'
+                  ? 'bg-red-600 text-white border-red-700'
+                  : selectedDoc.processingStatus === 'NEEDS_REVIEW'
+                  ? 'bg-purple-600 text-white border-purple-700'
+                  : 'bg-blue-600 text-white border-blue-700'
+              )}
+            >
+              {selectedDoc.processingStatus === 'VERIFIED' ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Verified</span>
+                </>
+              ) : selectedDoc.processingStatus === 'PENDING_OFFICER_REVIEW' ? (
+                <>
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Awaiting Officer</span>
+                </>
+              ) : selectedDoc.processingStatus === 'REJECTED' ? (
+                <>
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>Rejected</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{formatStatus(selectedDoc.processingStatus || 'PENDING', t)}</span>
+                </>
+              )}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. MAIN LAYOUT: COLLAPSIBLE QUEUE + DUAL-PANE WORKSTATION                 */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col lg:flex-row items-start gap-4">
+        {/* LEFT COLUMN: Collapsible Queue Panel */}
+        {isQueueVisible && (
+          <div className="w-full lg:w-72 shrink-0 bg-white border border-slate-200 rounded-2xl p-3 shadow-xs space-y-2.5 transition-all">
+            {/* Queue Search & Quick Filter */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <FileCheck className="w-4 h-4 text-blue-900" />
+                  <span>Queue ({filteredDocs.length})</span>
+                </span>
                 <button
                   type="button"
                   onClick={() => setIsQueueVisible(false)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                  title="Hide Queue Panel for Full Screen Review"
+                  className="text-[11px] font-semibold text-slate-400 hover:text-slate-700 px-1.5 py-0.5 rounded hover:bg-slate-100"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Hide</span>
+                  Hide
                 </button>
               </div>
 
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:bg-white font-medium"
-              >
-                <option value="">{t('officerDocuments.allStatuses', { defaultValue: 'All Queue Statuses' })}</option>
-                <option value="PENDING_OFFICER_REVIEW">Pending Officer Review (Verifier Signed ✓)</option>
-                <option value="PROCESSED">{t('status.processed', { defaultValue: 'Processed (Ready for Review)' })}</option>
-                <option value="NEEDS_REVIEW">{t('status.needsReview', { defaultValue: 'Needs Review' })}</option>
-                <option value="UPLOADED">{t('status.uploaded', { defaultValue: 'Uploaded' })}</option>
-                <option value="PROCESSING">{t('status.processing', { defaultValue: 'Processing' })}</option>
-                <option value="VERIFIED">{t('status.verified', { defaultValue: 'Verified' })}</option>
-                <option value="REJECTED">{t('status.rejected', { defaultValue: 'Rejected' })}</option>
-              </select>
-
-              {/* Search Bar */}
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder={t('officerVerification.searchCitizenPlaceholder', {
-                    defaultValue: 'Search applicant, file, survey...',
-                  })}
+                  placeholder="Search file, applicant, survey..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-900 focus:bg-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-900 transition-colors"
                 />
               </div>
+
+              {/* Status Filter Dropdown */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:bg-white font-medium"
+              >
+                <option value="">All Statuses</option>
+                <option value="PENDING_OFFICER_REVIEW">Awaiting Officer Sign</option>
+                <option value="PROCESSED">Processed / Ready</option>
+                <option value="NEEDS_REVIEW">Needs Review</option>
+                <option value="VERIFIED">Verified</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
             </div>
 
             {/* Document Queue List Cards */}
-            <div className="bg-white border border-slate-200 rounded-xl p-2 space-y-1.5 max-h-[calc(100vh-230px)] overflow-y-auto shadow-xs">
+            <div className="space-y-1.5 max-h-[calc(100vh-320px)] overflow-y-auto pr-0.5">
               {loading ? (
-                <div className="p-3 space-y-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                <div className="p-2 space-y-2">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-14 w-full rounded-xl" />
                   ))}
                 </div>
               ) : filteredDocs.length === 0 ? (
-                <div className="text-center py-12 text-xs text-slate-400">
-                  <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                  <p>
-                    {t('officerVerification.noCitizenDocsFound', {
-                      defaultValue: 'No pending documents match search.',
-                    })}
-                  </p>
+                <div className="text-center py-10 text-xs text-slate-400">
+                  <FileText className="w-7 h-7 mx-auto mb-1.5 text-slate-300" />
+                  <p>No documents found.</p>
                 </div>
               ) : (
                 filteredDocs.map((doc) => {
                   const isSelected = selectedDoc?._id === doc._id;
-                  const docUploader = typeof doc.uploadedBy === 'object' ? (doc.uploadedBy as User) : null;
+                  const docUploader =
+                    typeof doc.uploadedBy === 'object' ? (doc.uploadedBy as User) : null;
                   const status = doc.processingStatus || 'UPLOADED';
 
                   return (
@@ -420,740 +501,478 @@ export const UserDocumentVerificationWorkstation: React.FC<
                       key={doc._id}
                       type="button"
                       onClick={() => setSelectedDocId(doc._id)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all text-xs flex flex-col gap-1.5 ${
+                      className={cn(
+                        'w-full text-left p-2.5 rounded-xl border transition-all text-xs flex flex-col gap-1 cursor-pointer',
                         isSelected
-                          ? 'border-blue-900 bg-blue-50/60 shadow-xs ring-1 ring-blue-900'
-                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
-                      }`}
+                          ? 'border-blue-900 bg-blue-50/70 shadow-xs ring-1 ring-blue-900'
+                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      )}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 truncate max-w-[160px]">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-bold text-slate-900 truncate">
                           {doc.originalName || doc.fileName}
                         </span>
                         <span
-                          className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          className={cn(
+                            'text-[9px] px-1.5 py-0.2 rounded-md font-bold uppercase shrink-0',
                             status === 'VERIFIED'
                               ? 'bg-emerald-100 text-emerald-800'
                               : status === 'PENDING_OFFICER_REVIEW'
-                              ? 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold'
+                              ? 'bg-amber-100 text-amber-900'
                               : status === 'REJECTED'
                               ? 'bg-red-100 text-red-800'
-                              : status === 'NEEDS_REVIEW' || status === 'ACTION_REQUIRED'
-                              ? 'bg-purple-100 text-purple-800'
-                              : status === 'PROCESSED'
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
+                              : 'bg-blue-100 text-blue-900'
+                          )}
                         >
-                          {status === 'PROCESSED'
-                            ? 'PROCESSED'
+                          {status === 'VERIFIED'
+                            ? 'Verified'
                             : status === 'PENDING_OFFICER_REVIEW'
-                            ? 'Awaiting Officer Sign'
-                            : formatStatus(status, t)}
+                            ? 'Pending Sign'
+                            : status === 'REJECTED'
+                            ? 'Rejected'
+                            : 'In Review'}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-slate-600">
-                        <span className="flex items-center gap-1 truncate max-w-[130px]">
-                          <UserIcon className="w-3 h-3 text-slate-400 shrink-0" />
-                          <span className="truncate">{docUploader?.name || 'Citizen'}</span>
-                        </span>
-                        <span className="font-mono text-slate-400 text-[10px]">
-                          {new Date(doc.uploadedAt || doc.createdAt).toLocaleDateString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                          })}
-                        </span>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <span className="truncate">{docUploader?.name || 'Citizen'}</span>
+                        {doc.landRecord?.surveyNumber && (
+                          <span className="font-mono font-semibold text-slate-700">
+                            Gat #{doc.landRecord.surveyNumber}
+                          </span>
+                        )}
                       </div>
-
-                      {doc.landRecord && (
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
-                          <span className="font-mono text-slate-700">
-                            {t('common.survey', { defaultValue: 'Survey' })}: {doc.landRecord.surveyNumber}
-                          </span>
-                          <span className="text-emerald-700 font-medium flex items-center gap-1">
-                            <Sparkles className="w-2.5 h-2.5" />
-                            {(doc.landRecord.confidenceScore * 100).toFixed(0)}% OCR
-                          </span>
-                        </div>
-                      )}
                     </button>
                   );
                 })
               )}
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* Right Main Workstation: Split Screen (Extracted Data vs Government Records) */}
+        {/* RIGHT MAIN WORKSTATION: DUAL-PANE (DEED SCAN vs CADASTRAL REGISTRY) */}
         <div className="flex-1 w-full min-w-0 space-y-4">
           {selectedDoc ? (
             <>
-              {/* Document Header Bar with Show Queue & Generate Report */}
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  {!isQueueVisible && (
-                    <button
-                      type="button"
-                      onClick={() => setIsQueueVisible(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors shrink-0"
-                      title="Show Verification Queue"
-                    >
-                      <ChevronRight className="w-4 h-4 text-blue-900" />
-                      <span>Show Queue ({filteredDocs.length})</span>
-                    </button>
-                  )}
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-900 font-bold border border-blue-200">
-                        {selectedDoc.documentId}
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs text-slate-500">
-                        {new Date(selectedDoc.uploadedAt || selectedDoc.createdAt).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs text-slate-600">
-                        Applicant: <strong className="text-slate-800">{uploader?.name || 'Citizen'}</strong> ({uploader?.email || 'N/A'})
-                      </span>
-                    </div>
-                    <h2 className="text-base font-bold text-slate-900 truncate">{selectedDoc.originalName}</h2>
-                  </div>
-                </div>
-
-                {/* Right controls: Scan QR, Generate Report & Status Badge */}
-                <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
-                  {/* Scan QR Code to Verify Button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsQrScannerOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-colors border border-slate-700 cursor-pointer"
-                    title="Scan physical deed or document QR code using camera"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Scan QR</span>
-                  </button>
-
-                  {/* DILRMP 3.0 Land Stack Viewer Button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsLandStackOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shadow-xs transition-colors border border-indigo-700 cursor-pointer"
-                    title="Inspect 8-layer DILRMP 3.0 Land Stack & GIS Registry"
-                  >
-                    <Layers className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Land Stack (8 Layers)</span>
-                  </button>
-
-                  {/* Generate Verification Report Button */}
-                  <button
-                    type="button"
-                    onClick={handleGenerateReport}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-                    title="Generate and Print Official Statutory Verification Report (PDF)"
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>{t('officerVerification.generateReport', { defaultValue: 'Generate Report' })}</span>
-                  </button>
-
-                  {/* Status Pill / QR Verified Badge */}
-                  {selectedDoc.processingStatus === 'VERIFIED' ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-black uppercase bg-emerald-700 text-white border border-emerald-500 shadow-xs">
-                      <QrCode className="w-3.5 h-3.5 text-white" />
-                      <span>✓ FINAL VERIFIED &amp; SEALED</span>
-                    </span>
-                  ) : selectedDoc.processingStatus === 'PENDING_OFFICER_REVIEW' ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-black uppercase bg-amber-500 text-slate-950 border border-amber-600 shadow-xs">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-slate-950" />
-                      <span>AWAITING OFFICER SIGN (VERIFIER SIGNED ✓)</span>
-                    </span>
-                  ) : (
-                    <span
-                      className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold uppercase ${
-                        selectedDoc.processingStatus === 'REJECTED'
-                          ? 'bg-red-100 text-red-800'
-                          : selectedDoc.processingStatus === 'NEEDS_REVIEW' ||
-                            selectedDoc.processingStatus === 'ACTION_REQUIRED'
-                          ? 'bg-purple-100 text-purple-800'
-                          : selectedDoc.processingStatus === 'PROCESSED'
-                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {selectedDoc.processingStatus === 'REJECTED' ? (
-                        <XCircle className="w-3.5 h-3.5" />
-                      ) : selectedDoc.processingStatus === 'PROCESSED' ? (
-                        <Sparkles className="w-3.5 h-3.5 text-blue-700" />
-                      ) : (
-                        <Clock className="w-3.5 h-3.5" />
-                      )}
-                      {selectedDoc.processingStatus === 'PROCESSED'
-                        ? 'PROCESSED'
-                        : formatStatus(selectedDoc.processingStatus || 'PENDING', t)}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Digital Signature Audit Chain Banner */}
-              {(selectedDoc.metadata?.verifierSignature || selectedDoc.metadata?.officerSignature) && (
-                <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-emerald-950 text-white rounded-xl p-3.5 shadow-sm border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold flex items-center gap-2">
-                        <span>Digital Signature Audit Trail (Information Technology Act Compliant)</span>
-                        <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30">
-                          {selectedDoc.processingStatus === 'VERIFIED' ? 'Official Final Seal' : 'Verifier Initial Seal'}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-300 mt-0.5 space-x-2">
-                        {selectedDoc.metadata?.verifierSignature && (
-                          <span>
-                            Verifier: <strong>{selectedDoc.metadata.verifierSignature.signerName}</strong> (
-                            <code className="text-emerald-300">{selectedDoc.metadata.verifierSignature.signatureId}</code>)
-                          </span>
-                        )}
-                        {selectedDoc.metadata?.officerSignature && (
-                          <span>
-                            • Officer: <strong>{selectedDoc.metadata.officerSignature.signerName}</strong> (
-                            <code className="text-emerald-300">{selectedDoc.metadata.officerSignature.signatureId}</code>)
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-[10px] font-mono text-emerald-400 bg-black/40 px-2.5 py-1 rounded border border-emerald-500/30">
-                    HASH: {(selectedDoc.metadata?.officerSignature?.digest || selectedDoc.metadata?.verifierSignature?.digest || '').substring(0, 16)}...
-                  </div>
-                </div>
-              )}
-
-              {/* SPLIT SCREEN: Left = Extracted Data, Right = Government Records */}
+              {/* Dual-Pane Grid */}
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                {/* ================= LEFT SPLIT: EXTRACTED DATA ================= */}
-                <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col">
-                  {/* Left Header */}
-                  <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+                {/* ========================================================================= */}
+                {/* PANE 1: PHYSICAL DOCUMENT SCAN & AI OCR                                   */}
+                {/* ========================================================================= */}
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden flex flex-col">
+                  {/* Pane 1 Header & View Switcher */}
+                  <div className="bg-slate-50/80 border-b border-slate-200 px-4 py-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-blue-900" />
-                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        {t('officerVerification.extractedDataHeader', { defaultValue: '1. Extracted Data (Uploaded Doc & AI OCR)' })}
-                      </h3>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                        1. Physical Deed / Cadastral Scan
+                      </span>
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-emerald-600" />
-                      <span>{confidenceScore}% OCR Confidence</span>
-                    </span>
+
+                    <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-slate-200 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('preview')}
+                        className={cn(
+                          'px-2.5 py-1 rounded-md font-semibold transition-all',
+                          viewMode === 'preview'
+                            ? 'bg-blue-900 text-white shadow-2xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        )}
+                      >
+                        Document View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('data')}
+                        className={cn(
+                          'px-2.5 py-1 rounded-md font-semibold transition-all',
+                          viewMode === 'data'
+                            ? 'bg-blue-900 text-white shadow-2xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        )}
+                      >
+                        AI OCR Entities
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Scan Viewer & Mode Toggle */}
-                  <div className="p-4 space-y-4 flex-1">
-                    {/* Scan Toolbar */}
-                    <div className="flex items-center justify-between bg-slate-100 p-2 rounded-lg text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setViewMode('preview')}
-                          className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
-                            viewMode === 'preview'
-                              ? 'bg-blue-900 text-white shadow-xs'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
-                        >
-                          Document Scan View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setViewMode('data')}
-                          className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
-                            viewMode === 'data'
-                              ? 'bg-blue-900 text-white shadow-xs'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
-                        >
-                          Extracted Entities
-                        </button>
-                      </div>
+                  {/* Pane 1 Content Body */}
+                  <div className="p-4 space-y-4 flex-1 flex flex-col justify-between">
+                    {viewMode === 'preview' ? (
+                      <div className="space-y-3">
+                        {/* Zoom & Scan Controls */}
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-emerald-600" />
+                            <span>{confidenceScore}% OCR Confidence</span>
+                          </span>
 
-                      {viewMode === 'preview' && (
-                        <div className="flex items-center gap-1 text-slate-600">
-                          <button
-                            onClick={() => setZoom((z) => Math.min(2, z + 0.2))}
-                            className="p-1 hover:bg-slate-200 rounded text-slate-700"
-                            title="Zoom In"
-                          >
-                            <ZoomIn className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setZoom((z) => Math.max(0.6, z - 0.2))}
-                            className="p-1 hover:bg-slate-200 rounded text-slate-700"
-                            title="Zoom Out"
-                          >
-                            <ZoomOut className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setZoom(1)}
-                            className="p-1 hover:bg-slate-200 rounded text-slate-700"
-                            title="Reset Zoom"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                          </button>
-                          <a
-                            href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1 hover:bg-slate-200 rounded text-blue-900 ml-1"
-                            title="Open original file in new tab"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Scan Preview Canvas */}
-                    <div className="bg-slate-100 rounded-lg p-3 min-h-[220px] max-h-[300px] overflow-auto flex items-center justify-center border border-slate-200">
-                      {isPdf ? (
-                        <div className="text-center p-4">
-                          <FileText className="w-10 h-10 text-blue-900 mx-auto mb-2" />
-                          <div className="font-bold text-xs text-slate-800">{selectedDoc.originalName}</div>
-                          <div className="text-[11px] text-slate-500 mb-3">
-                            PDF Archival Document ({(selectedDoc.fileSize / 1024).toFixed(0)} KB)
+                          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                            <button
+                              type="button"
+                              onClick={() => setZoom((z) => Math.min(2, z + 0.2))}
+                              className="p-1 hover:bg-slate-200 rounded text-slate-700"
+                              title="Zoom In"
+                            >
+                              <ZoomIn className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setZoom((z) => Math.max(0.6, z - 0.2))}
+                              className="p-1 hover:bg-slate-200 rounded text-slate-700"
+                              title="Zoom Out"
+                            >
+                              <ZoomOut className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setZoom(1)}
+                              className="p-1 hover:bg-slate-200 rounded text-slate-700"
+                              title="Reset Zoom"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            </button>
+                            <a
+                              href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1 hover:bg-slate-200 rounded text-blue-900"
+                              title="Open original scan in new tab"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
                           </div>
-                          <a
-                            href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 text-white font-semibold text-xs hover:bg-blue-800 transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>Open PDF Document</span>
-                          </a>
                         </div>
-                      ) : (
-                        <img
-                          src={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
-                          alt={selectedDoc.originalName}
-                          style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}
-                          className="max-h-[280px] object-contain rounded shadow-sm transition-transform duration-200"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/sample-712-extract.png';
-                          }}
-                        />
-                      )}
-                    </div>
 
-                    {/* Extracted Fields Grid */}
-                    <div className="space-y-2 pt-2 border-t border-slate-100">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        Extracted Cadastral Attributes
+                        {/* Document Canvas */}
+                        <div className="h-[280px] bg-slate-100/70 border border-slate-200 rounded-xl overflow-auto flex items-center justify-center p-3">
+                          {isPdf ? (
+                            <div className="text-center p-4">
+                              <FileText className="w-12 h-12 text-blue-900 mx-auto mb-2" />
+                              <div className="font-bold text-xs text-slate-800">{selectedDoc.originalName}</div>
+                              <div className="text-[11px] text-slate-500 mb-3">
+                                PDF Archival Extract ({(selectedDoc.fileSize / 1024).toFixed(0)} KB)
+                              </div>
+                              <a
+                                href={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-900 text-white font-bold text-xs hover:bg-blue-800 transition-colors shadow-2xs"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>Open Full Document</span>
+                              </a>
+                            </div>
+                          ) : (
+                            <img
+                              src={selectedDoc.fileUrl || `/uploads/${selectedDoc.fileName}`}
+                              alt={selectedDoc.originalName}
+                              style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+                              className="max-h-[260px] object-contain rounded-lg shadow-xs transition-transform duration-200"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/sample-712-extract.png';
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    ) : (
+                      /* AI Extracted OCR Text View */
+                      <div className="h-[320px] bg-slate-50 border border-slate-200 rounded-xl p-3.5 overflow-y-auto font-mono text-xs text-slate-800 leading-relaxed">
+                        <div className="text-[10px] uppercase font-bold text-slate-400 mb-2">
+                          Raw OCR Extraction Stream:
+                        </div>
+                        {selectedDoc.metadata?.rawOcrText ||
+                          `महाराष्ट्र शासन महसूल व वन विभाग\nगाव नमुना ७ (अधिकार अभिलेख पत्रक) व गाव नमुना १२ (पिकांची पाहणी)\nगाव: ${extractedVillage} | तालुका: ${extractedTehsil} | जिल्हा: ${extractedDistrict}\nभूमापन क्रमांक व उपविभाग: ${extractedSurvey}\nखाते क्रमांक: ${extractedKhata}\nखातेदाराचे नाव: ${extractedOwner}\nएकूण क्षेत्र: ${extractedArea}\nआकारणी किंवा जुडी: रु. ४.२५\nफेरफार क्रमांक: ${extractedMutation}`}
+                      </div>
+                    )}
+
+                    {/* Extracted Cadastral Key-Value Grid */}
+                    <div className="pt-3 border-t border-slate-100">
+                      <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                         <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Owner / Khatedar</span>
-                          <span className="font-bold text-slate-900 text-xs">{extractedOwner}</span>
+                          <span className="text-[10px] text-slate-400 block uppercase">Owner</span>
+                          <span className="font-bold text-slate-900 truncate block">{extractedOwner}</span>
                         </div>
                         <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Survey / Gat No.</span>
-                          <span className="font-bold text-blue-900 font-mono text-xs">{extractedSurvey}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Khata &amp; Khasra No.</span>
-                          <span className="font-mono text-slate-800">{extractedKhata} / {extractedKhasra}</span>
+                          <span className="text-[10px] text-slate-400 block uppercase">Survey / Gat</span>
+                          <span className="font-bold font-mono text-blue-900 block">{extractedSurvey}</span>
                         </div>
                         <div>
                           <span className="text-[10px] text-slate-400 block uppercase">Plot Area</span>
-                          <span className="font-bold text-emerald-700">{extractedArea}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Village &amp; Tehsil</span>
-                          <span className="text-slate-800">{extractedVillage}, {extractedTehsil}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">District</span>
-                          <span className="text-slate-800">{extractedDistrict}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Classification</span>
-                          <span className="text-slate-800">{extractedClassification}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 block uppercase">Mutation (Ferfar)</span>
-                          <span className="font-mono text-slate-700">{extractedMutation}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Official Digital QR Seal Card */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <QrCode className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Official Digital QR Seal &amp; Security PIN</span>
-                        </span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
-                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                          <span>✓ QR Scanned &amp; Verified</span>
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-900 to-slate-950 rounded-xl text-white border border-slate-800 shadow-sm">
-                        {qrCodeDataUrl ? (
-                          <img
-                            src={qrCodeDataUrl}
-                            alt="QR Verification Seal"
-                            className="w-20 h-20 bg-white p-1 rounded-lg border border-slate-700 shrink-0 shadow-inner"
-                          />
-                        ) : (
-                          <div className="w-20 h-20 bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
-                            <QrCode className="w-8 h-8 text-slate-500 animate-pulse" />
-                          </div>
-                        )}
-                        <div className="space-y-1 text-xs min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-bold uppercase text-emerald-400">Security PIN:</span>
-                            <span className="font-mono text-xs font-black text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
-                              {computeDocumentSecretCode(selectedDoc.documentId)}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-300 leading-snug">
-                            Cryptographically signed digital revenue seal. Scan with any phone camera to verify official registry status.
-                          </p>
-                          <a
-                            href={`/verify-document?id=${encodeURIComponent(selectedDoc.documentId)}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline pt-0.5"
-                          >
-                            <span>Open Public Citizen Verification Portal</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
+                          <span className="font-bold text-emerald-700 block">{extractedArea}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* ================= RIGHT SPLIT: GOVERNMENT RECORDS ================= */}
-                <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col">
-                  {/* Right Header */}
-                  <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+                {/* ========================================================================= */}
+                {/* PANE 2: OFFICIAL CADASTRAL MASTER RECORD & AUDIT MATCH                   */}
+                {/* ========================================================================= */}
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden flex flex-col">
+                  {/* Pane 2 Header */}
+                  <div className="bg-slate-50/80 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Database className="w-4 h-4 text-emerald-700" />
-                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        {t('officerVerification.govRecordHeader', { defaultValue: '2. Government Records (Official Revenue Registry)' })}
-                      </h3>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                        2. Official Revenue Cadastral Registry
+                      </span>
                     </div>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
                       Jamabandi Master DB
                     </span>
                   </div>
 
-                  <div className="p-4 space-y-4 flex-1">
-                    {/* Official Cadastral Ledger Details */}
-                    <div className="bg-emerald-50/40 border border-emerald-200 rounded-lg p-3 space-y-2">
-                      <div className="flex items-center justify-between pb-1.5 border-b border-emerald-100">
-                        <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1.5">
-                          <Building className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>Directorate of Land Records Reference</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-700 font-semibold">
-                          {govRecord.recordId}
+                  {/* Pane 2 Content Body */}
+                  <div className="p-4 space-y-3.5 flex-1 flex flex-col justify-between">
+                    {/* Cadastral Parcel Summary Strip */}
+                    <div className="p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between flex-wrap gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-emerald-900 uppercase">
+                            Bhu-Aadhaar (ULPIN):
+                          </span>
+                          <span className="font-mono text-xs font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                            {govRecord.ulpin}
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-slate-800">
+                          Valuation: <strong className="text-emerald-800">₹{govRecord.calculatedValuation.toLocaleString('en-IN')}</strong>
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-[10px] text-slate-500 block uppercase">Official Land Title</span>
-                          <span className="font-bold text-slate-900">{govRecord.ownerName}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block uppercase">Official Gat / Survey</span>
-                          <span className="font-bold font-mono text-blue-900">{govRecord.surveyNumber}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block uppercase">Official Land Area</span>
-                          <span className="font-bold text-emerald-800">{govRecord.plotArea}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block uppercase">Title Tenure</span>
-                          <span className="text-slate-800 text-[11px]">{govRecord.tenureType}</span>
-                        </div>
-                        <div className="col-span-2 flex items-center justify-between pt-1 border-t border-emerald-100">
-                          <div>
-                            <span className="text-[10px] text-slate-500 block uppercase">Bhu-Aadhaar (ULPIN)</span>
-                            <span className="font-mono text-xs font-bold text-amber-900 bg-amber-100/80 px-1.5 py-0.2 rounded border border-amber-300">
-                              {govRecord.ulpin}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-[10px] text-slate-500 block uppercase">Govt Assessed Valuation</span>
-                            <span className="font-mono text-xs font-bold text-emerald-800">
-                              ₹{govRecord.calculatedValuation.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-[10px] text-slate-500 block uppercase">Encumbrance / Dispute Status</span>
-                          <span className={`font-semibold text-[11px] ${govRecord.hasActiveDispute ? 'text-rose-700' : govRecord.hasBankCharge ? 'text-amber-700' : 'text-emerald-700'}`}>
-                            {govRecord.encumbranceStatus}
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-between text-xs text-slate-600 flex-wrap gap-1 pt-1 border-t border-emerald-100">
+                        <span>Tenure: <strong className="text-slate-800">{govRecord.tenureType}</strong></span>
+                        <span className="text-emerald-700 font-semibold">{govRecord.encumbranceStatus}</span>
                       </div>
                     </div>
 
-                    {/* Side-by-Side Audit Comparison & Discrepancy Matrix */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                          <Scale className="w-3.5 h-3.5 text-blue-900" />
-                          <span>Field-by-Field Audit Comparison</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          100% Match
-                        </span>
+                    {/* Field-by-Field Audit Comparison Table */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                      <table className="w-full text-left">
+                        <thead className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase border-b border-slate-200">
+                          <tr>
+                            <th className="px-3 py-2">Attribute</th>
+                            <th className="px-3 py-2 text-blue-900">Extracted (Deed)</th>
+                            <th className="px-3 py-2 text-emerald-900">Official (Registry)</th>
+                            <th className="px-3 py-2 text-center">Audit</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-[11px]">
+                          {auditComparisons.map((c, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/50">
+                              <td className="px-3 py-1.5 font-medium text-slate-700">{c.field}</td>
+                              <td className="px-3 py-1.5 font-mono text-slate-900">{c.extracted}</td>
+                              <td className="px-3 py-1.5 font-mono text-slate-900">{c.gov}</td>
+                              <td className="px-3 py-1.5 text-center">
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                  <span>Match</span>
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Digital Seal & Security PIN Card */}
+                    <div className="flex items-center justify-between p-2.5 bg-slate-900 text-white rounded-xl text-xs gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {qrCodeDataUrl ? (
+                          <img
+                            src={qrCodeDataUrl}
+                            alt="QR Seal"
+                            className="w-12 h-12 bg-white p-1 rounded-lg shrink-0 shadow-inner"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
+                            <QrCode className="w-6 h-6 text-slate-500 animate-pulse" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-bold text-slate-200">
+                            Official SHA-256 Revenue Seal
+                          </div>
+                          <div className="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                            <span>PIN:</span>
+                            <span className="font-mono font-bold text-amber-300">
+                              {computeDocumentSecretCode(selectedDoc.documentId)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
-                        <table className="w-full text-left">
-                          <thead className="bg-slate-50 text-slate-700 text-[10px] font-semibold uppercase border-b border-slate-200">
-                            <tr>
-                              <th className="px-3 py-2">Field</th>
-                              <th className="px-3 py-2 text-blue-900">Extracted (Doc)</th>
-                              <th className="px-3 py-2 text-emerald-900">Official (Gov)</th>
-                              <th className="px-3 py-2 text-center">Result</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 text-[11px]">
-                            {auditComparisons.map((c, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50/60">
-                                <td className="px-3 py-2 font-medium text-slate-700">{c.field}</td>
-                                <td className="px-3 py-2 font-mono text-slate-900">{c.extracted}</td>
-                                <td className="px-3 py-2 font-mono text-slate-900">{c.gov}</td>
-                                <td className="px-3 py-2 text-center">
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <Check className="w-3 h-3 text-emerald-600" />
-                                    <span>Match</span>
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                      <a
+                        href={`/verify-document?id=${encodeURIComponent(selectedDoc.documentId)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 shrink-0"
+                      >
+                        <span>Citizen Portal</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Official Statutory Action Bar */}
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-blue-900" />
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900">
-                        {isOfficer
-                          ? 'Official Statutory Final Verification Verdict'
-                          : 'Verifier Scrutiny & Digital Sign-off'}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {isOfficer
-                          ? 'Execute final statutory verification and apply Official Digital Signature under Section 149 of Maharashtra Land Revenue Code, 1966.'
-                          : 'Verify cadastral consistency, sign with Verifier Digital Signature, and forward to Officer review queue.'}
-                      </p>
-                    </div>
-                  </div>
+              {/* ========================================================================= */}
+              {/* 3. STATUTORY VERDICT ACTION DOCK                                         */}
+              {/* ========================================================================= */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 text-xs text-slate-600">
+                  <ShieldCheck className="w-5 h-5 text-blue-900 shrink-0" />
+                  <span>
+                    {isOfficer
+                      ? 'Execute statutory verification verdict with Official Digital Signature (MLRC Sec 149).'
+                      : 'Perform cadastral consistency review, apply Verifier Signature, and route to Officer.'}
+                  </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 pt-1">
+                <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                  {/* Approve */}
                   <button
                     type="button"
                     onClick={() => handleOpenDecision('APPROVED')}
-                    className={`flex-1 min-w-[190px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white font-bold text-xs shadow-xs transition-colors cursor-pointer ${
-                      isOfficer ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-blue-800 hover:bg-blue-900'
-                    }`}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>
-                      {isOfficer
-                        ? 'Final Statutory Verification (Officer Digital Sign)'
-                        : 'Verify & Forward to Officer (Digital Sign)'}
-                    </span>
+                    <span>{isOfficer ? 'Approve & Apply Seal' : 'Verify & Forward'}</span>
                   </button>
 
+                  {/* Clarification */}
                   <button
                     type="button"
                     onClick={() => handleOpenDecision('NEEDS_REVIEW')}
-                    className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
                     <AlertTriangle className="w-4 h-4" />
-                    <span>{t('officerVerification.requestClarificationButton', { defaultValue: 'Request Clarification' })}</span>
+                    <span>Clarify</span>
                   </button>
 
+                  {/* Reject */}
                   <button
                     type="button"
                     onClick={() => handleOpenDecision('REJECTED')}
-                    className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
                     <XCircle className="w-4 h-4" />
-                    <span>{t('officerVerification.rejectDocumentButton', { defaultValue: 'Reject Document' })}</span>
+                    <span>Reject</span>
                   </button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="bg-white border border-slate-200 rounded-xl p-16 text-center text-slate-400 shadow-xs">
-              <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p className="text-sm font-semibold text-slate-600">
-                {t('officerVerification.noUserDocSelected', {
-                  defaultValue: 'No document selected from verification queue',
-                })}
-              </p>
-              <p className="text-xs text-slate-400 mt-1">
-                Select an application from the queue to start side-by-side inspection and record official verdict.
+            <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center text-slate-400 shadow-xs">
+              <FileText className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+              <p className="text-sm font-bold text-slate-700">No application selected</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Choose a document from the queue to start side-by-side verification.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Decision Execution Confirmation Modal */}
+      {/* ========================================================================= */}
+      {/* 4. MODALS: DECISION MODAL, QR SCANNER, & LAND STACK                       */}
+      {/* ========================================================================= */}
       {actionModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-5 shadow-2xl space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 {actionModal.action === 'APPROVED' ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 ) : actionModal.action === 'REJECTED' ? (
-                  <XCircle className="w-5 h-5 text-red-600" />
+                  <XCircle className="w-4 h-4 text-red-600" />
                 ) : (
-                  <AlertTriangle className="w-5 h-5 text-purple-600" />
+                  <AlertTriangle className="w-4 h-4 text-purple-600" />
                 )}
-                {actionModal.action === 'APPROVED'
-                  ? isOfficer
-                    ? 'Final Statutory Verification & Officer Signature'
-                    : 'Initial Verification & Verifier Signature'
-                  : t('officerVerification.confirmVerdict', {
-                      defaultValue: 'Confirm Verdict: {{action}}',
-                      action: actionModal.action ? formatStatus(actionModal.action, t) : '',
-                    })}
+                <span>
+                  {actionModal.action === 'APPROVED'
+                    ? isOfficer
+                      ? 'Officer Statutory Seal & Approval'
+                      : 'Verifier Scrutiny & Sign-off'
+                    : actionModal.action === 'REJECTED'
+                    ? 'Reject Application'
+                    : 'Request Citizen Clarification'}
+                </span>
               </h3>
               <button
                 onClick={() => setActionModal({ isOpen: false, action: null })}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-xs font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-600">
+            <div className="space-y-1.5 text-xs text-slate-600">
               <p>
-                {t('officerVerification.documentLabel', { defaultValue: 'Document' })}:{' '}
-                <strong className="text-slate-800">{selectedDoc?.originalName}</strong>
+                Document: <strong className="text-slate-900">{selectedDoc?.originalName}</strong>
               </p>
               <p>
-                {t('officerVerification.citizenUploaderLabel', { defaultValue: 'Citizen Uploader' })}:{' '}
-                <strong className="text-slate-800">
-                  {uploader?.name || t('roles.citizen', { defaultValue: 'Citizen' })}
-                </strong>{' '}
-                ({uploader?.email || 'N/A'})
+                Applicant: <strong className="text-slate-900">{uploader?.name || 'Citizen'}</strong>
               </p>
             </div>
 
-            {actionModal.action === 'APPROVED' && (
-              <div
-                className={`p-3 rounded-lg border text-xs ${
-                  isOfficer
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                    : 'bg-blue-50 border-blue-200 text-blue-950'
-                }`}
-              >
-                <div className="font-bold flex items-center gap-1.5 mb-1">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>
-                    {isOfficer
-                      ? 'Officer Statutory Digital Signature (DSC-OFF)'
-                      : 'Verifier Digital Signature (DSC-VER)'}
-                  </span>
-                </div>
-                <p className="text-[11px] leading-relaxed opacity-90">
-                  {isOfficer
-                    ? 'You are executing final statutory verification. The document will be permanently certified and sealed with status VERIFIED under MLRC Sec 149.'
-                    : 'You are completing initial verification. The document will be digitally signed and transitioned to PENDING_OFFICER_REVIEW for final sign-off by the Officer.'}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="block text-xs font-bold text-slate-700">
-                {t('officerVerification.mandatoryRemarksLabel', {
-                  defaultValue: 'Mandatory Statutory Justification / Remarks:',
-                })}
+                Statutory Justification / Remarks:
               </label>
               <textarea
                 rows={3}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder={t('officerVerification.enterRemarksPlaceholder', {
-                  defaultValue:
-                    'Enter official justification, Section reference, or reason for verdict...',
-                })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white font-mono"
+                placeholder="Enter justification, section reference, or reason..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-900 font-mono"
                 required
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setActionModal({ isOpen: false, action: null })}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
-                {t('common.cancel', { defaultValue: 'Cancel' })}
+                Cancel
               </button>
               <button
                 type="button"
                 disabled={isSubmitting || !remarks.trim()}
                 onClick={handleExecuteDecision}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer ${
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer',
                   actionModal.action === 'APPROVED'
                     ? isOfficer
-                      ? 'bg-emerald-700 hover:bg-emerald-800'
-                      : 'bg-blue-800 hover:bg-blue-900'
+                      ? 'bg-emerald-600 hover:bg-emerald-500'
+                      : 'bg-blue-800 hover:bg-blue-700'
                     : actionModal.action === 'REJECTED'
-                    ? 'bg-red-700 hover:bg-red-800'
-                    : 'bg-purple-700 hover:bg-purple-800'
-                }`}
+                    ? 'bg-red-700 hover:bg-red-600'
+                    : 'bg-purple-700 hover:bg-purple-600'
+                )}
               >
                 <Send className="w-3.5 h-3.5" />
-                {isSubmitting
-                  ? t('common.recording', { defaultValue: 'Recording...' })
-                  : actionModal.action === 'APPROVED'
-                  ? isOfficer
-                    ? 'Apply Officer Seal & Approve'
-                    : 'Digitally Sign & Forward to Officer'
-                  : t('officerVerification.confirmAction', {
-                      defaultValue: 'Record Official Verdict',
-                    })}
+                <span>
+                  {isSubmitting
+                    ? 'Recording...'
+                    : actionModal.action === 'APPROVED'
+                    ? isOfficer
+                      ? 'Apply Seal & Approve'
+                      : 'Sign & Forward'
+                    : 'Record Verdict'}
+                </span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Interactive QR Scanner Modal for Officer */}
+      {/* QR Scanner Modal */}
       <QrScannerModal
         isOpen={isQrScannerOpen}
         onClose={() => setIsQrScannerOpen(false)}
@@ -1162,7 +981,6 @@ export const UserDocumentVerificationWorkstation: React.FC<
           if (match) {
             setSelectedDocId(match._id);
           } else {
-            // refresh and select
             fetchDocuments().then(() => {
               const fresh = documents.find((d) => d.documentId === docId || d._id === docId);
               if (fresh) setSelectedDocId(fresh._id);
@@ -1171,7 +989,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
         }}
       />
 
-      {/* DILRMP 3.0 8-Layer Land Stack Modal */}
+      {/* 8-Layer Land Stack Modal */}
       {isLandStackOpen && (
         <Modal
           isOpen={isLandStackOpen}
@@ -1201,7 +1019,8 @@ export const UserDocumentVerificationWorkstation: React.FC<
                 circleRatePerSqm: govRecord.circleRatePerSqm,
                 calculatedValuation: govRecord.calculatedValuation,
                 isAadhaarSeeded: govRecord.isAadhaarSeeded,
-                verificationStatus: (selectedDoc?.processingStatus === 'VERIFIED' ? 'VERIFIED' : 'PENDING') as any,
+                verificationStatus:
+                  (selectedDoc?.processingStatus === 'VERIFIED' ? 'VERIFIED' : 'PENDING') as any,
                 confidenceScore: 0.98,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -1212,7 +1031,7 @@ export const UserDocumentVerificationWorkstation: React.FC<
               <button
                 type="button"
                 onClick={() => setIsLandStackOpen(false)}
-                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-semibold"
+                className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-semibold"
               >
                 Close Inspector
               </button>
