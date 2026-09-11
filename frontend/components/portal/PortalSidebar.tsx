@@ -14,7 +14,10 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Building,
+  LogOut,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { citizenService } from '../../services/citizen.service';
 import { cn } from '../../lib/utils';
 
 interface PortalSidebarProps {
@@ -28,6 +31,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
 }) => {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
 
   const navigation: {
     name: string;
@@ -164,6 +168,29 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
           </div>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
+
+        {/* Citizen Sign Out Option */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onCloseMobile) onCloseMobile();
+            citizenService.logout();
+            try {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+            } catch {}
+            router.push('/portal/login');
+          }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/60 border border-rose-900/40 hover:border-rose-700 transition-colors group cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <LogOut className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform" />
+            <span>{t('common.logout', 'Sign Out')}</span>
+          </div>
+          <span className="text-[10px] uppercase font-bold text-rose-400/80 bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-900/50">
+            Exit
+          </span>
+        </button>
       </div>
     </div>
   );

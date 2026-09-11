@@ -1271,7 +1271,10 @@
     "systemOnline": "System Online",
     "systemOnlineDesc": "AI & Multilingual OCR pipeline ready for Phase 2 integration.",
     "verifyLandRecord": "Verify Land Record",
-    "aiVerifications": "AI Verifications"
+    "aiVerifications": "AI Verifications",
+    "hideSidebar": "Hide Sidebar",
+    "showSidebar": "Show Sidebar",
+    "exit": "Exit"
   },
   "topbar": {
     "officerPortalTitle": "{{portalName}} Officer Portal",

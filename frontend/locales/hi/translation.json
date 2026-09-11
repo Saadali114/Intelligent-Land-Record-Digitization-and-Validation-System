@@ -1271,7 +1271,10 @@
     "systemOnline": "सिस्टम ऑनलाइन है",
     "systemOnlineDesc": "चरण २ एकीकरण के लिए एआई और बहुभाषी ओसीआर पाइपलाइन तैयार है।",
     "verifyLandRecord": "भूमि रिकॉर्ड सत्यापित करें",
-    "aiVerifications": "एआई सत्यापन"
+    "aiVerifications": "एआई सत्यापन",
+    "hideSidebar": "साइडबार छिपाएं",
+    "showSidebar": "साइडबार दिखाएं",
+    "exit": "बाहर निकलें"
   },
   "topbar": {
     "officerPortalTitle": "{{portalName}} अधिकारी पोर्टल",

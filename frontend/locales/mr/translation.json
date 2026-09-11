@@ -1271,7 +1271,10 @@
     "systemOnline": "प्रणाली ऑनलाइन आहे",
     "systemOnlineDesc": "टप्पा २ एकत्रीकरणासाठी AI आणि बहुभाषिक OCR पाइपलाइन तयार आहे.",
     "verifyLandRecord": "जमीन नोंदीची पडताळणी करा",
-    "aiVerifications": "AI पडताळण्या"
+    "aiVerifications": "AI पडताळण्या",
+    "hideSidebar": "साइडबार लपवा",
+    "showSidebar": "साइडबार दाखवा",
+    "exit": "बाहेर पडा"
   },
   "topbar": {
     "officerPortalTitle": "{{portalName}} अधिकारी पोर्टल",
