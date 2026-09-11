@@ -12,8 +12,10 @@ import {
   Briefcase,
   PhoneCall,
   Eye,
+  Volume2,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+import { ScreenReaderModal } from '../ui/ScreenReaderModal';
 
 export type FontSize = 'small' | 'normal' | 'large';
 
@@ -59,6 +61,18 @@ export const MainNavbar: React.FC = () => {
   const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
   const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<FontSize>('normal');
+  const [screenReaderModalOpen, setScreenReaderModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        setScreenReaderModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
+  }, []);
 
   useEffect(() => {
     try {
@@ -78,7 +92,15 @@ export const MainNavbar: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-slate-200 text-[11px] border-b border-slate-800">
+    <div className="bg-slate-900 text-slate-200 text-[11px] border-b border-slate-800 relative">
+      {/* Skip to Main Content Accessible Anchor for Screen Readers & Keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-amber-400 focus:text-slate-950 focus:font-black focus:rounded-lg focus:shadow-2xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
+      >
+        {t('navbar.skipToContent', 'Skip to main content')}
+      </a>
+
       {/* Topmost Official Accessibility & Gov Ribbon */}
       <div className="border-b border-slate-800/80 bg-slate-950/60 px-4 sm:px-6 lg:px-8 py-1.5">
         <div className="w-full flex flex-wrap items-center justify-between gap-2">
@@ -144,10 +166,17 @@ export const MainNavbar: React.FC = () => {
               </button>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1">
-              <Eye className="w-3 h-3 text-slate-400" />
-              <span className="text-slate-300">{t('navbar.screenReader')}</span>
-            </div>
+            {/* Screen Reader Access Interactive Trigger */}
+            <button
+              type="button"
+              onClick={() => setScreenReaderModalOpen(true)}
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer shadow-2xs"
+              title="Screen Reader Access & Audio Narration (Alt + S)"
+              aria-label="Screen Reader Access and Text-to-Speech audio tools (Press Alt + S)"
+            >
+              <Volume2 className="w-3 h-3 text-amber-400 shrink-0" />
+              <span className="font-semibold">{t('navbar.screenReader', 'Screen Reader Access')}</span>
+            </button>
 
             {/* Language Switcher in Top Bar */}
             <LanguageSwitcher variant="dark" />
@@ -258,6 +287,12 @@ export const MainNavbar: React.FC = () => {
           </Link>
         </nav>
       </div>
+
+      {/* Screen Reader Access & Text-to-Speech Modal */}
+      <ScreenReaderModal
+        isOpen={screenReaderModalOpen}
+        onClose={() => setScreenReaderModalOpen(false)}
+      />
     </div>
   );
 };

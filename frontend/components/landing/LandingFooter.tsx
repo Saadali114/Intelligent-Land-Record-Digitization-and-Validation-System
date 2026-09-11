@@ -164,6 +164,11 @@ export const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/screen-reader" className="hover:text-amber-400 transition-colors">
+                  {t('navbar.screenReader', 'Screen Reader Access')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/login" className="text-amber-400 font-bold hover:underline">
                   {t('navbar.employeeLogin')} &rarr;
                 </Link>
