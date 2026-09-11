@@ -32,8 +32,8 @@ interface LayerDef {
   authority: string;
   status: 'ACTIVE' | 'FLAGGED' | 'CLEARED';
   icon: React.ReactNode;
-  accentColor: string;
-  badgeBg: string;
+  iconBg: string;
+  badgeClass: string;
   governanceImpact: string;
   mockData: Record<string, string>;
   description: string;
@@ -51,9 +51,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 1: Cadastral Parcel Map & Geospatial Vector Boundary',
       authority: 'Survey of India • State Settlement Commissioner & Land Records',
       status: 'ACTIVE',
-      icon: <Compass className="w-5 h-5 text-cyan-400" />,
-      accentColor: 'border-cyan-500 text-cyan-400',
-      badgeBg: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+      icon: <Compass className="w-5 h-5 text-cyan-700" />,
+      iconBg: 'bg-cyan-50 border-cyan-200',
+      badgeClass: 'bg-cyan-50 text-cyan-800 border-cyan-200',
       governanceImpact:
         'Eliminates boundary encroachment disputes with millimeter-accurate WGS-84 coordinate polygons derived from high-resolution drone imagery (ETS survey).',
       description:
@@ -73,9 +73,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 2: Record of Rights (7/12 & 8A Extract / Jamabandi)',
       authority: 'Department of Land Resources (DoLR) • Maharashtra Mahabhulekh',
       status: 'ACTIVE',
-      icon: <FileText className="w-5 h-5 text-blue-400" />,
-      accentColor: 'border-blue-500 text-blue-400',
-      badgeBg: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
+      icon: <FileText className="w-5 h-5 text-blue-700" />,
+      iconBg: 'bg-blue-50 border-blue-200',
+      badgeClass: 'bg-blue-50 text-blue-800 border-blue-200',
       governanceImpact:
         'Guarantees indisputable ownership title with consent-based masked Aadhaar seeding (XXXX-XXXX-9124) enabling instantaneous SMS fraud alert notifications.',
       description:
@@ -95,9 +95,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 3: Land Registration & Conveyance (NGDRS / e-Deeds)',
       authority: 'Inspector General of Registration & Stamps (IGR) • SRO Haveli',
       status: 'CLEARED',
-      icon: <FileCheck2 className="w-5 h-5 text-emerald-400" />,
-      accentColor: 'border-emerald-500 text-emerald-400',
-      badgeBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+      icon: <FileCheck2 className="w-5 h-5 text-emerald-700" />,
+      iconBg: 'bg-emerald-50 border-emerald-200',
+      badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
       governanceImpact:
         'Instantaneous paperless conveyance through NGDRS direct integration; deed execution automatically triggers online Form 6 mutation pipelines without delay.',
       description:
@@ -117,9 +117,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 4: Land Use & Master Plan Statutory Zoning',
       authority: 'Town & Country Planning Directorate • Urban Development Dept',
       status: 'ACTIVE',
-      icon: <Building2 className="w-5 h-5 text-amber-400" />,
-      accentColor: 'border-amber-500 text-amber-400',
-      badgeBg: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+      icon: <Building2 className="w-5 h-5 text-amber-700" />,
+      iconBg: 'bg-amber-50 border-amber-200',
+      badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
       governanceImpact:
         'Eliminates unauthorized colony construction and environmental encroachment by flagging Coastal Regulation Zones (CRZ) and forest demarcations.',
       description:
@@ -138,9 +138,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 5: NAKSHA Urban Property Register (UrPro & Abadi)',
       authority: 'Urban Local Bodies (ULBs) • Municipal Corporations • SVAMITVA',
       status: 'ACTIVE',
-      icon: <Building className="w-5 h-5 text-purple-400" />,
-      accentColor: 'border-purple-500 text-purple-400',
-      badgeBg: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+      icon: <Building className="w-5 h-5 text-purple-700" />,
+      iconBg: 'bg-purple-50 border-purple-200',
+      badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
       governanceImpact:
         'Extends legal property rights and collateral borrowing power to urban built-up apartments, commercial shops, and rural inhabited Abadi zones.',
       description:
@@ -159,9 +159,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 6: Bank Mortgage Registry (Unified Lending Interface - ULI)',
       authority: 'Reserve Bank of India (RBI) • Unified Lending Interface • Banks',
       status: 'CLEARED',
-      icon: <Landmark className="w-5 h-5 text-indigo-400" />,
-      accentColor: 'border-indigo-500 text-indigo-400',
-      badgeBg: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30',
+      icon: <Landmark className="w-5 h-5 text-indigo-700" />,
+      iconBg: 'bg-indigo-50 border-indigo-200',
+      badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200',
       governanceImpact:
         'Completely halts multi-bank mortgage fraud; institutional lien is registered on the digital parcel instantaneously via RBI ULI API.',
       description:
@@ -180,9 +180,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 7: Revenue Court Case Management System (RCCMS)',
       authority: 'Court of Sub-Divisional Officer (SDO) & Tehsildar • Mantralaya',
       status: 'CLEARED',
-      icon: <Scale className="w-5 h-5 text-rose-400" />,
-      accentColor: 'border-rose-500 text-rose-400',
-      badgeBg: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+      icon: <Scale className="w-5 h-5 text-rose-700" />,
+      iconBg: 'bg-rose-50 border-rose-200',
+      badgeClass: 'bg-rose-50 text-rose-800 border-rose-200',
       governanceImpact:
         'Automatic mutation freezing when a court injunction or stay order is issued, stopping fraudulent distress sales during active litigation.',
       description:
@@ -201,9 +201,9 @@ export const LandStackSection: React.FC = () => {
       fullName: 'Layer 8: Circle Rate Guidance & Algorithmic Statutory Valuation',
       authority: 'Directorate of Valuation • Annual Statement of Rates (Ready Reckoner)',
       status: 'ACTIVE',
-      icon: <Calculator className="w-5 h-5 text-teal-400" />,
-      accentColor: 'border-teal-500 text-teal-400',
-      badgeBg: 'bg-teal-500/10 text-teal-300 border-teal-500/30',
+      icon: <Calculator className="w-5 h-5 text-teal-700" />,
+      iconBg: 'bg-teal-50 border-teal-200',
+      badgeClass: 'bg-teal-50 text-teal-800 border-teal-200',
       governanceImpact:
         'Eliminates arbitrary discretion and tax bribery through algorithmic circle rate calculations (Rate/sq.m × Plot Area = Guaranteed Fair Valuation).',
       description:
@@ -220,28 +220,28 @@ export const LandStackSection: React.FC = () => {
   const current = layers[selectedLayerIndex];
 
   return (
-    <section id="land-stack" className="py-20 bg-slate-950 text-white relative overflow-hidden border-b border-slate-800">
-      {/* Background Decorative Geospatial Grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+    <section id="land-stack" className="py-20 bg-slate-50 text-slate-900 relative overflow-hidden border-b border-slate-200">
+      {/* Background Subtle Geospatial Grid */}
+      <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:28px_28px] opacity-40 pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-900/60 border border-blue-700/60 text-xs font-bold text-cyan-300 uppercase tracking-wider shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>DILRMP 3.0 Operational Guidelines (2026–2031)</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-slate-900">
             The Unified{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-amber-200 to-yellow-300">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950">
               8-Layer Land Stack
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
             Eliminating historical government data silos by anchoring spatial boundaries, Record of Rights, registration deeds, urban property cards, bank liens, and court stay orders into a single deterministic 14-digit Bhu-Aadhaar (ULPIN).
           </p>
         </div>
@@ -250,9 +250,9 @@ export const LandStackSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Interactive Layer Vertical Selector */}
           <div className="lg:col-span-5 space-y-2.5">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1 pb-1 flex items-center justify-between">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1 pb-1 flex items-center justify-between">
               <span>Select Multi-Registry Layer:</span>
-              <span className="font-mono text-cyan-400">Layer 0{current.id} / 08</span>
+              <span className="font-mono text-blue-900 font-bold">Layer 0{current.id} / 08</span>
             </div>
 
             <div className="space-y-2">
@@ -263,16 +263,16 @@ export const LandStackSection: React.FC = () => {
                   onClick={() => setSelectedLayerIndex(idx)}
                   className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between gap-3 group ${
                     selectedLayerIndex === idx
-                      ? 'bg-slate-800/95 border-amber-400 shadow-lg shadow-amber-500/10 scale-[1.01]'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-850 text-slate-300'
+                      ? 'bg-blue-50/90 border-blue-600 shadow-md shadow-blue-500/10 scale-[1.01]'
+                      : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50/80 text-slate-700 shadow-2xs'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold shrink-0 transition-colors ${
                         selectedLayerIndex === idx
-                          ? 'bg-amber-400 text-slate-950 font-black'
-                          : 'bg-slate-800 text-slate-400 group-hover:text-white'
+                          ? 'bg-blue-900 text-white font-black'
+                          : 'bg-slate-100 text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-900'
                       }`}
                     >
                       {layer.id}
@@ -280,19 +280,19 @@ export const LandStackSection: React.FC = () => {
                     <div>
                       <div
                         className={`text-xs font-bold transition-colors ${
-                          selectedLayerIndex === idx ? 'text-white' : 'text-slate-300 group-hover:text-white'
+                          selectedLayerIndex === idx ? 'text-blue-950' : 'text-slate-800 group-hover:text-blue-900'
                         }`}
                       >
                         {layer.shortName}
                       </div>
-                      <div className="text-[10px] text-slate-400 truncate max-w-[240px]">
+                      <div className="text-[10px] text-slate-500 truncate max-w-[240px]">
                         {layer.authority.split('•')[0]}
                       </div>
                     </div>
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 rounded text-[9px] font-extrabold font-mono uppercase tracking-wider border shrink-0 ${layer.badgeBg}`}
+                    className={`px-2 py-0.5 rounded text-[9px] font-extrabold font-mono uppercase tracking-wider border shrink-0 ${layer.badgeClass}`}
                   >
                     {layer.status}
                   </span>
@@ -302,36 +302,36 @@ export const LandStackSection: React.FC = () => {
           </div>
 
           {/* Right Column: Dynamic Deep Dive Layer Inspector Card */}
-          <div className="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md space-y-6">
+          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
             {/* Card Header with Icon, Authority & Status */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
+                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${current.iconBg}`}>
                   {current.icon}
                 </div>
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-blue-700 font-bold">
                     DILRMP 3.0 Architectural Component
                   </span>
-                  <h3 className="text-lg font-black text-white mt-0.5">{current.fullName}</h3>
-                  <p className="text-xs text-indigo-300 font-semibold mt-0.5">{current.authority}</p>
+                  <h3 className="text-lg font-black text-slate-900 mt-0.5">{current.fullName}</h3>
+                  <p className="text-xs text-indigo-700 font-semibold mt-0.5">{current.authority}</p>
                 </div>
               </div>
 
               <span
-                className={`px-3 py-1 rounded-full text-xs font-black uppercase font-mono tracking-wider border self-start sm:self-auto ${current.badgeBg}`}
+                className={`px-3 py-1 rounded-full text-xs font-black uppercase font-mono tracking-wider border self-start sm:self-auto ${current.badgeClass}`}
               >
                 ● {current.status}
               </span>
             </div>
 
             {/* Layer Description */}
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{current.description}</p>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{current.description}</p>
 
             {/* Live Operational Data Inspector */}
             <div className="space-y-2">
-              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5 text-blue-700" />
                 <span>Simulated Real-Time Registry Attributes (Bhu-Aadhaar Linked):</span>
               </div>
 
@@ -339,12 +339,12 @@ export const LandStackSection: React.FC = () => {
                 {Object.entries(current.mockData).map(([key, val]) => (
                   <div
                     key={key}
-                    className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between"
+                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between"
                   >
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
                       {key}
                     </span>
-                    <span className="text-xs font-bold text-amber-300 font-mono mt-1 truncate">
+                    <span className="text-xs font-bold text-blue-950 font-mono mt-1 truncate">
                       {val}
                     </span>
                   </div>
@@ -353,26 +353,26 @@ export const LandStackSection: React.FC = () => {
             </div>
 
             {/* Governance & Fraud Prevention Impact Box */}
-            <div className="p-4 rounded-xl bg-blue-950/40 border border-blue-900/60 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
+            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" />
                 <span>Primary Governance & Anti-Fraud Impact:</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">{current.governanceImpact}</p>
+              <p className="text-xs text-slate-700 leading-relaxed">{current.governanceImpact}</p>
             </div>
 
             {/* CTAs */}
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <Link
                 href="/land-records"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition-all shadow-md shadow-amber-500/20"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-md shadow-blue-900/20"
               >
                 <span>Search Live 8-Layer Parcel</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/verification"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 transition-all shadow-2xs"
               >
                 <span>Inspector Verification Workstation</span>
               </Link>
@@ -380,26 +380,26 @@ export const LandStackSection: React.FC = () => {
           </div>
         </div>
 
-        {/* 14-Digit Bhu-Aadhaar (ULPIN) Integration Banner */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border border-blue-800/60 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* 14-Digit Bhu-Aadhaar (ULPIN) Integration Banner (Light Government Card) */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50/60 to-white border border-blue-200/80 shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1.5 max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs font-black text-amber-400">
-              <Lock className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 text-xs font-black text-blue-900">
+              <Lock className="w-3.5 h-3.5 text-blue-800" />
               <span>Unified 14-Digit Bhu-Aadhaar (ULPIN) Anchor</span>
             </div>
-            <h4 className="text-lg font-bold text-white">
+            <h4 className="text-lg sm:text-xl font-black text-slate-900">
               Every Parcel Linked by a Deterministic Spatial PIN
             </h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Derived from regional grid code, centroid latitude/longitude, and ETS cadastral polygon vertices. Cross-references Revenue, Survey, Registration, Banking, and Judiciary into one unified digital passport.
             </p>
           </div>
 
           <div className="shrink-0 flex flex-col items-center sm:items-end gap-2">
-            <div className="px-4 py-2 rounded-xl bg-slate-950 border border-amber-400/40 text-amber-300 font-mono text-base font-black tracking-widest shadow-inner">
+            <div className="px-5 py-2.5 rounded-xl bg-white border-2 border-blue-900 text-blue-950 font-mono text-lg font-black tracking-widest shadow-sm">
               81LVQLD9407JH0
             </div>
-            <span className="text-[10px] text-slate-400">Example Bhu-Aadhaar ULPIN Format</span>
+            <span className="text-[10px] text-slate-500 font-medium">Standard Bhu-Aadhaar ULPIN Format</span>
           </div>
         </div>
       </div>
