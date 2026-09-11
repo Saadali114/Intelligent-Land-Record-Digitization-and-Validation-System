@@ -24,6 +24,10 @@ import {
   ExternalLink,
   ShieldCheck,
   UserPlus,
+  Search,
+  Home,
+  Info,
+  Compass,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
@@ -45,433 +49,449 @@ export const SubNavbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-      <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
-        {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
-            <Building2 className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight text-blue-950">ILRDVS</span>
+    <header className="w-full relative z-30 select-none">
+      {/* ========================================================================= */}
+      {/* TIER 1: Main Brand & Action Header (Crisp White Government Identity)      */}
+      {/* ========================================================================= */}
+      <div className="bg-white border-b border-slate-200 shadow-xs">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3.5 gap-4">
+          {/* Left: Brand Identity with Emblem & Full Portal Titles */}
+          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
+              <Building2 className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <p className="text-[11px] font-semibold text-slate-600 tracking-tight leading-tight line-clamp-1">
-              {t('common.portalFullName')}
-            </p>
-            <p className="text-[9px] text-slate-400 font-medium">
-              {t('home.bannerBadge')}
-            </p>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-blue-950">
+                  ILRDVS
+                </span>
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-50 text-blue-800 border border-blue-200">
+                  Maharashtra Portal
+                </span>
+              </div>
+              <h1 className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight leading-snug">
+                {t('common.portalFullName', 'Intelligent Land Record Digitization & Validation System')}
+              </h1>
+              <p className="text-[10px] text-slate-500 font-medium hidden md:block">
+                {t('home.bannerBadge', 'National Land Records Modernization Programme (NLRMP)')} &bull; Digital India Land Records
+              </p>
+            </div>
+          </Link>
+
+          {/* Right: Quick Action CTAs & Language Switcher (Desktop) */}
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
+            <LanguageSwitcher variant="header" />
+
+            {/* Register Account */}
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
+            >
+              <UserPlus className="w-4 h-4 text-blue-900" />
+              <span>{t('navbar.register', 'Register')}</span>
+            </Link>
+
+            {/* Citizen Portal Access */}
+            <Link
+              href="/portal"
+              onClick={handleCitizenPortalClick}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+            >
+              <ShieldCheck className="w-4 h-4 text-slate-950" />
+              <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
+            </Link>
+
+            {/* Officer / Employee Login */}
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
+            >
+              <LogIn className="w-4 h-4 text-amber-400" />
+              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
+            </Link>
           </div>
-        </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden xl:flex items-center gap-1 text-xs font-semibold text-slate-700">
-          {/* Home */}
-          <Link
-            href="/"
-            className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-          >
-            {t('navbar.home')}
-          </Link>
-
-          {/* About */}
-          <Link
-            href="#about"
-            className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-          >
-            {t('navbar.about')}
-          </Link>
-
-          {/* Services Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenDropdown('services')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
+          {/* Mobile Right Controls: Language, Mini CTAs & Hamburger Toggle */}
+          <div className="flex lg:hidden items-center gap-2">
+            <LanguageSwitcher variant="header" />
+            <Link
+              href="/portal"
+              onClick={handleCitizenPortalClick}
+              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
+            >
+              {t('navbar.citizenPortal', 'Portal')}
+            </Link>
             <button
               type="button"
-              className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+              aria-label={t('navbar.toggleMenu', 'Toggle Menu')}
             >
-              <span>{t('navbar.services')}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-
-            {openDropdown === 'services' && (
-              <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
-                <Link
-                  href="/land-records"
-                  className="flex items-start gap-2.5 px-3.5 py-2 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
-                >
-                  <FileText className="w-4 h-4 text-blue-800 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-bold text-xs">{t('services.service1Title')}</div>
-                    <div className="text-[10px] text-slate-500">{t('services.service1Desc')}</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="flex items-start gap-2.5 px-3.5 py-2 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
-                >
-                  <Layers className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-bold text-xs">{t('navbar.services')}</div>
-                    <div className="text-[10px] text-slate-500">{t('navbar.singleWindowPortal', 'Single window digital portal')}</div>
-                  </div>
-                </Link>
-                <Link
-                  href="/verification"
-                  className="flex items-start gap-2.5 px-3.5 py-2 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
-                >
-                  <FileCheck2 className="w-4 h-4 text-purple-700 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-bold text-xs">{t('services.service4Title')}</div>
-                    <div className="text-[10px] text-slate-500">{t('services.service4Desc')}</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="flex items-start gap-2.5 px-3.5 py-2 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-bold text-xs">{t('services.service2Title')}</div>
-                    <div className="text-[10px] text-slate-500">{t('services.service2Desc')}</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="flex items-start gap-2.5 px-3.5 py-2 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
-                >
-                  <Building2 className="w-4 h-4 text-indigo-700 mt-0.5 shrink-0" />
-                  <div>
-                    <div className="font-bold text-xs">{t('services.service3Title')}</div>
-                    <div className="text-[10px] text-slate-500">{t('services.service3Desc')}</div>
-                  </div>
-                </Link>
-              </div>
-            )}
           </div>
-
-          {/* Resources Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenDropdown('resources')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button
-              type="button"
-              className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-            >
-              <span>{t('navbar.resources')}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {openDropdown === 'resources' && (
-              <div className="absolute top-full left-0 w-60 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
-                <Link
-                  href="#faq"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('resources.userGuides')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.stepByStepManuals', 'Step-by-step portal manuals')}</div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('resources.actsRules')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.officialCadastralGuidelines', 'Official cadastral guidelines')}</div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('resources.downloads')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.circularsGuidelines', 'Circulars & guidelines')}</div>
-                </Link>
-                <Link
-                  href="#contact"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('navbar.importantLinks', 'Important Links')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.stateCentralPortals', 'State & Central Land Portals')}</div>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Schemes & Projects Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenDropdown('schemes')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button
-              type="button"
-              className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-            >
-              <span>{t('navbar.schemes')}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {openDropdown === 'schemes' && (
-              <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
-                <Link
-                  href="#about"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('schemes.scheme1')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.dilrmpSubtitle', 'DILRMP, NLRMP, SVAMITVA')}</div>
-                </Link>
-                <Link
-                  href="#about"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('schemes.scheme2')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.droneMappingSubtitle', 'High-Resolution Drone Cadastral Mapping')}</div>
-                </Link>
-                <Link
-                  href="#about"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('schemes.scheme3')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.computerizedReposSubtitle', '100% Computerized Repositories')}</div>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Citizen Corner Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenDropdown('citizen')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button
-              type="button"
-              className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-            >
-              <span>{t('navbar.citizenCorner')}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {openDropdown === 'citizen' && (
-              <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
-                <Link
-                  href="/portal"
-                  onClick={handleCitizenPortalClick}
-                  className="flex items-center gap-2.5 px-4 py-2.5 bg-amber-50/80 border-b border-amber-100 hover:bg-amber-100/70 text-amber-950 font-bold"
-                >
-                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
-                  <div>
-                    <div className="text-xs">{t('navbar.citizenPortal')}</div>
-                    <div className="text-[10px] text-amber-800 font-normal">{t('navbar.digitizeAndTrack')}</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#services"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('citizenCorner.portalLink')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.titleSearchSubtitle', 'Title Search & Digital Extract Copy')}</div>
-                </Link>
-                <Link
-                  href="/verification"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('citizenCorner.applicationStatus')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.trackRequestSubtitle', 'Track Mutation or Verification Request')}</div>
-                </Link>
-                <Link
-                  href="#contact"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('citizenCorner.grievance')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.grievanceSubtitle', 'Register Land Record Discrepancy')}</div>
-                </Link>
-                <Link
-                  href="#contact"
-                  className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <div className="font-bold">{t('citizenCorner.feedback')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.feedbackSubtitle', 'Portal Experience & Suggestions')}</div>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* More Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenDropdown('more')}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button
-              type="button"
-              className="flex items-center gap-1 px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors"
-            >
-              <span>{t('navbar.faq')} &bull; {t('navbar.contact')}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {openDropdown === 'more' && (
-              <div className="absolute top-full right-0 w-52 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1">
-                <Link
-                  href="#gallery"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <Image className="w-4 h-4 text-blue-700" />
-                  <span>{t('navbar.gallery')}</span>
-                </Link>
-                <Link
-                  href="#faq"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <HelpCircle className="w-4 h-4 text-emerald-700" />
-                  <span>{t('navbar.faq')}</span>
-                </Link>
-                <Link
-                  href="#contact"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
-                >
-                  <Phone className="w-4 h-4 text-indigo-700" />
-                  <span>{t('navbar.contact')}</span>
-                </Link>
-              </div>
-            )}
-          </div>
-        </nav>
-
-        {/* Right CTA: Language Switcher, Register, Citizen Portal & Employee Login */}
-        <div className="hidden sm:flex items-center gap-2">
-          <LanguageSwitcher variant="header" />
-
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
-          >
-            <UserPlus className="w-3.5 h-3.5 text-blue-900" />
-            <span>{t('navbar.register', 'Register')}</span>
-          </Link>
-
-          <Link
-            href="/portal"
-            onClick={handleCitizenPortalClick}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-950" />
-            <span>{t('navbar.citizenPortal')}</span>
-          </Link>
-
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
-          >
-            <LogIn className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t('navbar.employeeLogin')}</span>
-          </Link>
-        </div>
-
-        {/* Mobile Hamburger Button */}
-        <div className="flex xl:hidden items-center gap-2">
-          <LanguageSwitcher variant="header" />
-          <Link
-            href="/register"
-            className="px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 font-bold text-xs"
-          >
-            {t('navbar.register', 'Register')}
-          </Link>
-          <Link
-            href="/portal"
-            onClick={handleCitizenPortalClick}
-            className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
-          >
-            {t('navbar.citizenPortal', 'Portal')}
-          </Link>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-slate-700 hover:bg-slate-100"
-            aria-label={t('navbar.toggleMenu', 'Toggle Menu')}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      {/* ========================================================================= */}
+      {/* TIER 2: Dedicated Sticky Sub-Navbar (Official Deep Navy Menu Bar)        */}
+      {/* ========================================================================= */}
+      <div className="sticky top-0 z-40 bg-blue-950 text-white border-b border-blue-900 shadow-md">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-12">
+          {/* Desktop Navigation Menu Links */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+            {/* Home */}
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-900/80 text-slate-200 hover:text-amber-400 transition-colors"
+            >
+              <Home className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t('navbar.home', 'Home')}</span>
+            </Link>
+
+            {/* About Us */}
+            <Link
+              href="#about"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-900/80 text-slate-200 hover:text-amber-400 transition-colors"
+            >
+              <Info className="w-3.5 h-3.5 text-blue-400" />
+              <span>{t('navbar.about', 'About Us')}</span>
+            </Link>
+
+            {/* Services Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('services')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1 px-3 py-2 rounded-md transition-colors ${
+                  openDropdown === 'services'
+                    ? 'bg-blue-900 text-amber-300 font-bold'
+                    : 'text-slate-200 hover:bg-blue-900/80 hover:text-amber-400'
+                }`}
+              >
+                <span>{t('navbar.services', 'Services')}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {openDropdown === 'services' && (
+                <div className="absolute top-full left-0 w-72 rounded-xl bg-white border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1 text-slate-800">
+                  <Link
+                    href="/land-records"
+                    className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors border-b border-slate-100"
+                  >
+                    <FileText className="w-4 h-4 text-blue-800 mt-0.5 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">{t('services.service1Title', '7/12 Satbara Extract')}</div>
+                      <div className="text-[10px] text-slate-500">{t('services.service1Desc', 'Search survey numbers, plot tenure and rights')}</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="#services"
+                    className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors border-b border-slate-100"
+                  >
+                    <Layers className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">{t('services.items.propertyCard.title', 'Property Card (Malmatta Patrak)')}</div>
+                      <div className="text-[10px] text-slate-500">{t('navbar.singleWindowPortal', 'Urban cadastral CTS property record')}</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/verification"
+                    className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors border-b border-slate-100"
+                  >
+                    <FileCheck2 className="w-4 h-4 text-purple-700 mt-0.5 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">{t('services.service4Title', 'Document Verification & Validation')}</div>
+                      <div className="text-[10px] text-slate-500">{t('services.service4Desc', 'AI-assisted cadastral boundary & signature verification')}</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="#services"
+                    className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-blue-50 text-slate-700 hover:text-blue-950 transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">{t('services.service2Title', 'Mutation Register (Ferfar)')}</div>
+                      <div className="text-[10px] text-slate-500">{t('services.service2Desc', 'Track Form 6 legal mutation transactions')}</div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Schemes & Projects Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('schemes')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1 px-3 py-2 rounded-md transition-colors ${
+                  openDropdown === 'schemes'
+                    ? 'bg-blue-900 text-amber-300 font-bold'
+                    : 'text-slate-200 hover:bg-blue-900/80 hover:text-amber-400'
+                }`}
+              >
+                <span>{t('navbar.schemes', 'Schemes & Projects')}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {openDropdown === 'schemes' && (
+                <div className="absolute top-full left-0 w-72 rounded-xl bg-white border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1 text-slate-800">
+                  <Link
+                    href="#about"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
+                  >
+                    <div className="font-bold text-xs">{t('schemes.scheme1', 'DILRMP 3.0 Modernization')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.dilrmpSubtitle', 'DILRMP, NLRMP, SVAMITVA Integrated')}</div>
+                  </Link>
+                  <Link
+                    href="#about"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
+                  >
+                    <div className="font-bold text-xs">{t('schemes.scheme2', 'SVAMITVA Drone Survey')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.droneMappingSubtitle', 'High-Resolution Drone Cadastral Mapping')}</div>
+                  </Link>
+                  <Link
+                    href="#about"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
+                  >
+                    <div className="font-bold text-xs">{t('schemes.scheme3', 'Mahabhunaksha Geo-Referencing')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.computerizedReposSubtitle', '100% Computerized Land Repositories')}</div>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Resources & Downloads Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('resources')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1 px-3 py-2 rounded-md transition-colors ${
+                  openDropdown === 'resources'
+                    ? 'bg-blue-900 text-amber-300 font-bold'
+                    : 'text-slate-200 hover:bg-blue-900/80 hover:text-amber-400'
+                }`}
+              >
+                <span>{t('navbar.resources', 'Resources')}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {openDropdown === 'resources' && (
+                <div className="absolute top-full left-0 w-64 rounded-xl bg-white border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1 text-slate-800">
+                  <Link
+                    href="#faq"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
+                  >
+                    <div className="font-bold text-xs">{t('resources.userGuides', 'User Guides & Manuals')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.stepByStepManuals', 'Step-by-step portal manuals')}</div>
+                  </Link>
+                  <Link
+                    href="#services"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
+                  >
+                    <div className="font-bold text-xs">{t('resources.actsRules', 'Acts & Land Revenue Rules')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.officialCadastralGuidelines', 'Official cadastral guidelines')}</div>
+                  </Link>
+                  <Link
+                    href="#services"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900 border-b border-slate-100"
+                  >
+                    <div className="font-bold text-xs">{t('resources.downloads', 'Circulars & Guidelines')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.circularsGuidelines', 'Circulars & guidelines')}</div>
+                  </Link>
+                  <Link
+                    href="#contact"
+                    className="block px-4 py-2.5 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
+                  >
+                    <div className="font-bold text-xs">{t('navbar.importantLinks', 'Important Links')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.stateCentralPortals', 'State & Central Land Portals')}</div>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Citizen Corner Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('citizen')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1 px-3 py-2 rounded-md transition-colors ${
+                  openDropdown === 'citizen'
+                    ? 'bg-blue-900 text-amber-300 font-bold'
+                    : 'text-slate-200 hover:bg-blue-900/80 hover:text-amber-400'
+                }`}
+              >
+                <span>{t('navbar.citizenCorner', 'Citizen Corner')}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {openDropdown === 'citizen' && (
+                <div className="absolute top-full left-0 w-72 rounded-xl bg-white border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in-50 slide-in-from-top-1 text-slate-800">
+                  <Link
+                    href="/portal"
+                    onClick={handleCitizenPortalClick}
+                    className="flex items-center gap-2.5 px-4 py-2.5 bg-amber-50/80 border-b border-amber-100 hover:bg-amber-100/70 text-amber-950 font-bold"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                    <div>
+                      <div className="text-xs">{t('navbar.citizenPortal', 'Citizen Self-Service Portal')}</div>
+                      <div className="text-[10px] text-amber-800 font-normal">{t('navbar.digitizeAndTrack', 'Digitize and track extracts')}</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/land-records"
+                    className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
+                  >
+                    <div className="font-bold text-xs">{t('citizenCorner.portalLink', 'Search 7/12 Records')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.titleSearchSubtitle', 'Title Search & Digital Extract Copy')}</div>
+                  </Link>
+                  <Link
+                    href="/verification"
+                    className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
+                  >
+                    <div className="font-bold text-xs">{t('citizenCorner.applicationStatus', 'Application Status')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.trackRequestSubtitle', 'Track Mutation or Verification Request')}</div>
+                  </Link>
+                  <Link
+                    href="#contact"
+                    className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
+                  >
+                    <div className="font-bold text-xs">{t('citizenCorner.grievance', 'Grievance Redressal')}</div>
+                    <div className="text-[10px] text-slate-500">{t('navbar.grievanceSubtitle', 'Register Land Record Discrepancy')}</div>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Link: FAQs */}
+            <Link
+              href="#faq"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-900/80 text-slate-200 hover:text-amber-400 transition-colors"
+            >
+              <span>{t('navbar.faq', 'FAQs')}</span>
+            </Link>
+
+            {/* Direct Link: Contact Us */}
+            <Link
+              href="#contact"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-900/80 text-slate-200 hover:text-amber-400 transition-colors"
+            >
+              <span>{t('navbar.contact', 'Contact Us')}</span>
+            </Link>
+          </nav>
+
+          {/* Right Sub-Navbar Shortcut: Search Land Records Action */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Link
+              href="/land-records"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-amber-300 hover:text-amber-200 font-bold text-xs border border-blue-800 transition-all shadow-2xs"
+            >
+              <Search className="w-3.5 h-3.5 text-amber-400" />
+              <span>Search Cadastral Records</span>
+            </Link>
+          </div>
+
+          {/* Mobile indicator on Sub-Navbar */}
+          <div className="flex lg:hidden items-center justify-between w-full text-xs font-semibold text-slate-300">
+            <span className="text-[11px] text-amber-400 flex items-center gap-1">
+              <Compass className="w-3.5 h-3.5" />
+              <span>Navigation Menu</span>
+            </span>
+            <Link href="/land-records" className="text-[11px] text-slate-200 underline hover:text-white">
+              Search Land Records &rarr;
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MOBILE DRAWER NAVIGATION                                                  */}
+      {/* ========================================================================= */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2 text-xs font-semibold text-slate-700">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2.5 text-xs font-semibold text-slate-700 shadow-xl">
           <Link
             href="/register"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg bg-blue-50 text-blue-900 font-bold border border-blue-200"
+            className="block px-3.5 py-2.5 rounded-xl bg-blue-50 text-blue-900 font-bold border border-blue-200 text-center"
           >
             + {t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}
           </Link>
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('navbar.home')}
-          </Link>
-          <Link
-            href="#about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('navbar.about')}
-          </Link>
-          <Link
-            href="/land-records"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('services.service1Title')}
-          </Link>
-          <Link
-            href="/verification"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('services.service4Title')}
-          </Link>
-
-          <Link
-            href="#faq"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('navbar.faq')}
-          </Link>
-          <Link
-            href="#contact"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('navbar.contact')}
-          </Link>
-          <div className="pt-2 space-y-2">
+          <div className="grid grid-cols-2 gap-2 pt-1 pb-2">
             <Link
               href="/portal"
               onClick={(e) => {
                 setMobileMenuOpen(false);
                 handleCitizenPortalClick(e);
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
             >
               <ShieldCheck className="w-4 h-4 text-slate-950" />
-              <span>{t('navbar.citizenPortal')}</span>
+              <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
             </Link>
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-900 text-white font-bold"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 text-white font-bold"
             >
               <LogIn className="w-4 h-4 text-amber-400" />
-              <span>{t('navbar.employeeLogin')}</span>
+              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
+            </Link>
+          </div>
+
+          <div className="border-t border-slate-100 pt-2 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              {t('navbar.home', 'Home')}
+            </Link>
+            <Link
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              {t('navbar.about', 'About Us')}
+            </Link>
+            <Link
+              href="/land-records"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50 text-blue-900 font-bold"
+            >
+              {t('services.service1Title', '7/12 Satbara Extract')}
+            </Link>
+            <Link
+              href="/verification"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              {t('services.service4Title', 'Document Verification')}
+            </Link>
+            <Link
+              href="#faq"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              {t('navbar.faq', 'FAQs')}
+            </Link>
+            <Link
+              href="#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+            >
+              {t('navbar.contact', 'Contact Us')}
             </Link>
           </div>
         </div>
