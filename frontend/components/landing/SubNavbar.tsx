@@ -134,11 +134,9 @@ export const SubNavbar: React.FC = () => {
             <Link
               href="/portal"
               onClick={handleCitizenPortalClick}
-              className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs"
+              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-xs"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('navbar.citizenPortal', 'Citizen Portal')}</span>
-              <span className="sm:hidden">{t('navbar.portalShort', 'Portal')}</span>
+              {t('navbar.citizenPortal', 'Portal')}
             </Link>
             <button
               type="button"

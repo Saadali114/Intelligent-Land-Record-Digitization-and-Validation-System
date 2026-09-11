@@ -103,30 +103,30 @@ export const MainNavbar: React.FC = () => {
 
       {/* Topmost Official Accessibility & Gov Ribbon */}
       <div className="border-b border-slate-800/80 bg-slate-950/60 px-4 sm:px-6 lg:px-8 py-1.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           {/* Government Identification */}
-          <div className="flex items-center gap-2 font-medium text-slate-300 min-w-0">
-            <span className="text-amber-400 font-bold tracking-wider shrink-0">
+          <div className="flex items-center gap-2.5 font-medium text-slate-300">
+            <span className="text-amber-400 font-bold tracking-wider">
               {t('common.govtOfIndiaEmblem', '🏛️ भारत सरकार')}
             </span>
-            <span className="text-slate-600 hidden sm:inline">|</span>
-            <span className="hidden sm:inline text-slate-300 font-semibold uppercase truncate">
+            <span className="text-slate-600">|</span>
+            <span className="hidden sm:inline text-slate-300 font-semibold uppercase">
               {t('common.govtOfIndia')}
             </span>
             <span className="text-slate-600 hidden md:inline">|</span>
-            <span className="hidden md:inline text-slate-400 truncate">
+            <span className="hidden md:inline text-slate-400">
               {t('home.bannerBadge')}
             </span>
           </div>
 
           {/* Accessibility & Utility Tools */}
-          <div className="flex items-center gap-2 sm:gap-3 text-[10px] text-slate-300 shrink-0">
+          <div className="flex items-center gap-3 text-[10px] text-slate-300">
             <div className="hidden lg:flex items-center gap-1.5 text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/50">
               <PhoneCall className="w-2.5 h-2.5" />
               <span>{t('common.tollFree')}</span>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+            <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
               <span className="text-slate-400">{t('navbar.textLabel', 'Text:')}</span>
               <button
                 type="button"
