@@ -74,7 +74,7 @@ export const SubNavbar: React.FC = () => {
       {/* TIER 1: Main Brand & Action Header (Crisp White Government Identity)      */}
       {/* ========================================================================= */}
       <div className="bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3 sm:py-3.5 gap-4">
+        <div className="w-full px-3 sm:px-6 lg:px-8 flex items-center justify-between py-2.5 sm:py-3.5 gap-2 sm:gap-4">
           {/* Left: Brand Identity with Emblem & Full Portal Titles */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0 flex-1 sm:flex-initial">
             <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
@@ -99,11 +99,11 @@ export const SubNavbar: React.FC = () => {
           </Link>
 
           {/* Right: Quick Action CTAs (Desktop) */}
-          <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             {/* Register Account */}
             <Link
               href="/register"
-              className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs hover:shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
             >
               <UserPlus className="w-4 h-4 text-blue-900" />
               <span>{t('navbar.register', 'Register')}</span>
@@ -113,19 +113,19 @@ export const SubNavbar: React.FC = () => {
             <Link
               href="/portal"
               onClick={handleCitizenPortalClick}
-              className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
             >
               <ShieldCheck className="w-4 h-4 text-slate-950" />
               <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
             </Link>
 
-            {/* Officer Portal Access */}
+            {/* Officer / Employee Login */}
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
             >
-              <Building2 className="w-4 h-4 text-amber-400" />
-              <span>{t('navbar.officerPortal', 'Officer Portal')}</span>
+              <LogIn className="w-4 h-4 text-amber-400" />
+              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
             </Link>
           </div>
 
@@ -154,7 +154,7 @@ export const SubNavbar: React.FC = () => {
       {/* TIER 2: Dedicated Sticky Sub-Navbar (Official Deep Navy Menu Bar)        */}
       {/* ========================================================================= */}
       <div className="hidden lg:block sticky top-0 z-40 bg-blue-950 text-white border-b border-blue-900 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-12">
           {/* Desktop Navigation Menu Links */}
           <nav className="flex items-center gap-1 text-xs font-semibold">
             {/* Home */}
@@ -441,8 +441,8 @@ export const SubNavbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold transition-colors"
             >
-              <Building2 className="w-4 h-4 text-amber-400" />
-              <span>{t('navbar.officerPortal', 'Officer Portal')}</span>
+              <LogIn className="w-4 h-4 text-amber-400" />
+              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
             </Link>
           </div>
 
