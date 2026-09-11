@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {
   ShieldCheck,
   FileCheck2,
-  Bell,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
@@ -72,20 +71,6 @@ export const HeroSlider: React.FC = () => {
     },
     {
       id: 2,
-      tag: t('home.slider.slide2Tag'),
-      tagIcon: <Bell className="w-4 h-4 text-rose-400" />,
-      title: t('home.slider.slide2Title'),
-      highlight: t('home.slider.slide2Highlight'),
-      description: t('home.slider.slide2Desc'),
-      primaryBtnText: t('home.slider.slide2PrimaryBtn'),
-      primaryBtnLink: '#notices',
-      secondaryBtnText: t('home.slider.slide2SecondaryBtn'),
-      secondaryBtnLink: '#faq',
-      badge: t('home.slider.slide2Badge'),
-      theme: 'from-indigo-950 via-slate-900 to-blue-950',
-    },
-    {
-      id: 3,
       tag: t('home.slider.slide3Tag'),
       tagIcon: <Sparkles className="w-4 h-4 text-cyan-400" />,
       title: t('home.slider.slide3Title'),
@@ -123,19 +108,6 @@ export const HeroSlider: React.FC = () => {
 
       {/* Decorative Grid Overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
-
-      {/* Top Live Ticker Ribbon */}
-      <div className="relative z-20 bg-blue-950/80 border-b border-blue-800/40 px-4 py-2 text-xs flex items-center justify-between">
-        <div className="max-w-7xl mx-auto w-full flex items-center gap-2 overflow-hidden">
-          <span className="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider shrink-0 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-            {t('home.slider.liveGazette')}
-          </span>
-          <p className="text-slate-300 text-[11px] truncate">
-            {t('home.slider.tickerText')}
-          </p>
-        </div>
-      </div>
 
       {/* Main Slide Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
@@ -315,51 +287,6 @@ export const HeroSlider: React.FC = () => {
             )}
 
             {currentSlide === 2 && (
-              <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl backdrop-blur-md space-y-3.5">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div className="font-bold text-xs text-white flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-rose-400" />
-                    {t('home.slider.slide2CardTitle')}
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-rose-950 text-rose-300 text-[10px] font-bold border border-rose-800">
-                    {t('home.slider.slide2UpdatedToday')}
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700 space-y-1">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-amber-400 font-bold font-mono">CIR-2026/DILRMP-88</span>
-                      <span className="text-slate-400">{t('home.slider.slide2Notice1Date')}</span>
-                    </div>
-                    <div className="font-semibold text-slate-200">
-                      {t('home.slider.slide2Notice1Text')}
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700 space-y-1">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-emerald-400 font-bold font-mono">NOT-REV/104-B</span>
-                      <span className="text-slate-400">{t('home.slider.slide2Notice2Date')}</span>
-                    </div>
-                    <div className="font-semibold text-slate-200">
-                      {t('home.slider.slide2Notice2Text')}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2 text-center">
-                  <Link
-                    href="#notices"
-                    className="text-xs font-bold text-amber-400 hover:underline inline-flex items-center gap-1"
-                  >
-                    {t('home.slider.slide2ViewAll')} <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {currentSlide === 3 && (
               <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl backdrop-blur-md space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="font-bold text-xs text-white flex items-center gap-2">

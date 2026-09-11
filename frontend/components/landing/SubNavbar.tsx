@@ -188,7 +188,7 @@ export const SubNavbar: React.FC = () => {
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('resources.downloads')}</div>
-                  <div className="text-[10px] text-slate-500">{t('navbar.gazetteCircularsGuidelines', 'Gazette circulars & guidelines')}</div>
+                  <div className="text-[10px] text-slate-500">{t('navbar.circularsGuidelines', 'Circulars & guidelines')}</div>
                 </Link>
                 <Link
                   href="#contact"
@@ -225,7 +225,7 @@ export const SubNavbar: React.FC = () => {
                   <div className="text-[10px] text-slate-500">{t('navbar.dilrmpSubtitle', 'DILRMP, NLRMP, SVAMITVA')}</div>
                 </Link>
                 <Link
-                  href="#notices"
+                  href="#about"
                   className="block px-4 py-2 hover:bg-slate-50 text-slate-700 hover:text-blue-900"
                 >
                   <div className="font-bold">{t('schemes.scheme2')}</div>
@@ -241,15 +241,6 @@ export const SubNavbar: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* News & Notices */}
-          <Link
-            href="#notices"
-            className="px-3 py-2 rounded-lg hover:text-blue-900 hover:bg-slate-100 transition-colors relative"
-          >
-            <span>{t('navbar.news')}</span>
-            <span className="absolute top-1.5 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-          </Link>
 
           {/* Citizen Corner Dropdown */}
           <div
@@ -447,13 +438,7 @@ export const SubNavbar: React.FC = () => {
           >
             {t('services.service4Title')}
           </Link>
-          <Link
-            href="#notices"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-          >
-            {t('navbar.news')}
-          </Link>
+
           <Link
             href="#faq"
             onClick={() => setMobileMenuOpen(false)}

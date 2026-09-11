@@ -7,7 +7,6 @@ import {
   HeroSlider,
   AboutUsSection,
   ServicesSection,
-  NewsNoticesSection,
   FaqSection,
   ContactSection,
   LandingFooter,
@@ -28,11 +27,8 @@ export default function HomePage() {
       {/* 4. About Us Section (Cadastral Heritage, Modernization mission, 4 AI Pillars) */}
       <AboutUsSection />
 
-      {/* 6. Land Related Services Section (6 core citizen services with direct access links) */}
+      {/* 5. Land Related Services Section (6 core citizen services with direct access links) */}
       <ServicesSection />
-
-      {/* 5. News & Notices Section (Official Gazettes, Circulars, Orders with filter tabs) */}
-      <NewsNoticesSection />
 
       {/* 7. FAQs Section (Interactive accordion with common citizen questions) */}
       <FaqSection />
