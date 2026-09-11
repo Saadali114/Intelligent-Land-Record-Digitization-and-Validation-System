@@ -51,22 +51,22 @@ export const SubNavbar: React.FC = () => {
       {/* TIER 1: Main Brand & Action Header (Crisp White Government Identity)      */}
       {/* ========================================================================= */}
       <div className="bg-white border-b border-slate-200 shadow-xs">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3.5 gap-4">
+        <div className="w-full px-3 sm:px-6 lg:px-8 flex items-center justify-between py-2.5 sm:py-3.5 gap-2 sm:gap-4">
           {/* Left: Brand Identity with Emblem & Full Portal Titles */}
-          <Link href="/" className="flex items-center gap-3.5 group shrink-0">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
-              <Building2 className="w-7 h-7 sm:w-8 sm:h-8" />
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0 flex-1 sm:flex-initial">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-blue-900 via-indigo-900 to-blue-950 flex items-center justify-center text-amber-400 font-black shadow-md border border-blue-800/40 group-hover:scale-105 transition-transform shrink-0">
+              <Building2 className="w-5 h-5 sm:w-8 sm:h-8" />
             </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-blue-950">
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-lg sm:text-2xl font-black tracking-tight text-blue-950">
                   ILRDVS
                 </span>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-50 text-blue-800 border border-blue-200">
                   Maharashtra Portal
                 </span>
               </div>
-              <h1 className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight leading-snug">
+              <h1 className="text-[11px] sm:text-sm font-bold text-slate-800 tracking-tight leading-tight truncate sm:whitespace-normal">
                 {t('common.portalFullName', 'Intelligent Land Record Digitization & Validation System')}
               </h1>
               <p className="text-[10px] text-slate-500 font-medium hidden md:block">
@@ -107,21 +107,21 @@ export const SubNavbar: React.FC = () => {
           </div>
 
           {/* Mobile Right Controls: Mini CTAs & Hamburger Toggle */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             <Link
               href="/portal"
               onClick={handleCitizenPortalClick}
-              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs"
+              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-xs"
             >
               {t('navbar.citizenPortal', 'Portal')}
             </Link>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
               aria-label={t('navbar.toggleMenu', 'Toggle Menu')}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
@@ -392,22 +392,23 @@ export const SubNavbar: React.FC = () => {
       {/* MOBILE DRAWER NAVIGATION                                                  */}
       {/* ========================================================================= */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2.5 text-xs font-semibold text-slate-700 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3 text-xs font-semibold text-slate-700 shadow-xl max-h-[80vh] overflow-y-auto">
+          {/* Action CTAs Strip */}
           <Link
             href="/register"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3.5 py-2.5 rounded-xl bg-blue-50 text-blue-900 font-bold border border-blue-200 text-center"
+            className="block px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold border border-blue-200 text-center transition-colors"
           >
             + {t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}
           </Link>
-          <div className="grid grid-cols-2 gap-2 pt-1 pb-2">
+          <div className="grid grid-cols-2 gap-2">
             <Link
               href="/portal"
               onClick={(e) => {
                 setMobileMenuOpen(false);
                 handleCitizenPortalClick(e);
               }}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold shadow-xs"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shadow-xs transition-colors"
             >
               <ShieldCheck className="w-4 h-4 text-slate-950" />
               <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
@@ -415,55 +416,98 @@ export const SubNavbar: React.FC = () => {
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 text-white font-bold"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold transition-colors"
             >
               <LogIn className="w-4 h-4 text-amber-400" />
               <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
             </Link>
           </div>
 
+          {/* Core Navigation Links */}
           <div className="border-t border-slate-100 pt-2 space-y-1">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-900"
             >
-              {t('navbar.home', 'Home')}
+              <Home className="w-4 h-4 text-blue-900" />
+              <span>{t('navbar.home', 'Home')}</span>
             </Link>
+
             <Link
               href="#about"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700"
             >
-              {t('navbar.about', 'About Us')}
+              <Info className="w-4 h-4 text-blue-700" />
+              <span>{t('navbar.about', 'About Us')}</span>
             </Link>
+
             <Link
-              href="/land-records"
+              href="#land-stack"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50 text-blue-900 font-bold"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50/60 hover:bg-blue-100/60 text-blue-950 font-bold"
             >
-              {t('services.service1Title', '7/12 Satbara Extract')}
+              <Layers className="w-4 h-4 text-blue-800" />
+              <span>{t('navbar.landStack', '8-Layer Land Stack & ULPIN')}</span>
             </Link>
+
             <Link
-              href="/verification"
+              href="#services"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700"
             >
-              {t('services.service4Title', 'Document Verification')}
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>{t('navbar.services', 'Land Related Services')}</span>
             </Link>
+
+            <div className="pl-6 space-y-1 border-l-2 border-slate-100 my-1">
+              <Link
+                href="/land-records"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1.5 px-2 text-slate-600 hover:text-blue-900 text-[11px]"
+              >
+                • {t('services.service1Title', '7/12 Satbara Extract')}
+              </Link>
+              <Link
+                href="/land-records"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1.5 px-2 text-slate-600 hover:text-blue-900 text-[11px]"
+              >
+                • {t('services.service2Title', '8A Khata Extract')}
+              </Link>
+              <Link
+                href="/verification"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1.5 px-2 text-slate-600 hover:text-blue-900 text-[11px]"
+              >
+                • {t('services.service3Title', 'Ferfar (Form 6) Mutation')}
+              </Link>
+              <Link
+                href="/verification"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1.5 px-2 text-slate-600 hover:text-blue-900 text-[11px]"
+              >
+                • {t('services.service4Title', 'Verification Workstation')}
+              </Link>
+            </div>
+
             <Link
               href="#faq"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700"
             >
-              {t('navbar.faq', 'FAQs')}
+              <HelpCircle className="w-4 h-4 text-indigo-700" />
+              <span>{t('navbar.faq', 'Frequently Asked Questions')}</span>
             </Link>
+
             <Link
               href="#contact"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-50"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700"
             >
-              {t('navbar.contact', 'Contact Us')}
+              <Phone className="w-4 h-4 text-emerald-700" />
+              <span>{t('navbar.contact', 'Contact & Grievance')}</span>
             </Link>
           </div>
         </div>

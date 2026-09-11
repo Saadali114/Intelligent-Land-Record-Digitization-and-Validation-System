@@ -220,34 +220,34 @@ export const LandStackSection: React.FC = () => {
   const current = layers[selectedLayerIndex];
 
   return (
-    <section id="land-stack" className="py-20 bg-slate-50 text-slate-900 relative overflow-hidden border-b border-slate-200">
+    <section id="land-stack" className="py-12 sm:py-20 bg-slate-50 text-slate-900 relative overflow-hidden border-b border-slate-200">
       {/* Background Subtle Geospatial Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:28px_28px] opacity-40 pointer-events-none" />
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 space-y-8 sm:space-y-12">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>DILRMP 3.0 Operational Guidelines (2026–2031)</span>
+        <div className="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-[11px] sm:text-xs font-bold text-blue-900 uppercase tracking-wider shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate max-w-[260px] sm:max-w-none">DILRMP 3.0 Guidelines (2026–2031)</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-slate-900">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-slate-900">
             The Unified{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950">
               8-Layer Land Stack
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+          <p className="text-xs sm:text-base text-slate-600 leading-relaxed">
             Eliminating historical government data silos by anchoring spatial boundaries, Record of Rights, registration deeds, urban property cards, bank liens, and court stay orders into a single deterministic 14-digit Bhu-Aadhaar (ULPIN).
           </p>
         </div>
 
         {/* Interactive 8-Layer Stacking Architecture Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Left Column: Interactive Layer Vertical Selector */}
           <div className="lg:col-span-5 space-y-2.5">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1 pb-1 flex items-center justify-between">
@@ -285,7 +285,7 @@ export const LandStackSection: React.FC = () => {
                       >
                         {layer.shortName}
                       </div>
-                      <div className="text-[10px] text-slate-500 truncate max-w-[240px]">
+                      <div className="text-[10px] text-slate-500 truncate max-w-[130px] sm:max-w-[240px]">
                         {layer.authority.split('•')[0]}
                       </div>
                     </div>
@@ -302,18 +302,18 @@ export const LandStackSection: React.FC = () => {
           </div>
 
           {/* Right Column: Dynamic Deep Dive Layer Inspector Card */}
-          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl space-y-5 sm:space-y-6">
             {/* Card Header with Icon, Authority & Status */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 sm:pb-5">
               <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${current.iconBg}`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0 ${current.iconBg}`}>
                   {current.icon}
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-blue-700 font-bold">
                     DILRMP 3.0 Architectural Component
                   </span>
-                  <h3 className="text-lg font-black text-slate-900 mt-0.5 leading-snug">{current.fullName}</h3>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5 leading-snug">{current.fullName}</h3>
                   <p className="text-xs text-indigo-700 font-semibold mt-0.5">{current.authority}</p>
                 </div>
               </div>
@@ -331,16 +331,16 @@ export const LandStackSection: React.FC = () => {
 
             {/* Live Operational Data Inspector */}
             <div className="space-y-2">
-              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <div className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5 text-blue-700" />
                 <span>Simulated Real-Time Registry Attributes (Bhu-Aadhaar Linked):</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
                 {Object.entries(current.mockData).map(([key, val]) => (
                   <div
                     key={key}
-                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between"
+                    className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between"
                   >
                     <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
                       {key}
@@ -354,26 +354,26 @@ export const LandStackSection: React.FC = () => {
             </div>
 
             {/* Governance & Fraud Prevention Impact Box */}
-            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+            <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
-                <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
                 <span>Primary Governance & Anti-Fraud Impact:</span>
               </div>
               <p className="text-xs text-slate-700 leading-relaxed">{current.governanceImpact}</p>
             </div>
 
             {/* CTAs */}
-            <div className="pt-2 flex flex-wrap items-center gap-3">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <Link
                 href="/land-records"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-md shadow-blue-900/20"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-md shadow-blue-900/20 text-center"
               >
                 <span>Search Live 8-Layer Parcel</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/verification"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 transition-all shadow-2xs"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 transition-all shadow-2xs text-center"
               >
                 <span>Inspector Verification Workstation</span>
               </Link>
@@ -382,13 +382,13 @@ export const LandStackSection: React.FC = () => {
         </div>
 
         {/* 14-Digit Bhu-Aadhaar (ULPIN) Integration Banner (Light Government Card) */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50/60 to-white border border-blue-200/80 shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs font-black text-blue-900">
+        <div className="p-5 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50/60 to-white border border-blue-200/80 shadow-md flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
+          <div className="space-y-1.5 max-w-2xl text-center md:text-left">
+            <div className="inline-flex items-center gap-2 text-xs font-black text-blue-900 justify-center md:justify-start">
               <Lock className="w-3.5 h-3.5 text-blue-800" />
               <span>Unified 14-Digit Bhu-Aadhaar (ULPIN) Anchor</span>
             </div>
-            <h4 className="text-lg sm:text-xl font-black text-slate-900">
+            <h4 className="text-base sm:text-xl font-black text-slate-900">
               Every Parcel Linked by a Deterministic Spatial PIN
             </h4>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -396,8 +396,8 @@ export const LandStackSection: React.FC = () => {
             </p>
           </div>
 
-          <div className="shrink-0 flex flex-col items-center sm:items-end gap-2">
-            <div className="px-5 py-2.5 rounded-xl bg-white border-2 border-blue-900 text-blue-950 font-mono text-lg font-black tracking-widest shadow-sm">
+          <div className="w-full md:w-auto shrink-0 flex flex-col items-center md:items-end gap-2">
+            <div className="w-full md:w-auto text-center px-4 sm:px-5 py-2.5 rounded-xl bg-white border-2 border-blue-900 text-blue-950 font-mono text-base sm:text-lg font-black tracking-widest shadow-sm">
               81LVQLD9407JH0
             </div>
             <span className="text-[10px] text-slate-500 font-medium">Standard Bhu-Aadhaar ULPIN Format</span>

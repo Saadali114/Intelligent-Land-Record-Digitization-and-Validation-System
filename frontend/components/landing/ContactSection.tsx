@@ -59,28 +59,28 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+    <section id="contact" className="py-12 sm:py-20 bg-white border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-12">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
+        <div className="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold uppercase tracking-wider">
             <MessageSquare className="w-3.5 h-3.5 text-blue-800" />
             {t('navbar.contact')}
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
             {t('contact.title')}
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600">
             {t('contact.subtitle')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left: Contact Info Cards */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="p-6 rounded-2xl bg-slate-900 text-white space-y-4 shadow-xl">
-              <h3 className="font-bold text-lg text-amber-400 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-amber-400" />
+          <div className="lg:col-span-5 space-y-5 sm:space-y-6">
+            <div className="p-5 sm:p-6 rounded-2xl bg-slate-900 text-white space-y-4 shadow-xl">
+              <h3 className="font-bold text-base sm:text-lg text-amber-400 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-amber-400 shrink-0" />
                 {t('contact.directorateTitle')}
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -124,9 +124,9 @@ export const ContactSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-950 space-y-2">
+            <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-950 space-y-2">
               <div className="font-bold flex items-center gap-1.5 text-blue-900">
-                <CheckCircle2 className="w-4 h-4 text-blue-700" />
+                <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0" />
                 {t('contact.rtsGuaranteeTitle')}
               </div>
               <p className="text-slate-600 leading-relaxed text-[11px]">
@@ -136,7 +136,7 @@ export const ContactSection: React.FC = () => {
           </div>
 
           {/* Right: Interactive Inquiry / Grievance Form */}
-          <div className="lg:col-span-7 bg-slate-50 border border-slate-200 p-8 rounded-2xl shadow-xs">
+          <div className="lg:col-span-7 bg-slate-50 border border-slate-200 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xs">
             {submitted ? (
               <div className="p-8 text-center space-y-3 bg-white rounded-xl border border-emerald-300">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">

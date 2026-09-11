@@ -170,28 +170,31 @@ export const MainNavbar: React.FC = () => {
             <button
               type="button"
               onClick={() => setScreenReaderModalOpen(true)}
-              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer shadow-2xs shrink-0"
               title="Screen Reader Access & Audio Narration (Alt + S)"
               aria-label="Screen Reader Access and Text-to-Speech audio tools (Press Alt + S)"
             >
               <Volume2 className="w-3 h-3 text-amber-400 shrink-0" />
-              <span className="font-semibold">{t('navbar.screenReader', 'Screen Reader Access')}</span>
+              <span className="font-semibold hidden sm:inline">{t('navbar.screenReader', 'Screen Reader Access')}</span>
+              <span className="font-semibold sm:hidden">SR</span>
             </button>
 
             {/* Language Switcher in Top Bar */}
-            <LanguageSwitcher variant="dark" />
+            <div className="shrink-0">
+              <LanguageSwitcher variant="dark" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Top Navigation Row: Districts, RTI, RTS, EODB, Dashboard */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-4">
+      <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
         {/* Left Side: Districts Dropdown */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => setDistrictDropdownOpen(!districtDropdownOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-white font-semibold text-xs border border-slate-700 hover:border-blue-500 transition-all shadow-xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-white font-semibold text-xs border border-slate-700 hover:border-blue-500 transition-all shadow-xs shrink-0"
           >
             <MapPin className="w-3.5 h-3.5 text-amber-400" />
             <span>

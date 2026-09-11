@@ -18,26 +18,26 @@ export const AboutUsSection: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section id="about" className="py-20 bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">
+    <section id="about" className="py-12 sm:py-20 bg-white border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-16">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider">
             <Award className="w-3.5 h-3.5 text-blue-700" />
             {t('about.badge') || 'National Land Records Modernization Programme (DILRMP)'}
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
             {t('about.title') || 'Preserving & Safeguarding India’s Cadastral Heritage'}
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+          <p className="text-xs sm:text-base text-slate-600 leading-relaxed">
             {t('about.description') || 'ILRDVS was created to modernize millions of fragile, hand-written land records into structured, tamper-evident digital assets using neural computer vision and human inspector governance.'}
           </p>
         </div>
 
         {/* 2-Column Story & Architecture */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-5 text-sm text-slate-600 leading-relaxed">
-            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-900" />
               {t('about.challengeTitle')}
             </h3>
@@ -48,26 +48,26 @@ export const AboutUsSection: React.FC = () => {
               {t('about.challengeP2')}
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-blue-950 font-mono">8 Layers</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">DILRMP 3.0</div>
-                <div className="text-[11px] text-slate-500">Unified Land Stack</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-blue-950 font-mono">8 Layers</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">DILRMP 3.0</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500">Unified Stack</div>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-indigo-900 font-mono">14 Digits</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">Bhu-Aadhaar</div>
-                <div className="text-[11px] text-slate-500">Spatial ULPIN Anchor</div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-indigo-900 font-mono">14 Digits</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">Bhu-Aadhaar</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500">Spatial Anchor</div>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-emerald-800 font-mono">100%</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.auditTrailTitle')}</div>
-                <div className="text-[11px] text-slate-500">{t('about.auditTrailDesc')}</div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-emerald-800 font-mono">100%</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">{t('about.auditTrailTitle')}</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500 truncate">{t('about.auditTrailDesc')}</div>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xl font-black text-purple-800 font-mono">98.4%</div>
-                <div className="text-xs font-bold text-slate-800 mt-0.5">{t('about.accuracyTitle')}</div>
-                <div className="text-[11px] text-slate-500">{t('about.accuracyDesc')}</div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-purple-800 font-mono">98.4%</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">{t('about.accuracyTitle')}</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500 truncate">{t('about.accuracyDesc')}</div>
               </div>
             </div>
           </div>

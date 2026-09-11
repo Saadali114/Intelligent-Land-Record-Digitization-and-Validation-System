@@ -126,20 +126,20 @@ export const HeroSlider: React.FC = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
 
       {/* Main Slide Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[460px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 lg:py-20 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[420px] sm:min-h-[460px]">
           {/* Left Column: Heading, Tag, Description, CTAs */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             {/* Tag Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-blue-200 backdrop-blur-sm shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="inline-flex flex-wrap items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-[11px] sm:text-xs font-semibold text-blue-200 backdrop-blur-sm shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-full">
               {slide.tagIcon}
-              <span>{slide.tag}</span>
-              <span className="text-slate-500">•</span>
+              <span className="truncate max-w-[200px] sm:max-w-none">{slide.tag}</span>
+              <span className="text-slate-500 hidden sm:inline">•</span>
               <span className="text-amber-400 font-bold">{slide.badge}</span>
             </div>
 
             {/* Slide Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-5xl font-black tracking-tight leading-tight sm:leading-tight animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight sm:leading-tight animate-in fade-in slide-in-from-bottom-3 duration-500">
               {slide.title}{' '}
               <span className="block mt-1 bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-sm">
                 {slide.highlight}
@@ -147,15 +147,15 @@ export const HeroSlider: React.FC = () => {
             </h1>
 
             {/* Slide Description */}
-            <p className="text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <p className="text-xs sm:text-sm lg:text-base text-slate-300 max-w-xl leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500">
               {slide.description}
             </p>
 
-            {/* Action Buttons */}
-            <div className="pt-2 flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-500">
+            {/* Action Buttons (Full-width on mobile, inline on tablet+) */}
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-5 duration-500">
               <Link
                 href={slide.primaryBtnLink}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all hover:scale-102"
+                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all text-center"
               >
                 <span>{slide.primaryBtnText}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -163,14 +163,14 @@ export const HeroSlider: React.FC = () => {
 
               <Link
                 href={slide.secondaryBtnLink}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition-all backdrop-blur-sm"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition-all backdrop-blur-sm text-center"
               >
                 <span>{slide.secondaryBtnText}</span>
               </Link>
             </div>
 
             {/* Trust Badges */}
-            <div className="pt-4 flex flex-wrap items-center gap-4 text-[11px] text-slate-400 border-t border-slate-800/80">
+            <div className="pt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-[11px] text-slate-400 border-t border-slate-800/80">
               <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5" /> {t('home.slider.trust1')}
               </span>
