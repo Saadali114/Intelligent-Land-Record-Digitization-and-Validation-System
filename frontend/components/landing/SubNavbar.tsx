@@ -26,12 +26,35 @@ import {
   UserPlus,
   Home,
   Info,
+  MapPin,
+  Shield,
+  FileCheck,
+  Briefcase,
+  LayoutDashboard,
+  ArrowRight,
 } from 'lucide-react';
+
+const DISTRICTS_LIST = [
+  { key: 'pune', defaultName: 'Pune' },
+  { key: 'mumbaiCity', defaultName: 'Mumbai City' },
+  { key: 'mumbaiSuburban', defaultName: 'Mumbai Suburban' },
+  { key: 'nagpur', defaultName: 'Nagpur' },
+  { key: 'nashik', defaultName: 'Nashik' },
+  { key: 'thane', defaultName: 'Thane' },
+  { key: 'chhatrapatiSambhajinagar', defaultName: 'Chhatrapati Sambhajinagar' },
+  { key: 'kolhapur', defaultName: 'Kolhapur' },
+  { key: 'solapur', defaultName: 'Solapur' },
+  { key: 'amravati', defaultName: 'Amravati' },
+  { key: 'nanded', defaultName: 'Nanded' },
+  { key: 'satara', defaultName: 'Satara' },
+];
 
 export const SubNavbar: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileDistrictOpen, setMobileDistrictOpen] = useState(false);
+  const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const toggleDropdown = (name: string) => {
@@ -421,6 +444,107 @@ export const SubNavbar: React.FC = () => {
               <LogIn className="w-4 h-4 text-amber-400" />
               <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
             </Link>
+          </div>
+
+          {/* Governance Tools & Direct Portals in Mobile Burger */}
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+            {/* Direct Dashboard Link */}
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <LayoutDashboard className="w-4 h-4 text-amber-400" />
+                <span>{t('navbar.dashboard', 'Admin & Operations Dashboard')}</span>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+            </Link>
+
+            {/* Districts Selector Accordion */}
+            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+              <button
+                type="button"
+                onClick={() => setMobileDistrictOpen(!mobileDistrictOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-amber-500" />
+                  <span>
+                    {t('navbar.districts', 'Districts')}:{' '}
+                    <span className="text-blue-900 font-extrabold">
+                      {selectedDistrictKey ? t(`districts.${selectedDistrictKey}`, selectedDistrictKey) : t('common.all', 'All Districts')}
+                    </span>
+                  </span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${mobileDistrictOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {mobileDistrictOpen && (
+                <div className="p-2 border-t border-slate-200 grid grid-cols-2 gap-1 max-h-48 overflow-y-auto bg-slate-50/70">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDistrictKey(null);
+                      setMobileDistrictOpen(false);
+                    }}
+                    className={`text-left px-2 py-1.5 rounded text-[11px] font-bold ${
+                      selectedDistrictKey === null ? 'bg-blue-900 text-white' : 'text-blue-950 hover:bg-slate-200'
+                    }`}
+                  >
+                    ✓ {t('common.all', 'All Districts')}
+                  </button>
+                  {DISTRICTS_LIST.map((dist) => (
+                    <button
+                      key={dist.key}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDistrictKey(dist.key);
+                        setMobileDistrictOpen(false);
+                      }}
+                      className={`text-left px-2 py-1.5 rounded text-[11px] truncate transition-colors ${
+                        selectedDistrictKey === dist.key
+                          ? 'bg-blue-900 text-white font-bold'
+                          : 'text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {t(`districts.${dist.key}`, dist.defaultName)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Key Governance Portals (RTI, RTS, EODB) */}
+            <div className="grid grid-cols-3 gap-1.5 text-center text-[11px]">
+              <Link
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-xl bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-900 font-bold border border-slate-200 flex flex-col items-center gap-1 shadow-2xs transition-colors"
+                title={t('navbar.rtiTitle', 'Right to Information')}
+              >
+                <Shield className="w-4 h-4 text-blue-700" />
+                <span>RTI</span>
+              </Link>
+              <Link
+                href="#services"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-xl bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 font-bold border border-slate-200 flex flex-col items-center gap-1 shadow-2xs transition-colors"
+                title={t('navbar.rtsTitle', 'Right to Services')}
+              >
+                <FileCheck className="w-4 h-4 text-emerald-700" />
+                <span>RTS</span>
+              </Link>
+              <Link
+                href="#services"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-xl bg-white hover:bg-purple-50 text-slate-800 hover:text-purple-900 font-bold border border-slate-200 flex flex-col items-center gap-1 shadow-2xs transition-colors"
+                title={t('navbar.eodbTitle', 'Ease of Doing Business')}
+              >
+                <Briefcase className="w-4 h-4 text-purple-700" />
+                <span>EODB</span>
+              </Link>
+            </div>
           </div>
 
           {/* Core Navigation Links */}

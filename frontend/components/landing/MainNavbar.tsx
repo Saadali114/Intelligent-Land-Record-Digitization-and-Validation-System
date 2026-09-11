@@ -187,8 +187,8 @@ export const MainNavbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Top Navigation Row: Districts, RTI, RTS, EODB, Dashboard */}
-      <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
+      {/* Main Top Navigation Row: Districts, RTI, RTS, EODB, Dashboard (Desktop Only - on mobile/tablet these are inside the burger drawer) */}
+      <div className="hidden lg:flex w-full px-4 sm:px-6 lg:px-8 py-2.5 items-center justify-between gap-4">
         {/* Left Side: Districts Dropdown */}
         <div className="relative shrink-0">
           <button
