@@ -1,125 +1,118 @@
-'use client';
-
 import React from 'react';
+import {
+  ShieldCheck,
+  Cpu,
+  CheckCircle2,
+  Lock,
+  Layers,
+  Sparkles,
+  Award,
+  Users,
+  Building2,
+  FileText,
+} from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 
 export const AboutUsSection: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section
-      id="about"
-      data-purpose="modernizing-historical-records"
-      className="py-16 px-4 sm:px-8 max-w-7xl mx-auto bg-white select-none"
-    >
-      {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center space-x-1.5 bg-emerald-100/80 text-sovereign-800 font-mono text-xs px-3 py-1 rounded-full uppercase tracking-widest font-semibold mb-3 border border-emerald-200">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-          <span>Digital Governance</span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-stone-900 tracking-tight">
-          Modernizing Historical Land Records with Cadastral AI
-        </h2>
-        <p className="text-stone-600 text-sm sm:text-base mt-3 leading-relaxed">
-          ILRDVS is designed to bridge historical paper records (Modi script, archaic Marathi, and revenue formats) with modern digital land registries, ensuring every land parcel is securely geo-referenced and tamper-proof.
-        </p>
-      </div>
-
-      {/* Modernization Split Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        {/* Left: Narrative & Key Metrics */}
-        <div className="lg:col-span-5 bg-white border border-stone-200 rounded-xl p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center space-x-3 mb-4">
-              <span className="w-8 h-8 rounded bg-gold-100 text-gold-600 flex items-center justify-center font-bold text-sm">
-                📜
-              </span>
-              <h3 className="font-serif font-bold text-lg text-stone-900">
-                The Challenge of Archival Land Records
-              </h3>
-            </div>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              For decades, land records—including Records of Rights (RoR), mutation registers, and registered sale deeds—have been maintained on physical paper, making them vulnerable to yellowing, ink bleeding, tear damage, and manual transcription errors.
-            </p>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mt-3">
-              These vulnerabilities can contribute to duplicate or conflicting land records, ownership disputes, lengthy civil litigation, and delays in land verification. ILRDVS addresses these challenges through an end-to-end AI-powered workflow for digitizing, validating, and verifying land records.
-            </p>
+    <section id="about" className="py-12 sm:py-20 bg-white border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-16">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider">
+            <Award className="w-3.5 h-3.5 text-blue-700" />
+            {t('about.badge') || 'National Land Records Modernization Programme (DILRMP)'}
           </div>
-
-          {/* 4 Metric Highlights */}
-          <div className="grid grid-cols-2 gap-4 pt-6 mt-6 border-t border-stone-200">
-            <div className="bg-white p-3 rounded border border-stone-200 shadow-2xs">
-              <div className="text-2xl font-bold font-serif text-sovereign-800">8 Layers</div>
-              <div className="text-[11px] text-stone-500">DILRMP 3.0 Unified Stack</div>
-            </div>
-            <div className="bg-white p-3 rounded border border-stone-200 shadow-2xs">
-              <div className="text-2xl font-bold font-serif text-gold-600">14 Digits</div>
-              <div className="text-[11px] text-stone-500">Bhu-Aadhaar Spatial Anchor</div>
-            </div>
-            <div className="bg-white p-3 rounded border border-stone-200 shadow-2xs">
-              <div className="text-2xl font-bold font-serif text-emerald-700">100%</div>
-              <div className="text-[11px] text-stone-500">Audit Trail Provenance</div>
-            </div>
-            <div className="bg-white p-3 rounded border border-stone-200 shadow-2xs">
-              <div className="text-2xl font-bold font-serif text-sovereign-800">98.4%</div>
-              <div className="text-[11px] text-stone-500">OCR Extraction Accuracy</div>
-            </div>
-          </div>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            {t('about.title') || 'Preserving & Safeguarding India’s Cadastral Heritage'}
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 leading-relaxed">
+            {t('about.description') || 'ILRDVS was created to modernize millions of fragile, hand-written land records into structured, tamper-evident digital assets using neural computer vision and human inspector governance.'}
+          </p>
         </div>
 
-        {/* Right: 4 AI Technical Capabilities */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Card 1 */}
-          <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm mb-3">
-              ⚙️
-            </div>
-            <h4 className="font-serif font-bold text-sm text-stone-900 mb-1">
-              OpenCV &amp; EasyOCR
-            </h4>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Adaptive thresholding, deskewing, and multilingual neural recognition of cursive and handwritten Devanagari script for accurate extraction.
+        {/* 2-Column Story & Architecture */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-900" />
+              {t('about.challengeTitle')}
+            </h3>
+            <p>
+              {t('about.challengeP1')}
             </p>
+            <p>
+              {t('about.challengeP2')}
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-blue-950 font-mono">8 Layers</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">DILRMP 3.0</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500">Unified Stack</div>
+              </div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-indigo-900 font-mono">14 Digits</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">Bhu-Aadhaar</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500">Spatial Anchor</div>
+              </div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-emerald-800 font-mono">100%</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">{t('about.auditTrailTitle')}</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500 truncate">{t('about.auditTrailDesc')}</div>
+              </div>
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-lg sm:text-xl font-black text-purple-800 font-mono">98.4%</div>
+                <div className="text-[11px] sm:text-xs font-bold text-slate-800 mt-0.5">{t('about.accuracyTitle')}</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-500 truncate">{t('about.accuracyDesc')}</div>
+              </div>
+            </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 rounded bg-gold-50 text-gold-600 flex items-center justify-center font-bold text-sm mb-3">
-              📐
+          {/* 4 Core Pillars Grid */}
+          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 hover:border-blue-500 hover:shadow-md transition-all">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center font-bold">
+                <Cpu className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar1Title')}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t('about.pillar1Desc')}
+              </p>
             </div>
-            <h4 className="font-serif font-bold text-sm text-stone-900 mb-1">
-              Spatial NER Extraction
-            </h4>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Heuristic cadastral parsing isolates Survey No, Khasra, Khata, Plot Area, Owner Name, and Mutation references directly into structured datasets.
-            </p>
-          </div>
 
-          {/* Card 3 */}
-          <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm mb-3">
-              🖥️
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 hover:border-emerald-500 hover:shadow-md transition-all">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar2Title')}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t('about.pillar2Desc')}
+              </p>
             </div>
-            <h4 className="font-serif font-bold text-sm text-stone-900 mb-1">
-              Inspector Workstation
-            </h4>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Dual-pane scan/parse review interface enabling revenue officers to compare raw archival scans against AI predictions before sanctioning.
-            </p>
-          </div>
 
-          {/* Card 4 */}
-          <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 rounded bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm mb-3">
-              🔏
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 hover:border-purple-500 hover:shadow-md transition-all">
+              <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center font-bold">
+                <Users className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar3Title')}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t('about.pillar3Desc')}
+              </p>
             </div>
-            <h4 className="font-serif font-bold text-sm text-stone-900 mb-1">
-              Tamper-Proof Certificates
-            </h4>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              Automated generation of official bilingual certificates with digital watermarks, SHA-256 integrity signatures, and instant print capability.
-            </p>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 hover:border-amber-500 hover:shadow-md transition-all">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
+                <Lock className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-slate-900 text-sm">{t('about.pillar4Title')}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t('about.pillar4Desc')}
+              </p>
+            </div>
           </div>
         </div>
       </div>

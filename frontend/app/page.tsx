@@ -15,34 +15,34 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#f7f8f4] flex flex-col selection:bg-emerald-200 selection:text-emerald-950">
-      {/* 1. Main Top Gov Ribbon */}
+    <div className="min-h-screen bg-white flex flex-col selection:bg-amber-400 selection:text-slate-950">
+      {/* 1. Main Top Navbar (Districts, RTI, RTS, EODB, Dashboard) */}
       <MainNavbar />
 
-      {/* 2. Subnavbar Brand & CTAs */}
+      {/* 2. Subnavbar (ILRDVS brand, Home, About, Services, Resources, Schemes & Projects, Citizen Corner, [Officer Login]) */}
       <SubNavbar />
 
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-        {/* 3. Hero Section: Cadastral Vault & Record Protection */}
+        {/* 3. Hero Section (Attractive slider: "Your land records are safe here", Land info slides, DILRMP 3.0 highlights) */}
         <HeroSlider />
 
-        {/* 4. Rescuing Historical Parchments with Cadastral AI */}
+        {/* 4. About Us Section (Cadastral Heritage, Modernization mission, 4 AI Pillars) */}
         <AboutUsSection />
 
-        {/* 5. The Unified 8-Layer Cadastral Land Stack */}
+        {/* 5. The Unified 8-Layer Land Stack (DILRMP 3.0 Operational Guidelines 2026-2031) */}
         <LandStackSection />
 
-        {/* 6. Certified Cadastral Services & Records */}
+        {/* 6. Land Related Services Section (Core citizen services with direct access links) */}
         <ServicesSection />
 
-        {/* 7. Frequently Asked Questions */}
+        {/* 7. FAQs Section (Interactive accordion with common citizen questions) */}
         <FaqSection />
 
-        {/* 8. Citizen Helpdesk & Regional Offices */}
+        {/* 8. Contact Us Section (Grievance submission & Revenue Directorate directory) */}
         <ContactSection />
       </main>
 
-      {/* 9. Official Maharashtra Government Footer */}
+      {/* 9. Official Government Footer */}
       <LandingFooter />
     </div>
   );

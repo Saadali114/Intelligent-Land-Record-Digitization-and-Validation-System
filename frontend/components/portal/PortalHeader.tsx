@@ -1,158 +1,178 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import {
-  Menu,
-  Building2,
   Bell,
-  User as UserIcon,
+  User,
   LogOut,
-  PhoneCall,
-  ShieldCheck,
-  CheckCircle2,
+  Building2,
+  FileCheck2,
+  Menu,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { citizenService } from '../../services/citizen.service';
+import { CitizenProfile, CitizenNotification } from '../../types/citizen';
 
-export interface PortalHeaderProps {
+interface PortalHeaderProps {
   onToggleSidebar?: () => void;
 }
 
 export const PortalHeader: React.FC<PortalHeaderProps> = ({ onToggleSidebar }) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(1);
+  const pathname = usePathname();
+  const [profile, setProfile] = useState<CitizenProfile | null>(null);
+  const [notifications, setNotifications] = useState<CitizenNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
-  const profile = citizenService.getProfile();
+  useEffect(() => {
+    const prof = citizenService.getProfile();
+    setProfile(prof);
+    const notifs = citizenService.getNotifications();
+    setNotifications(notifs);
+  }, [pathname]);
 
-  const handleLogout = () => {
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleLogout = async () => {
     citizenService.logout();
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch {
+      // ignore
+    }
     router.push('/portal/login');
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-2xs select-none">
-      {/* Top Official Accessibility & Gov Ribbon */}
-      <div className="bg-[#f6f8f4] border-b border-slate-200/70 px-4 sm:px-6 lg:px-8 py-1 text-[11px] text-slate-700">
-        <div className="w-full flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[#14532d] font-bold">🏛️ महाराष्ट्र शासन | Govt. of Maharashtra</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-600 hidden sm:inline">DILRMP 3.0 & NLRMP Compliant Citizen Node</span>
-            <span className="text-slate-300 hidden md:inline">|</span>
-            <span className="hidden md:inline-flex items-center gap-1 text-[#166534] font-medium">
-              <PhoneCall className="w-3 h-3" />
-              <span>टोल-फ्री: 1800-120-8040</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px]">
-              <span className="text-slate-500 font-medium">Text:</span>
-              <button type="button" className="px-1 text-slate-700 font-bold hover:text-[#14532d]">A-</button>
-              <button type="button" className="px-1 text-[#14532d] font-bold bg-emerald-100 rounded">A</button>
-              <button type="button" className="px-1 text-slate-700 font-bold hover:text-[#14532d]">A+</button>
-            </div>
-            <LanguageSwitcher variant="light" />
-          </div>
-        </div>
-      </div>
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
+      {/* Top Gov Tricolor Thin Ribbon */}
+      <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 border-b border-slate-200" />
 
       {/* Main Bar */}
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Left: Hamburger + Brand */}
         <div className="flex items-center gap-3">
-          {onToggleSidebar && (
-            <button
-              onClick={onToggleSidebar}
-              className="md:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 cursor-pointer"
-              aria-label="Toggle navigation"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none"
+            aria-label={t('topbar.toggleNavigation', { defaultValue: 'Toggle navigation' })}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
           <Link href="/portal" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg bg-sovereign-800 border border-emerald-500/40 flex items-center justify-center text-white font-bold shadow-xs">
-              <Building2 className="w-5 h-5 text-emerald-300" />
+            <div className="w-9 h-9 rounded-lg bg-blue-900 flex items-center justify-center text-amber-400 font-bold shadow-xs">
+              <Building2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold tracking-wider text-sovereign-950 font-mono text-sm sm:text-base">
-                  ILRDVS
+                <span className="text-base font-bold text-slate-900 tracking-tight">
+                  ILRDVS <span className="text-blue-900 font-semibold">{t('navbar.citizenPortal')}</span>
                 </span>
-                <span className="text-sm sm:text-base font-bold text-sovereign-800">
-                  महा-भूमी
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 text-[10px] uppercase font-bold tracking-wider border border-emerald-300 hidden sm:inline-block">
-                  Govt of India / DLRS
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  {t('citizenCorner.title')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 hidden md:block">
-                Intelligent Land Record Digitization &amp; Statutory Validation System
+                {t('common.portalFullName')}
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Center: DILRMP FedOps & RTS SLA Node Status (Matching Stitch) */}
-        <div className="hidden xl:flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-            </span>
-            <span className="text-xs text-slate-700 font-medium">DILRMP 3.0 FedOps Core Node</span>
-            <span className="text-xs text-emerald-800 font-bold font-mono">[ONLINE]</span>
-          </div>
+        {/* Right: Actions, Language, Notifications, Profile */}
+        <div className="flex items-center gap-2.5">
+          {/* Language Selector Component */}
+          <LanguageSwitcher variant="header" />
 
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
-            <span className="text-xs text-slate-600 font-medium">RTS SLA Target:</span>
-            <span className="text-xs text-emerald-900 font-bold font-mono">14 Days Max</span>
-          </div>
-        </div>
+          {/* Notifications Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none transition-colors"
+              title={t('notifications.title')}
+              aria-label={t('notifications.viewNotifications', { defaultValue: 'View notifications' })}
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white ring-2 ring-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
 
-        {/* Right: Notification bell & User profile */}
-        <div className="flex items-center gap-3">
-          {/* Notification Bell */}
-          <Link
-            href="/portal/notifications"
-            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 relative transition-colors"
-            title="Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg border border-slate-200 bg-white shadow-xl py-2 z-50 animate-in fade-in">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    {t('notifications.title')} ({unreadCount} {t('notifications.unread')})
+                  </span>
+                  <Link
+                    href="/portal/notifications"
+                    onClick={() => setShowNotifications(false)}
+                    className="text-xs text-blue-800 hover:underline font-medium"
+                  >
+                    {t('common.viewAll')}
+                  </Link>
+                </div>
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                  {notifications.slice(0, 4).map((n) => (
+                    <Link
+                      key={n.id}
+                      href={n.link || '/portal/notifications'}
+                      onClick={() => setShowNotifications(false)}
+                      className={`block px-4 py-2.5 hover:bg-slate-50 transition-colors ${
+                        !n.read ? 'bg-blue-50/50' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-xs font-semibold text-slate-900 line-clamp-1">
+                          {n.title}
+                        </span>
+                        <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                          {n.date}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">
+                        {n.message}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
+          </div>
+
+          {/* Profile pill */}
+          <Link
+            href="/portal/profile"
+            className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+          >
+            <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-900 flex items-center justify-center font-bold text-xs">
+              {(profile?.name || 'C').charAt(0).toUpperCase()}
+            </div>
+            <div className="hidden sm:block text-left">
+              <div className="text-xs font-semibold text-slate-900 leading-tight">
+                {profile?.name || t('common.citizen', { defaultValue: 'Citizen' })}
+              </div>
+              <div className="text-[10px] text-slate-500 leading-none">{t('navbar.citizenCorner')}</div>
+            </div>
           </Link>
 
-          {/* Profile pill with Logout */}
-          <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-            <div className="hidden sm:flex flex-col items-end text-right leading-tight">
-              <span className="text-xs font-bold text-slate-900">
-                {profile?.name || 'Saad Ali'}
-              </span>
-              <span className="text-[10px] text-emerald-800 font-semibold font-mono">
-                Citizen Corner • Haveli
-              </span>
-            </div>
-
-            <div className="w-8 h-8 rounded-full bg-sovereign-800 text-white flex items-center justify-center font-bold text-xs border border-emerald-600/40 shadow-2xs">
-              SA
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="p-1 text-slate-400 hover:text-rose-600 transition-colors ml-1"
-              title="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+            title={t('common.logout')}
+            aria-label={t('common.signOutCitizen', { defaultValue: 'Sign out of Citizen Portal' })}
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>

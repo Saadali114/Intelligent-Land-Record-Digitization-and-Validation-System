@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import {
+  MapPin,
+  ChevronDown,
+  LayoutDashboard,
+  FileCheck,
+  Shield,
+  Briefcase,
+  PhoneCall,
+  Eye,
+  Volume2,
+} from 'lucide-react';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { ScreenReaderModal } from '../ui/ScreenReaderModal';
 
 export type FontSize = 'small' | 'normal' | 'large';
@@ -24,10 +36,43 @@ export const applyFontSize = (size: FontSize) => {
   }
 };
 
+interface DistrictOption {
+  key: string;
+  defaultName: string;
+}
+
+const DISTRICTS_LIST: DistrictOption[] = [
+  { key: 'pune', defaultName: 'Pune' },
+  { key: 'mumbaiCity', defaultName: 'Mumbai City' },
+  { key: 'mumbaiSuburban', defaultName: 'Mumbai Suburban' },
+  { key: 'nagpur', defaultName: 'Nagpur' },
+  { key: 'nashik', defaultName: 'Nashik' },
+  { key: 'thane', defaultName: 'Thane' },
+  { key: 'chhatrapatiSambhajinagar', defaultName: 'Chhatrapati Sambhajinagar' },
+  { key: 'kolhapur', defaultName: 'Kolhapur' },
+  { key: 'solapur', defaultName: 'Solapur' },
+  { key: 'amravati', defaultName: 'Amravati' },
+  { key: 'nanded', defaultName: 'Nanded' },
+  { key: 'satara', defaultName: 'Satara' },
+];
+
 export const MainNavbar: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const [districtDropdownOpen, setDistrictDropdownOpen] = useState(false);
+  const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<FontSize>('normal');
   const [screenReaderModalOpen, setScreenReaderModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        setScreenReaderModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
+  }, []);
 
   useEffect(() => {
     try {
@@ -46,103 +91,211 @@ export const MainNavbar: React.FC = () => {
     applyFontSize(size);
   };
 
-  const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
-    try {
-      localStorage.setItem('i18nextLng', lang);
-    } catch {
-      // ignore
-    }
-  };
-
   return (
-    <header className="w-full text-xs select-none" data-purpose="top-government-bar">
-      {/* Tricolor Flag Line */}
-      <div className="h-1 w-full bg-gradient-to-r from-orange-500 via-white to-green-600" />
+    <div className="bg-slate-900 text-slate-200 text-[11px] border-b border-slate-800 relative">
+      {/* Skip to Main Content Accessible Anchor for Screen Readers & Keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-amber-400 focus:text-slate-950 focus:font-black focus:rounded-lg focus:shadow-2xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
+      >
+        {t('navbar.skipToContent', 'Skip to main content')}
+      </a>
 
-      {/* Official Portal Identity Banner */}
-      <div className="bg-stone-900 text-stone-300 border-b border-stone-800 px-4 sm:px-8 py-1.5 flex flex-wrap justify-between items-center text-[11px]">
-        <div className="flex items-center space-x-3">
-          <span className="inline-flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-            <span className="font-semibold text-white tracking-wide">Government of India</span>
-          </span>
-          <span className="text-stone-600">|</span>
-          <span className="font-medium text-stone-300">GOVERNMENT OF INDIA / DLRS</span>
-          <span className="text-stone-600">|</span>
-          <span className="hidden md:inline text-stone-400">
-            National Land Records Modernization Programme (NLRMP)
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          {/* Toll-free telephone support */}
-          <span className="hidden sm:inline-flex items-center space-x-1 text-gold-500 font-medium font-mono">
-            <span>Toll-Free: 1800-120-8040</span>
-          </span>
-
-          {/* Accessibility switcher */}
-          <div className="flex items-center space-x-1 bg-stone-800 px-1.5 py-0.5 rounded text-[10px]">
-            <button
-              type="button"
-              onClick={() => handleFontSizeChange('small')}
-              className={`cursor-pointer hover:text-white px-1 transition-colors ${
-                fontSize === 'small' ? 'font-bold text-white' : 'text-stone-400'
-              }`}
-              title="Small Text"
-            >
-              A-
-            </button>
-            <button
-              type="button"
-              onClick={() => handleFontSizeChange('normal')}
-              className={`cursor-pointer hover:text-white px-1 transition-colors ${
-                fontSize === 'normal' ? 'font-bold text-white' : 'text-stone-400'
-              }`}
-              title="Normal Text"
-            >
-              A
-            </button>
-            <button
-              type="button"
-              onClick={() => handleFontSizeChange('large')}
-              className={`cursor-pointer hover:text-white px-1 transition-colors ${
-                fontSize === 'large' ? 'font-bold text-white' : 'text-stone-400'
-              }`}
-              title="Large Text"
-            >
-              A+
-            </button>
+      {/* Topmost Official Accessibility & Gov Ribbon */}
+      <div className="border-b border-slate-800/80 bg-slate-950/60 px-4 sm:px-6 lg:px-8 py-1.5">
+        <div className="w-full flex flex-wrap items-center justify-between gap-2">
+          {/* Government Identification */}
+          <div className="flex items-center gap-2.5 font-medium text-slate-300">
+            <span className="text-amber-400 font-bold tracking-wider">
+              {t('common.govtOfIndiaEmblem', '🏛️ भारत सरकार')}
+            </span>
+            <span className="text-slate-600">|</span>
+            <span className="hidden sm:inline text-slate-300 font-semibold uppercase">
+              {t('common.govtOfIndia')}
+            </span>
+            <span className="text-slate-600 hidden md:inline">|</span>
+            <span className="hidden md:inline text-slate-400">
+              {t('home.bannerBadge')}
+            </span>
           </div>
 
-          {/* Screen reader modal trigger */}
-          <button
-            type="button"
-            onClick={() => setScreenReaderModalOpen(true)}
-            className="cursor-pointer hover:text-white flex items-center space-x-1 text-stone-300"
-          >
-            <span>Screen Reader</span>
-          </button>
+          {/* Accessibility & Utility Tools */}
+          <div className="flex items-center gap-3 text-[10px] text-slate-300">
+            <div className="hidden lg:flex items-center gap-1.5 text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/50">
+              <PhoneCall className="w-2.5 h-2.5" />
+              <span>{t('common.tollFree')}</span>
+            </div>
 
-          {/* Language dropdown */}
-          <select
-            value={i18n.language?.startsWith('mr') ? 'mr' : i18n.language?.startsWith('hi') ? 'hi' : 'en'}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            className="bg-stone-800 text-white border-0 py-0.5 px-1.5 rounded text-[10px] focus:ring-0 cursor-pointer outline-none"
-          >
-            <option value="en">English</option>
-            <option value="mr">मराठी (Marathi)</option>
-            <option value="hi">हिन्दी (Hindi)</option>
-          </select>
+            <div className="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+              <span className="text-slate-400">{t('navbar.textLabel', 'Text:')}</span>
+              <button
+                type="button"
+                onClick={() => handleFontSizeChange('small')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'small' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
+                title={t('navbar.decreaseText')}
+                aria-label={t('navbar.decreaseText')}
+                aria-pressed={fontSize === 'small'}
+              >
+                A-
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFontSizeChange('normal')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'normal' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
+                title={t('navbar.standardText')}
+                aria-label={t('navbar.standardText')}
+                aria-pressed={fontSize === 'normal'}
+              >
+                A
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFontSizeChange('large')}
+                className={`hover:text-white px-1.5 py-0.5 rounded font-bold transition-colors ${
+                  fontSize === 'large' ? 'text-amber-400 bg-slate-700/80' : 'text-slate-300'
+                }`}
+                title={t('navbar.increaseText')}
+                aria-label={t('navbar.increaseText')}
+                aria-pressed={fontSize === 'large'}
+              >
+                A+
+              </button>
+            </div>
+
+            {/* Screen Reader Access Interactive Trigger */}
+            <button
+              type="button"
+              onClick={() => setScreenReaderModalOpen(true)}
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer shadow-2xs shrink-0"
+              title="Screen Reader Access & Audio Narration (Alt + S)"
+              aria-label="Screen Reader Access and Text-to-Speech audio tools (Press Alt + S)"
+            >
+              <Volume2 className="w-3 h-3 text-amber-400 shrink-0" />
+              <span className="font-semibold hidden sm:inline">{t('navbar.screenReader', 'Screen Reader Access')}</span>
+              <span className="font-semibold sm:hidden">SR</span>
+            </button>
+
+            {/* Language Switcher in Top Bar */}
+            <div className="shrink-0">
+              <LanguageSwitcher variant="dark" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {screenReaderModalOpen && (
-        <ScreenReaderModal
-          isOpen={screenReaderModalOpen}
-          onClose={() => setScreenReaderModalOpen(false)}
-        />
-      )}
-    </header>
+      {/* Main Top Navigation Row: Districts, RTI, RTS, EODB, Dashboard (Desktop Only - on mobile/tablet these are inside the burger drawer) */}
+      <div className="hidden lg:flex w-full px-4 sm:px-6 lg:px-8 py-2.5 items-center justify-between gap-4">
+        {/* Left Side: Districts Dropdown */}
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setDistrictDropdownOpen(!districtDropdownOpen)}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-white font-semibold text-xs border border-slate-700 hover:border-blue-500 transition-all shadow-xs shrink-0"
+          >
+            <MapPin className="w-3.5 h-3.5 text-amber-400" />
+            <span>
+              {t('navbar.districts')} (
+              {selectedDistrictKey
+                ? t(`districts.${selectedDistrictKey}`, selectedDistrictKey)
+                : t('common.all')}
+              )
+            </span>
+            <ChevronDown
+              className={`w-3 h-3 text-slate-400 transition-transform ${districtDropdownOpen ? 'rotate-180' : ''
+                }`}
+            />
+          </button>
+
+          {districtDropdownOpen && (
+            <div className="absolute top-full left-0 mt-1.5 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 grid grid-cols-1 gap-1 max-h-64 overflow-y-auto">
+              <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 border-b border-slate-800 flex items-center justify-between">
+                <span>{t('navbar.maharashtraDistricts', 'Maharashtra Districts')}</span>
+                {selectedDistrictKey && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDistrictKey(null);
+                      setDistrictDropdownOpen(false);
+                    }}
+                    className="text-[9px] text-amber-400 hover:underline"
+                  >
+                    {t('common.all')}
+                  </button>
+                )}
+              </div>
+              {DISTRICTS_LIST.map((dist) => (
+                <button
+                  key={dist.key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDistrictKey(dist.key);
+                    setDistrictDropdownOpen(false);
+                  }}
+                  className={`text-left px-2 py-1.5 rounded hover:bg-blue-900/60 transition-colors truncate text-[11px] ${
+                    selectedDistrictKey === dist.key
+                      ? 'bg-blue-950 text-amber-300 font-bold'
+                      : 'text-slate-300'
+                  }`}
+                >
+                  {t(`districts.${dist.key}`, dist.defaultName)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Key Governance Portals (RTI, RTS, EODB, Dashboard) */}
+        <nav className="flex items-center flex-wrap gap-1 sm:gap-2">
+          {/* RTI */}
+          <Link
+            href="#faq"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title={t('navbar.rtiTitle', 'Right to Information Act portal')}
+          >
+            <Shield className="w-3.5 h-3.5 text-blue-400" />
+            <span>{t('navbar.rti')}</span>
+          </Link>
+
+          {/* RTS */}
+          <Link
+            href="#services"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title={t('navbar.rtsTitle', 'Right to Services Act')}
+          >
+            <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{t('navbar.rts')}</span>
+          </Link>
+
+          {/* EODB */}
+          <Link
+            href="#services"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-xs font-medium"
+            title={t('navbar.eodbTitle', 'Ease of Doing Business')}
+          >
+            <Briefcase className="w-3.5 h-3.5 text-purple-400" />
+            <span>{t('navbar.eodb')}</span>
+          </Link>
+
+          {/* Dashboard Direct Link */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-900/80 hover:bg-blue-800 text-white font-semibold text-xs border border-blue-700/60 transition-all shadow-xs"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5 text-amber-400" />
+            <span>{t('navbar.dashboard')}</span>
+          </Link>
+        </nav>
+      </div>
+
+      {/* Screen Reader Access & Text-to-Speech Modal */}
+      <ScreenReaderModal
+        isOpen={screenReaderModalOpen}
+        onClose={() => setScreenReaderModalOpen(false)}
+      />
+    </div>
   );
 };

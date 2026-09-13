@@ -2,208 +2,193 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard,
-  FileSpreadsheet,
   FileText,
   Layers,
-  UploadCloud,
-  Search,
-  Scale,
-  HelpCircle,
-  ShieldCheck,
-  CheckCircle2,
+  Bell,
+  UserCheck,
   PhoneCall,
+  ArrowUpRight,
+  ShieldCheck,
+  Building,
   LogOut,
-  X,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { citizenService } from '../../services/citizen.service';
+import { cn } from '../../lib/utils';
 
-export interface PortalSidebarProps {
+interface PortalSidebarProps {
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
 }
 
 export const PortalSidebar: React.FC<PortalSidebarProps> = ({
-  mobileOpen,
+  mobileOpen = false,
   onCloseMobile,
 }) => {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
 
-  const workspaceNav = [
+  const navigation: {
+    name: string;
+    href: string;
+    icon: any;
+    exact?: boolean;
+    highlight?: boolean;
+    badge?: string;
+  }[] = [
     {
-      name: 'नागरिक कक्ष (Citizen Hub)',
+      name: t('navbar.dashboard'),
       href: '/portal',
-      exact: true,
       icon: LayoutDashboard,
+      exact: true,
     },
     {
-      name: 'फेरफार नोंद (Mutation Queue)',
-      href: '/portal/applications',
-      badge: '28',
-      icon: FileText,
-    },
-    {
-      name: 'भू-नकाशा (GIS Cadastral)',
+      name: t('landRecords.title'),
       href: '/portal/land-records',
-      tag: 'EPSG:3857',
       icon: Layers,
     },
     {
-      name: 'मोडी लिपी (OCR Archival)',
-      href: '/portal/upload',
-      icon: UploadCloud,
+      name: t('applications.title'),
+      href: '/portal/applications',
+      icon: FileText,
     },
     {
-      name: 'मंजूरी अहवाल (Audit Logs)',
-      href: '/documents',
-      icon: ShieldCheck,
+      name: t('notifications.title'),
+      href: '/portal/notifications',
+      icon: Bell,
+    },
+    {
+      name: t('profile.personalInfo'),
+      href: '/portal/profile',
+      icon: UserCheck,
     },
   ];
 
-  const registersNav = [
-    {
-      name: '७/१२ व ८-अ (7/12 & 8-A)',
-      href: '/portal/land-records',
-      icon: FileSpreadsheet,
-    },
-    {
-      name: 'तक्रार नोंदवही (RTS Appeals)',
-      href: '/verification',
-      icon: Scale,
-    },
-    {
-      name: 'मदत केंद्र (Help & FAQs)',
-      href: '/#faq',
-      icon: HelpCircle,
-    },
-  ];
-
-  const handleLogout = () => {
-    citizenService.logout();
-    router.push('/portal/login');
+  const isActive = (itemHref: string, exact?: boolean) => {
+    if (exact) {
+      return pathname === itemHref;
+    }
+    return !!pathname?.startsWith(itemHref);
   };
 
   const content = (
-    <div className="flex flex-col h-full bg-[#132e22] text-white w-72 select-none justify-between border-r border-[#0b1d16] shadow-md">
-      <div className="overflow-y-auto">
-        {/* District Division Header Pill */}
-        <div className="p-3">
-          <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/10 border border-white/15">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span className="font-mono text-xs text-emerald-100 font-bold tracking-wide">
-                HAVELI DIV #411028
-              </span>
-            </div>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-bold">
-              ONLINE
-            </span>
-          </div>
+    <div className="flex flex-col h-full bg-slate-900 text-slate-300 w-64 border-r border-slate-800">
+      {/* Sidebar Top Banner */}
+      <div className="p-4 border-b border-slate-800/80">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>{t('navbar.citizenPortal')}</span>
         </div>
-
-        {/* Section 1: Citizen Workspace */}
-        <div className="px-3 pt-2 pb-1">
-          <span className="text-[10px] uppercase tracking-wider text-emerald-300/75 font-bold">
-            Citizen Workspace
-          </span>
+        <div className="mt-1 text-[11px] text-slate-500">
+          {t('common.revenueDept')}
         </div>
-        <nav className="flex flex-col gap-1 px-3">
-          {workspaceNav.map((item) => {
-            const active = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all text-xs font-semibold ${
-                  active
-                    ? 'bg-white/20 text-white font-bold shadow-[inset_3px_0_0_0_#85f8c4] border border-emerald-500/30'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-emerald-300' : 'text-emerald-400/80'}`} />
-                  <span className="truncate">{item.name}</span>
-                </div>
-                {item.badge && (
-                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-400 text-slate-950 font-bold">
-                    {item.badge}
-                  </span>
-                )}
-                {item.tag && (
-                  <span className="text-[10px] font-mono text-emerald-300">
-                    {item.tag}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Section 2: Statutory Registers */}
-        <div className="px-3 pt-4 pb-1">
-          <span className="text-[10px] uppercase tracking-wider text-emerald-300/75 font-bold">
-            Statutory Registers
-          </span>
-        </div>
-        <nav className="flex flex-col gap-1 px-3">
-          {registersNav.map((item) => {
-            const active = false;
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all text-xs font-semibold ${
-                  active
-                    ? 'bg-white/20 text-white font-bold shadow-[inset_3px_0_0_0_#85f8c4]'
-                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className="w-4 h-4 shrink-0 text-emerald-400/80" />
-                  <span className="truncate">{item.name}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
       </div>
 
-      {/* Footer Info: NIC Central Gateway & Sign Out */}
-      <div className="p-3 bg-black/20 border-t border-white/10 space-y-2">
-        <div className="p-2.5 bg-white/10 rounded-lg border border-white/15 flex flex-col gap-1.5 text-[10px]">
-          <div className="flex items-center justify-between">
-            <span className="text-emerald-200/80 font-medium">NIC Central Gateway</span>
-            <span className="text-emerald-300 font-bold font-mono">99.98% Sync</span>
+      {/* Nav items */}
+      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {navigation.map((item) => {
+          const active = isActive(item.href, item.exact);
+          const Icon = item.icon;
+
+          if (item.highlight) {
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onCloseMobile}
+                className={cn(
+                  'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-all my-2 shadow-sm',
+                  active
+                    ? 'bg-blue-600 text-white shadow-blue-900/50'
+                    : 'bg-blue-900/40 text-blue-200 border border-blue-700/50 hover:bg-blue-900/70 hover:text-white'
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 text-amber-300" />
+                  <span>{item.name}</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-400 text-slate-950">
+                  {item.badge}
+                </span>
+              </Link>
+            );
+          }
+
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onCloseMobile}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                active
+                  ? 'bg-slate-800 text-white font-semibold'
+                  : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+              )}
+            >
+              <Icon
+                className={cn(
+                  'w-4 h-4 transition-colors',
+                  active ? 'text-blue-400' : 'text-slate-500'
+                )}
+              />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Footer Support Card */}
+      <div className="p-3 border-t border-slate-800/80 space-y-3">
+        <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-800 text-xs">
+          <div className="flex items-center gap-2 font-semibold text-slate-200 mb-1">
+            <PhoneCall className="w-3.5 h-3.5 text-amber-400" />
+            <span>{t('common.helpdesk')}</span>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-white/20 overflow-hidden">
-            <div className="h-full bg-emerald-400 rounded-full w-[99.98%]"></div>
-          </div>
-          <div className="flex items-center justify-between pt-0.5 text-emerald-300/70 font-mono">
-            <span>Node: MH-PUN-04</span>
-            <span className="text-emerald-300 font-bold">Encrypted</span>
-          </div>
+          <p className="text-[11px] text-slate-400">
+            {t('common.tollFree')}
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {t('common.helpdeskHours', { defaultValue: 'Mon–Sat: 9:00 AM to 6:00 PM' })}
+          </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-950/40 hover:text-white transition-colors cursor-pointer"
+        <Link
+          href="/"
+          className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <LogOut className="w-4 h-4 text-rose-400" />
-            <span>लॉगआउट (Sign Out)</span>
+            <Building className="w-3.5 h-3.5" />
+            <span>{t('common.backToHome')}</span>
           </div>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-900/60 font-bold text-rose-200">
-            EXIT
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </Link>
+
+        {/* Citizen Sign Out Option */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onCloseMobile) onCloseMobile();
+            citizenService.logout();
+            try {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+            } catch {}
+            router.push('/portal/login');
+          }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/60 border border-rose-900/40 hover:border-rose-700 transition-colors group cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <LogOut className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform" />
+            <span>{t('common.logout', 'Sign Out')}</span>
+          </div>
+          <span className="text-[10px] uppercase font-bold text-rose-400/80 bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-900/50">
+            Exit
           </span>
         </button>
       </div>
@@ -212,19 +197,17 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col shrink-0 h-[calc(100vh-4rem)] sticky top-16">
-        {content}
-      </aside>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-shrink-0">{content}</aside>
 
-      {/* Mobile Drawer */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
           />
-          <div className="relative flex w-72 max-w-xs flex-1 flex-col bg-[#132e22] shadow-2xl z-10">
+          <div className="relative flex flex-col flex-1 max-w-xs w-full shadow-2xl">
             {content}
           </div>
         </div>

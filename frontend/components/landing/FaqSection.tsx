@@ -1,208 +1,350 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import {
+  HelpCircle,
+  ChevronDown,
+  Search,
+  CheckCircle2,
+  Layers,
+  Cpu,
+  ShieldCheck,
+  FileText,
+  AlertCircle,
+  Sparkles,
+  ArrowRight,
+  Lock,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface FaqItem {
-  id: number;
-  category: 'ALL' | 'LAND_STACK' | 'AI_OCR' | 'VERIFICATION' | 'SECURITY';
-  tag: string;
-  tagColor: string;
+  id: string;
+  category: 'ALL' | 'LAND_STACK' | 'AI_TECH' | 'VERIFICATION' | 'LEGAL_SECURITY';
+  categoryLabelKey: string;
   question: string;
   answer: string;
+  highlights?: string[];
+  actionLink?: {
+    text: string;
+    href: string;
+  };
 }
 
 export const FaqSection: React.FC = () => {
   const { t } = useTranslation();
-  const [openId, setOpenId] = useState<number | null>(1);
-  const [activeCategory, setActiveCategory] = useState<string>('ALL');
+  const [openId, setOpenId] = useState<string | null>('faq-stack-1');
+  const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const filterTabs = [
-    { key: 'ALL', label: 'All Questions' },
-    { key: 'LAND_STACK', label: '8-Layer Land Stack & ULPIN' },
-    { key: 'AI_OCR', label: 'AI OCR & Digitization' },
-    { key: 'VERIFICATION', label: 'Verification & Mutation' },
-    { key: 'SECURITY', label: 'Anti-Fraud & Security' },
+  const tabs = [
+    { key: 'ALL', label: 'All Questions', icon: <HelpCircle className="w-3.5 h-3.5" /> },
+    { key: 'LAND_STACK', label: '8-Layer Land Stack & ULPIN', icon: <Layers className="w-3.5 h-3.5 text-blue-700" /> },
+    { key: 'AI_TECH', label: 'AI OCR & Digitization', icon: <Cpu className="w-3.5 h-3.5 text-cyan-700" /> },
+    { key: 'VERIFICATION', label: 'Verification & Mutation', icon: <FileText className="w-3.5 h-3.5 text-emerald-700" /> },
+    { key: 'LEGAL_SECURITY', label: 'Anti-Fraud & Security', icon: <ShieldCheck className="w-3.5 h-3.5 text-indigo-700" /> },
   ];
 
-  const faqList: FaqItem[] = [
+  const faqItems: FaqItem[] = [
     {
-      id: 1,
+      id: 'faq-stack-1',
       category: 'LAND_STACK',
-      tag: '8-LAYER LAND STACK',
-      tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      categoryLabelKey: '8-Layer Land Stack',
       question: 'What is the DILRMP 3.0 (2026–2031) 8-Layer Land Stack?',
       answer:
-        'The DILRMP 3.0 8-Layer Land Stack unifies 8 previously disconnected registries: L1 (Vector Maps), L2 (Record of Rights 7/12 & 8-A), L3 (IGR Registration Deeds), L4 (Land Use & Statutory Zoning), L5 (MAHACity Urban Property), L6 (Bank Liens), L7 (RCCMS Revenue Court Disputes), and L8 (Ready Reckoner Valuation). This eliminates paper-based verification and creates a deterministic single source of truth.',
+        'Under the Digital India Land Records Modernization Programme (DILRMP) 3.0 Operational Guidelines (2026–2031), the 8-Layer Land Stack is India’s unified digital geospatial framework for land governance. It unifies previously disconnected government silos into a single, cohesive multi-tier data model: (L1) WGS-84 Cadastral Vector Map, (L2) Record of Rights 7/12 & 8A Extract, (L3) NGDRS Land Registration Deeds, (L4) Land Use & Master Plan Zoning, (L5) NAKSHA Urban Property Register, (L6) RBI Unified Lending Interface Bank Liens, (L7) RCCMS Revenue Court Stay Orders, and (L8) Circle Rate Algorithmic Valuation.',
+      highlights: [
+        'Unifies 8 separate department databases into one parcel passport',
+        'Eliminates multi-bank mortgage fraud via real-time ULI liens',
+        'Automatic mutation freeze upon RCCMS court stay orders',
+      ],
+      actionLink: {
+        text: 'Explore Interactive 8-Layer Stack',
+        href: '#land-stack',
+      },
     },
     {
-      id: 2,
+      id: 'faq-stack-2',
       category: 'LAND_STACK',
-      tag: 'BHU-AADHAAR (ULPIN)',
-      tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
+      categoryLabelKey: 'Bhu-Aadhaar (ULPIN)',
       question: 'What is the 14-digit Bhu-Aadhaar (ULPIN) and how is it assigned?',
       answer:
-        'The Unique Land Parcel Identification Number (ULPIN), known as Bhu-Aadhaar, is a 14-digit alphanumeric geocoded number generated from the latitude and longitude vertices of each parcel based on WGS-84 coordinate standards. It acts as an immutable digital DNA for land, preventing boundary disputes and fictitious transactions.',
+        'Bhu-Aadhaar (Unique Land Parcel Identification Number - ULPIN) is a deterministic 14-character alphanumeric code (e.g. 81LVQLD9407JH0) assigned to every land parcel in India. Derived algorithmically from regional grid code, centroid latitude/longitude, and cadastral survey boundaries, it acts as a permanent, tamper-evident digital PIN connecting revenue records, registration deeds, bank mortgages, and municipal property cards.',
+      highlights: [
+        'Deterministic spatial derivation with zero manual human tampering',
+        'Unique spatial PIN for both agricultural rural and urban properties',
+        'Directly linked with masked Aadhaar seeding (XXXX-XXXX-9124) for SMS notifications',
+      ],
+      actionLink: {
+        text: 'Search Land Records by ULPIN',
+        href: '/land-records',
+      },
     },
     {
-      id: 3,
-      category: 'AI_OCR',
-      tag: 'AI PIPELINE & OCR',
-      tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      id: 'faq-ai-1',
+      category: 'AI_TECH',
+      categoryLabelKey: 'AI Technology',
       question: 'How does the AI OCR Pipeline recognize aged, handwritten Marathi records?',
       answer:
-        'Our custom vision transformer engine combines OpenCV morphological cleaning (despeckling, deskewing, and contrast normalization) with EasyOCR and TrOCR models fine-tuned on archival 18th-century Peshwa Modi script and handwritten Devanagari. It reaches 98.4%+ extraction accuracy on yellowed parchment deeds.',
+        'ILRDVS uses a state-of-the-art multi-stage vision pipeline: (1) Adaptive OpenCV binarization, noise filtering, and deskewing; (2) Deep Convolutional Neural Networks and Bi-LSTM vision models trained on historical cursive Devanagari script; and (3) Spatial Named Entity Recognition (NER) that transcribes owner names, survey/gat numbers, khata numbers, potkharaba land classifications, and plot areas with field-level confidence scoring.',
+      highlights: [
+        'Trained on extensive historical Maharashtra Modi & Devanagari archives',
+        'Sub-3.2s inference SLA per archival extract scan',
+        'Self-healing continuous learning feedback loop from inspector corrections',
+      ],
     },
     {
-      id: 4,
+      id: 'faq-verif-1',
       category: 'VERIFICATION',
-      tag: 'SATBARA 7/12',
-      tagColor: 'bg-stone-100 text-stone-700 border-stone-200',
+      categoryLabelKey: 'Satbara (7/12)',
       question: 'What is Village Form 7/12 (Satbara Extract) and how is it used?',
       answer:
-        'Village Form 7/12 (गावनिहाय सातबारा) is the statutory Record of Rights (RoR) under the Maharashtra Land Revenue Code (MLRC) 1966. Form 7 contains ownership, occupants, and tenancy rights, while Form 12 details crop cultivation, water sources, and agricultural liabilities. Certified copies are cryptographically signed with QR verification.',
+        'Village Form 7/12 (गाव नमुना ७/१२) is the statutory Record of Rights maintained under the Maharashtra Land Revenue Code 1966. Form 7 captures ownership details, survey and Gat numbers, and occupancy tenure class (Bhogwatdar Class 1 vs Class 2). Form 12 records crops grown, irrigated areas, and potkharaba (uncultivable land). It is the mandatory title document required for land sales, bank agricultural loans, and succession claims.',
+      actionLink: {
+        text: 'Search Certified 7/12 Extracts',
+        href: '/land-records',
+      },
     },
     {
-      id: 5,
+      id: 'faq-verif-2',
       category: 'VERIFICATION',
-      tag: 'MUTATION (FERFAR)',
-      tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
+      categoryLabelKey: 'Mutation (Form 6)',
       question: 'What is Form 6 Mutation (Ferfar) and what is the clearance SLA?',
       answer:
-        'Form 6 (फेरफार नोंदवही) records all alterations in land ownership arising from sale deeds, heir-ship inheritances, partitions, or court decrees. Under the Maharashtra Right to Public Services Act (RTS), a 15-day public objection notice is published online (e-Chawadi), after which Circle Officers sanction the mutation.',
+        'Form 6 Mutation Register (फेरफार नोंदवही) records every legal title modification—including sale conveyance, inheritance (वारस नोंद), partition, or bank mortgage release. Under the Right to Services (RTS) Act, uncontested mutations are mandated to be reviewed and sanctioned within 15 working days by the local Talathi and Circle Officer.',
+      highlights: [
+        'Online Form 6 tracking from citizen portal',
+        'Mandatory 15-day statutory clearance SLA',
+        'Instantaneous triggering upon NGDRS sale deed registration',
+      ],
     },
     {
-      id: 6,
-      category: 'LAND_STACK',
-      tag: 'URBAN PROPERTY CARD',
-      tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      question: 'What is the difference between a 7/12 Satbara and Urban Property Cards?',
+      id: 'faq-verif-3',
+      category: 'VERIFICATION',
+      categoryLabelKey: 'Urban Property Card',
+      question: 'What is the difference between rural 7/12 Satbara and urban Property Cards?',
       answer:
-        'A 7/12 extract is issued for rural and agricultural land under the Talathi jurisdiction, while an Urban Property Card (Milkat Patra / CTS Card) is issued by City Survey Offices for non-agricultural plots, gaothan properties, and municipal urban land parcels.',
+        'Village Form 7/12 applies to revenue villages and agricultural land. Urban Property Cards (नगर भूमापन मिळकत पत्रिका) are maintained by the City Survey Office (CTSO) under the NAKSHA Urban Property Register framework for municipal areas. They reference City Survey (CTS) numbers, carpet plot area, permissible Floor Space Index (FSI), and municipal assessment details.',
+      actionLink: {
+        text: 'Explore Cadastral Services',
+        href: '#services',
+      },
     },
     {
-      id: 7,
-      category: 'SECURITY',
-      tag: 'SECURITY & ANTI-FRAUD',
-      tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      id: 'faq-sec-1',
+      category: 'LEGAL_SECURITY',
+      categoryLabelKey: 'Security & Anti-Fraud',
       question: 'How does ILRDVS prevent fraudulent double registration and distress sales?',
       answer:
-        'Whenever an applicant submits a deed or mutation, ILRDVS conducts automated real-time cross-checks across Layer 3 (IGR Registration), Layer 6 (RBI CERSAI Banking Liens), and Layer 7 (RCCMS Revenue Court Injunctions). If any active injunction or existing buyer lien exists, the system flags the collision and halts registration instantaneously.',
+        'Every parcel is cross-verified across 3 real-time gateways: (1) Reserve Bank of India Unified Lending Interface (ULI) prevents multi-bank hypothecation; (2) Revenue Court Case Management System (RCCMS) automatically freezes mutations if a court stay order exists; and (3) Algorithmic Circle Rate valuation prevents under-declaration of property values.',
+      highlights: [
+        'SHA-256 cryptographic audit hash on all certified digital certificates',
+        'Real-time RBI lending lien lock',
+        'Automatic stay order flags prevent illegal conveyance of contested parcels',
+      ],
+      actionLink: {
+        text: 'Launch Verification Workstation',
+        href: '/verification',
+      },
+    },
+    {
+      id: 'faq-sec-2',
+      category: 'LEGAL_SECURITY',
+      categoryLabelKey: 'Grievance Redressal',
+      question: 'How do I report typographical discrepancies or boundary errors in my record?',
+      answer:
+        'Citizens can file an online grievance via our Citizen Corner or Contact section below. Revenue inspectors examine the original physical cadastral sheets and Electronic Total Station (ETS) survey coordinates in the split-screen Verification Workstation, rectify verified discrepancies, and reissue a certified extract with an auditable change log.',
+      actionLink: {
+        text: 'Submit Online Grievance',
+        href: '#contact',
+      },
     },
   ];
 
   const filteredFaqs = useMemo(() => {
-    return faqList.filter((item) => {
-      const matchesCategory =
-        activeCategory === 'ALL' || item.category === activeCategory;
-      const matchesQuery =
+    return faqItems.filter((item) => {
+      const matchesTab = activeTab === 'ALL' || item.category === activeTab;
+      const matchesSearch =
         searchQuery.trim() === '' ||
         item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tag.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesQuery;
+        item.categoryLabelKey.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesTab && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeTab, searchQuery]);
 
   return (
-    <section
-      id="faq"
-      data-purpose="faq-section"
-      className="py-16 border-t border-stone-200 bg-white select-none"
-    >
-      <div className="max-w-4xl mx-auto px-4 sm:px-8">
+    <section id="faq" className="py-12 sm:py-20 bg-slate-50 border-b border-slate-200 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 space-y-8 sm:space-y-10">
         {/* Section Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-1 bg-emerald-100 text-sovereign-800 font-mono text-[11px] px-3 py-1 rounded-full uppercase tracking-wider font-semibold mb-2 border border-emerald-200">
-            <span>💡</span>
-            <span>CITIZEN KNOWLEDGE BASE &amp; FAQ</span>
+        <div className="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-xs font-bold text-blue-900 uppercase tracking-wider shadow-2xs">
+            <HelpCircle className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+            <span>Citizen Knowledge Base & FAQ</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
+
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-stone-600 text-xs sm:text-sm mt-1">
+
+          <p className="text-xs sm:text-base text-slate-600 leading-relaxed">
             Find answers regarding the 8-Layer Land Stack, Bhu-Aadhaar (ULPIN), 7/12 Satbara extracts, Form 6 mutations, and AI cadastral verification.
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-6 relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search questions (e.g., 8-layer stack, Bhu-Aadhaar, mutation, OCR)..."
-            className="w-full bg-white border border-stone-200 rounded-lg pl-10 pr-4 py-2.5 text-xs sm:text-sm shadow-2xs focus:ring-1 focus:ring-sovereign-800 focus:border-sovereign-800 outline-none"
-          />
-          <span className="absolute left-3.5 top-3 text-stone-400 text-xs">
-            🔍
-          </span>
-        </div>
-
-        {/* Filter Pills */}
-        <div className="flex flex-wrap gap-2 mb-8 justify-center text-xs">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveCategory(tab.key)}
-              className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
-                activeCategory === tab.key
-                  ? 'bg-sovereign-800 text-white'
-                  : 'bg-white border border-stone-200 hover:bg-stone-100 text-stone-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* FAQ Accordions */}
-        <div className="space-y-3" data-purpose="faq-accordions">
-          {filteredFaqs.map((faq) => {
-            const isOpen = openId === faq.id;
-            return (
-              <div
-                key={faq.id}
-                className="bg-white border border-stone-200 rounded-xl shadow-2xs overflow-hidden"
+        {/* Search Bar & Category Filter Tabs */}
+        <div className="space-y-3 sm:space-y-4">
+          {/* Quick Search Box */}
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search questions (e.g., 8-layer stack, Bhu-Aadhaar, mutation, OCR)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 shadow-2xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
               >
-                <button
-                  type="button"
-                  onClick={() => setOpenId(isOpen ? null : faq.id)}
-                  className="w-full text-left p-4 flex items-center justify-between text-xs sm:text-sm font-semibold text-stone-900 hover:bg-stone-50 transition-colors cursor-pointer"
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Filter Pills (Scrollable on mobile, flex-wrap on tablet+) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 pt-1 overflow-x-auto pb-1 sm:pb-0 sm:flex-wrap sm:justify-center -mx-4 px-4 sm:mx-0 sm:px-0">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                className={`inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-blue-900 text-white shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:text-blue-950 hover:bg-slate-100 shadow-2xs'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Interactive FAQ Accordion List */}
+        <div className="space-y-3">
+          {filteredFaqs.length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 space-y-2">
+              <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
+              <p className="font-bold text-slate-800 text-sm">No matching questions found</p>
+              <p className="text-xs text-slate-500">
+                Try searching for keywords like "Satbara", "Bhu-Aadhaar", "Land Stack", or "Mutation".
+              </p>
+            </div>
+          ) : (
+            filteredFaqs.map((faq, idx) => {
+              const isOpen = openId === faq.id;
+              return (
+                <div
+                  key={faq.id}
+                  className={`rounded-2xl border transition-all duration-200 bg-white overflow-hidden ${
+                    isOpen ? 'border-blue-900 shadow-md ring-1 ring-blue-900/10' : 'border-slate-200 shadow-2xs hover:border-slate-300'
+                  }`}
                 >
-                  <span className="flex items-center space-x-3 min-w-0">
-                    <span
-                      className={`w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold shrink-0 ${
-                        isOpen
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-stone-100 text-stone-700'
-                      }`}
-                    >
-                      {faq.id}
-                    </span>
-                    <span className="truncate">{faq.question}</span>
-                  </span>
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <span
-                      className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${faq.tagColor}`}
-                    >
-                      {faq.tag}
-                    </span>
-                    <span className="text-stone-400 text-xs">
-                      {isOpen ? '▲' : '▼'}
-                    </span>
-                  </div>
-                </button>
-                {isOpen && (
-                  <div className="px-5 pb-4 pt-1 text-xs text-stone-600 leading-relaxed border-t border-stone-100">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(isOpen ? null : faq.id)}
+                    className="w-full text-left p-3.5 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 transition-colors hover:bg-slate-50/70"
+                  >
+                    <div className="flex items-center gap-2.5 sm:gap-3.5">
+                      <span
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-[11px] sm:text-xs font-black flex items-center justify-center shrink-0 transition-colors ${
+                          isOpen ? 'bg-blue-900 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <span className="font-bold text-xs sm:text-base text-slate-900 leading-snug">
+                        {faq.question}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                        {faq.categoryLabelKey}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-blue-900' : ''
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 space-y-4 animate-in fade-in-50 duration-200">
+                      <p>{faq.answer}</p>
+
+                      {/* Key Takeaway Bullets if available */}
+                      {faq.highlights && faq.highlights.length > 0 && (
+                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                          <div className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>Key Governance Provisions:</span>
+                          </div>
+                          <ul className="space-y-1 text-xs text-slate-600">
+                            {faq.highlights.map((h, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-blue-900 font-bold">•</span>
+                                <span>{h}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Action CTA Link if available */}
+                      {faq.actionLink && (
+                        <div className="pt-1">
+                          <Link
+                            href={faq.actionLink.href}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 hover:text-blue-700 hover:underline"
+                          >
+                            <span>{faq.actionLink.text}</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Still have questions? Helpdesk Banner */}
+        <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-50 via-slate-50 to-indigo-50 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="space-y-0.5">
+            <h4 className="font-bold text-slate-900 text-sm">Still have questions regarding your land parcel?</h4>
+            <p className="text-xs text-slate-600">
+              Our 24x7 citizen helpdesk and regional taluka revenue inspectors are available to assist.
+            </p>
+          </div>
+          <Link
+            href="#contact"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs transition-all shrink-0 text-center"
+          >
+            <span>Contact Helpdesk</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </section>

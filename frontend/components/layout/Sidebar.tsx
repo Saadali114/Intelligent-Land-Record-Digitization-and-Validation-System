@@ -16,15 +16,8 @@ import {
   FileCheck2,
   LogOut,
   PanelLeftClose,
-  Map,
-  FileText,
-  History,
-  ShieldCheck,
-  Scale,
-  Sparkles,
-  Activity,
-  Layers,
 } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 
 export interface SidebarProps {
@@ -42,64 +35,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, isAdmin, isOfficer, isVerifier, logout } = useAuth();
 
-  const coreWorkstation = [
+  const navItems = [
     {
-      label: 'प्रशासन कक्ष (Workstation)',
+      label: t('navbar.dashboard'),
       href: '/dashboard',
       icon: LayoutDashboard,
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
     {
-      label: 'फेरफार नोंद (Mutation Queue)',
+      label: t('navbar.landRecords'),
+      href: '/land-records',
+      icon: FileSpreadsheet,
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
+    },
+    {
+      label: t('navbar.documentRepository'),
+      href: '/documents',
+      icon: Files,
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
+    },
+    {
+      label: t('navbar.verificationQueue'),
       href: '/verification',
       icon: CheckCheck,
-      badge: '28',
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
+
     {
-      label: 'भू-नकाशा (GIS Cadastral)',
-      href: '/land-records',
-      icon: Map,
-    },
-    {
-      label: 'मोडी लिपी (OCR Archive)',
-      href: '/documents',
-      icon: History,
-    },
-    {
-      label: 'मंजुरी अहवाल (Audit Logs)',
+      label: t('navbar.userManagement'),
       href: '/users',
-      icon: ShieldCheck,
+      icon: Users,
+      roles: ['ADMIN', 'OFFICER'],
+    },
+    {
+      label: t('navbar.myProfile'),
+      href: '/profile',
+      icon: UserCheck,
+      roles: ['ADMIN', 'OFFICER', 'VERIFIER'],
     },
   ];
 
-  const revenueRecords = [
-    {
-      label: '७/१२ व ८-अ (7/12 & 8-A)',
-      href: '/land-records',
-      icon: FileSpreadsheet,
-    },
-    {
-      label: 'तक्रार नोंदणी (RTS Appeals)',
-      href: '/verification',
-      icon: Scale,
-    },
-  ];
+  const allowedNavItems = navItems.filter((item) =>
+    user ? item.roles.includes(user.role) : false
+  );
 
   const renderSidebarContent = (collapsed: boolean) => (
     <div
       className={cn(
-        'flex h-full flex-col justify-between bg-[#0a2918] text-slate-200 transition-all duration-300 border-r border-emerald-950/80 select-none',
-        collapsed ? 'py-4 px-2 items-center' : 'py-4 px-3'
+        'flex h-full flex-col justify-between bg-slate-900 text-slate-200 transition-all duration-300',
+        collapsed ? 'py-5 px-2 items-center' : 'py-5 px-4'
       )}
     >
       <div className={cn('w-full', collapsed && 'flex flex-col items-center')}>
-        {/* Header Branding */}
+        {/* Header Branding & Collapse Trigger */}
         {collapsed ? (
-          <div className="flex flex-col items-center gap-3 mb-5">
+          <div className="flex flex-col items-center gap-3 mb-6">
             <div
-              className="w-10 h-10 rounded-xl bg-[#14532d] border border-emerald-500/50 flex items-center justify-center text-amber-300 font-bold shadow-md shrink-0"
-              title="ILRDVS महा-भूमी"
+              className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shrink-0"
+              title="ILRD PORTAL - National Land Registry"
             >
               <FileCheck2 className="w-5 h-5" />
             </div>
@@ -107,181 +102,226 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                aria-label="Expand Sidebar"
-                className="p-1.5 rounded-lg text-emerald-300 hover:text-white hover:bg-[#0f3e28] transition-colors"
+                aria-label={t('sidebar.showSidebar', { defaultValue: 'Expand Sidebar (Ctrl+B)' })}
+                title={t('sidebar.showSidebar', { defaultValue: 'Expand Sidebar (Ctrl+B)' })}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                <PanelLeftClose className="w-4 h-4 text-emerald-400 rotate-180" />
+                <PanelLeftClose className="w-4 h-4 text-blue-400 rotate-180" />
               </button>
             )}
           </div>
         ) : (
-          <div className="space-y-3 mb-5 px-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#14532d] border border-emerald-500/50 flex items-center justify-center text-amber-300 font-bold shrink-0 shadow-xs">
-                  <FileCheck2 className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-sm font-black text-white tracking-wide truncate">
-                    ILRDVS महा-भूमी
-                  </h2>
-                  <p className="text-[10px] text-emerald-300 font-medium truncate">
-                    DILRMP 3.0 Land Records
-                  </p>
-                </div>
+          <div className="flex items-center justify-between px-2 mb-6">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">
+                <FileCheck2 className="w-5 h-5" />
               </div>
-
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-white tracking-wide truncate">ILRD PORTAL</h2>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {t('sidebar.nationalLandRegistry', { defaultValue: 'National Land Registry' })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="md:hidden p-1 rounded text-emerald-300 hover:text-white hover:bg-[#0f3e28]"
+                  aria-label={t('common.close', { defaultValue: 'Close' })}
+                  className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               )}
-            </div>
-
-            {/* Division & Status Pill */}
-            <div className="flex items-center justify-between px-2 py-1 rounded bg-[#0f3e28] border border-emerald-900/60 text-[10px]">
-              <span className="font-mono font-bold text-emerald-200">HAVELI DIV-411028</span>
-              <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold uppercase text-[9px]">
-                LIVE GIS
-              </span>
+              {onToggleCollapse && (
+                <button
+                  type="button"
+                  onClick={onToggleCollapse}
+                  aria-label={t('sidebar.hideSidebar', { defaultValue: 'Hide Sidebar (Ctrl+B)' })}
+                  title={t('sidebar.hideSidebar', { defaultValue: 'Hide Sidebar' })}
+                  className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* Section 1: CORE WORKSTATION */}
-        <div className="space-y-1 mb-4">
-          {!collapsed && (
-            <div className="px-2 mb-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-400/70">
-              CORE WORKSTATION
-            </div>
-          )}
+        {!collapsed && (
+          <div className="px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            {t('sidebar.navigation', { defaultValue: 'Navigation' })}
+          </div>
+        )}
 
-          <nav className="space-y-1">
-            {coreWorkstation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
+        {/* Navigation List */}
+        <nav className={cn('space-y-1.5 w-full', collapsed && 'flex flex-col items-center')}>
+          {allowedNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || (item.href !== '/dashboard' && !!pathname?.startsWith(item.href));
 
+            if (collapsed) {
               return (
                 <Link
-                  key={item.label}
+                  key={item.href}
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    'relative flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all group overflow-hidden',
+                    'w-11 h-11 flex items-center justify-center rounded-xl transition-all relative group',
                     isActive
-                      ? 'bg-[#164028] text-white font-bold shadow-xs border border-emerald-700/60'
-                      : 'text-slate-300 hover:bg-[#164028]/60 hover:text-white'
+                      ? 'bg-blue-600 text-white shadow-md font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   )}
-                  title={collapsed ? item.label : undefined}
+                  title={item.label}
+                  aria-label={item.label}
                 >
-                  {isActive && !collapsed && (
-                    <div className="absolute left-0 top-1 bottom-1 w-1 bg-amber-400 rounded-r"></div>
-                  )}
-                  <div className="flex items-center gap-2.5 min-w-0 pl-0.5">
-                    <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-emerald-300')} />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </div>
-
-                  {!collapsed && item.badge && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 shrink-0">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Section 2: REVENUE RECORDS & ACTS */}
-        <div className="space-y-1">
-          {!collapsed && (
-            <div className="px-2 mb-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-400/70">
-              REVENUE RECORDS & ACTS
-            </div>
-          )}
-
-          <nav className="space-y-1">
-            {revenueRecords.map((item) => {
-              const Icon = item.icon;
-              const isActive = false;
-
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    'flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all group',
-                    isActive
-                      ? 'bg-[#14532d] text-white font-bold shadow-xs border border-emerald-500/50'
-                      : 'text-slate-300 hover:bg-[#0f3e28] hover:text-white'
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className="w-4 h-4 shrink-0 text-slate-400 group-hover:text-emerald-300" />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  <Icon className={cn('w-5 h-5', isActive ? 'text-white' : 'text-slate-400 group-hover:text-white')} />
+                  {/* Floating tooltip on hover */}
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 border border-slate-700">
+                    {item.label}
                   </div>
                 </Link>
               );
-            })}
-          </nav>
-        </div>
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all',
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                )}
+              >
+                <Icon className={cn('w-4 h-4', isActive ? 'text-white' : 'text-slate-400')} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Footer: NIC Sync & Sign Out */}
-      <div className="pt-3 border-t border-emerald-950/80 w-full space-y-2">
-        {!collapsed && (
-          <div className="px-2 py-1.5 rounded bg-[#0f3e28]/70 border border-emerald-900/60 flex items-center justify-between text-[10px] text-emerald-300">
-            <span className="flex items-center gap-1.5">
+      {/* Footer: System Status, User Profile & Dedicated Sign Out */}
+      <div className={cn('space-y-3 pt-3 border-t border-slate-800 w-full', collapsed && 'flex flex-col items-center')}>
+        {/* System Online Status */}
+        {collapsed ? (
+          <div
+            className="flex items-center justify-center w-10 h-8 rounded-lg bg-slate-800/60 border border-slate-700/60"
+            title={t('sidebar.systemOnline', { defaultValue: 'System Online' })}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          </div>
+        ) : (
+          <div className="px-3 py-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[11px] text-slate-400">
+            <div className="font-semibold text-slate-200 mb-0.5 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              NIC Server Sync:
-            </span>
-            <span className="font-mono font-bold text-white">99.98%</span>
+              {t('sidebar.systemOnline', { defaultValue: 'System Online' })}
+            </div>
+            <p className="text-[10px] leading-relaxed text-slate-400">
+              {t('sidebar.systemOnlineDesc', {
+                defaultValue: 'AI & Multilingual OCR pipeline ready for Phase 2 integration.',
+              })}
+            </p>
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => logout()}
-          className={cn(
-            'flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-rose-300 hover:text-white hover:bg-rose-950/50 transition-colors',
-            collapsed ? 'justify-center' : 'px-2.5'
-          )}
-          title="Sign Out"
-        >
-          <LogOut className="w-4 h-4 text-rose-400" />
-          {!collapsed && <span>Sign Out</span>}
-        </button>
+        {/* User Profile Card */}
+        {user && (
+          collapsed ? (
+            <div
+              className="flex items-center justify-center relative group"
+              title={`${user.name} (${user.role})`}
+            >
+              <div className="w-10 h-10 rounded-full bg-blue-900 border border-blue-600/50 flex items-center justify-center text-amber-400 font-bold text-xs shadow-xs cursor-pointer">
+                {user.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 border border-slate-700">
+                <div className="font-bold">{user.name}</div>
+                <div className="text-[10px] text-amber-400">{user.role}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-slate-800/80 border border-slate-700/80">
+              <div className="w-8 h-8 rounded-full bg-blue-900 border border-blue-600/50 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0">
+                {user.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-semibold text-white truncate">{user.name}</div>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 font-bold text-[9px] border border-blue-800/50">
+                    {user.role}
+                  </span>
+                  <span className="truncate">{user.department || user.district}</span>
+                </div>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Dedicated Sign Out Button */}
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (onClose) onClose();
+              logout();
+            }}
+            className="w-11 h-11 flex items-center justify-center rounded-xl text-rose-300 hover:text-white bg-rose-950/40 hover:bg-rose-900/80 border border-rose-900/50 hover:border-rose-700 transition-all cursor-pointer shadow-xs relative group"
+            title={t('common.logout', 'Sign Out')}
+            aria-label={t('common.logout', 'Sign Out')}
+          >
+            <LogOut className="w-5 h-5 text-rose-400 group-hover:scale-110 transition-transform" />
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-rose-300 text-xs font-bold rounded-lg shadow-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 border border-slate-700">
+              {t('common.logout', 'Sign Out')}
+            </div>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              if (onClose) onClose();
+              logout();
+            }}
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold text-rose-300 hover:text-white bg-rose-950/40 hover:bg-rose-900/80 border border-rose-900/50 hover:border-rose-700 transition-all group cursor-pointer shadow-xs"
+            title={t('common.logout', 'Sign Out')}
+          >
+            <div className="flex items-center gap-2.5">
+              <LogOut className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" />
+              <span>{t('common.logout', 'Sign Out')}</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-rose-300/90 bg-rose-900/60 px-1.5 py-0.5 rounded border border-rose-800/60">
+              {t('sidebar.exit', 'Exit')}
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop collapsible sidebar - collapses to sleek w-20 mini-rail showing little bit */}
       <aside
         className={cn(
-          'hidden md:flex flex-col shrink-0 h-[calc(100vh-3.5rem)] sticky top-14 transition-all duration-300 z-30',
-          isCollapsed ? 'w-16' : 'w-64'
+          'hidden md:flex flex-col fixed inset-y-0 z-30 pt-16 border-r border-slate-800 transition-all duration-300 ease-in-out',
+          isCollapsed ? 'w-20' : 'w-64'
         )}
       >
         {renderSidebarContent(isCollapsed)}
       </aside>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Always full width when opened on mobile) */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
             onClick={onClose}
           />
-          <div className="relative flex w-64 max-w-xs flex-1 flex-col bg-[#0a2918] shadow-2xl z-10">
+          <div className="relative w-72 h-full z-10 shadow-2xl animate-in slide-in-from-left duration-200">
             {renderSidebarContent(false)}
           </div>
         </div>

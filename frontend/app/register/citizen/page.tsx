@@ -142,12 +142,12 @@ export default function CitizenRegisterPage() {
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/register" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-sovereign-800 flex items-center justify-center text-amber-400 font-bold shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-blue-900 flex items-center justify-center text-amber-400 font-bold shadow-xs">
               <Building2 className="w-6 h-6" />
             </div>
             <div>
               <div className="text-base font-bold text-slate-900">
-                ILRDVS <span className="text-sovereign-800 font-semibold">{t('registration.citizenPortal', { defaultValue: 'Citizen Portal' })}</span>
+                ILRDVS <span className="text-blue-900 font-semibold">{t('registration.citizenPortal', { defaultValue: 'Citizen Portal' })}</span>
               </div>
               <div className="text-xs text-slate-500">{t('registration.newCitizenRegistration', { defaultValue: 'New Citizen Registration' })}</div>
             </div>
@@ -170,7 +170,7 @@ export default function CitizenRegisterPage() {
         <div className="bg-white border border-slate-200 rounded-2xl shadow-lg p-6 sm:p-8">
           {/* Header Title */}
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-sovereign-800 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-center mx-auto mb-3">
               <UserCheck className="w-6 h-6" />
             </div>
             <h1 className="text-xl font-bold text-slate-900">
@@ -188,7 +188,7 @@ export default function CitizenRegisterPage() {
             <div
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                 step === 1
-                  ? 'bg-sovereign-800 text-white'
+                  ? 'bg-blue-900 text-white'
                   : 'bg-emerald-100 text-emerald-800'
               }`}
             >
@@ -199,7 +199,7 @@ export default function CitizenRegisterPage() {
             <div
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                 step === 2
-                  ? 'bg-sovereign-800 text-white'
+                  ? 'bg-blue-900 text-white'
                   : 'bg-slate-100 text-slate-400'
               }`}
             >
@@ -235,7 +235,7 @@ export default function CitizenRegisterPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder={t('registration.namePlaceholderCitizen', { defaultValue: 'e.g. Shankar Ganpat Patil' })}
-                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
@@ -252,7 +252,7 @@ export default function CitizenRegisterPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder={t('registration.emailPlaceholderCitizen', { defaultValue: 'citizen@example.com' })}
-                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
@@ -275,7 +275,7 @@ export default function CitizenRegisterPage() {
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
                       placeholder={t('registration.phonePlaceholder', { defaultValue: '9822012345' })}
                       maxLength={10}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors font-mono"
+                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors font-mono"
                     />
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                   </div>
@@ -289,7 +289,7 @@ export default function CitizenRegisterPage() {
                     <select
                       value={formData.preferredLanguage}
                       onChange={(e) => setFormData({ ...formData, preferredLanguage: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors"
+                      className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors"
                     >
                       <option value="en">English</option>
                       <option value="mr">मराठी (Marathi)</option>
@@ -302,7 +302,7 @@ export default function CitizenRegisterPage() {
 
               <button
                 type="submit"
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-sovereign-800 hover:bg-sovereign-900 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="w-full mt-2 py-3 px-4 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <span>{t('registration.continueCredentials', { defaultValue: 'Continue to Security Setup' })}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function CitizenRegisterPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="••••••••••••"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors font-mono"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors font-mono"
                   />
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
@@ -377,7 +377,7 @@ export default function CitizenRegisterPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="••••••••••••"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sovereign-800 focus:border-sovereign-800 transition-colors font-mono"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-colors font-mono"
                   />
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
@@ -390,7 +390,7 @@ export default function CitizenRegisterPage() {
                     type="checkbox"
                     checked={formData.acceptTerms}
                     onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
-                    className="w-4 h-4 rounded text-sovereign-800 focus:ring-sovereign-800 border-slate-300 mt-0.5"
+                    className="w-4 h-4 rounded text-blue-900 focus:ring-blue-900 border-slate-300 mt-0.5"
                   />
                   <span className="text-xs text-slate-600">
                     {t('registration.agreeTermsText', {
@@ -412,7 +412,7 @@ export default function CitizenRegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-2/3 py-3 px-4 rounded-xl bg-sovereign-800 hover:bg-sovereign-900 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+                  className="w-2/3 py-3 px-4 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {isLoading ? (
                     <span>{t('registration.creatingAccount', { defaultValue: 'Creating Account...' })}</span>
