@@ -16,13 +16,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none';
 
     const variants = {
-      primary: 'bg-blue-900 text-white hover:bg-blue-800 focus:ring-blue-700 shadow-sm',
-      secondary: 'bg-slate-800 text-white hover:bg-slate-700 focus:ring-slate-600 shadow-sm',
+      primary: 'bg-[#14532d] text-white hover:bg-[#166534] focus:ring-[#14532d] shadow-sm',
+      secondary: 'bg-slate-850 text-white hover:bg-slate-800 focus:ring-slate-600 shadow-sm',
       outline:
-        'border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 focus:ring-slate-400',
+        'border border-slate-300 text-slate-700 bg-white hover:bg-[#f7f8f4] hover:border-emerald-600 hover:text-emerald-950 focus:ring-emerald-500',
       danger: 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm',
-      success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm',
-      ghost: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:ring-slate-400',
+      success: 'bg-[#16a34a] text-white hover:bg-[#15803d] focus:ring-[#16a34a] shadow-sm',
+      ghost: 'text-slate-600 hover:text-emerald-900 hover:bg-emerald-50 focus:ring-emerald-500',
     };
 
     const sizes = {

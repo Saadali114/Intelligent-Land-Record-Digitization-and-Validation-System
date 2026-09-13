@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 100 25% 97%;
+    --foreground: 130 50% 10%;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900;
+    @apply bg-[#f6f8f4] text-slate-900 antialiased selection:bg-emerald-200 selection:text-emerald-950;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -21,29 +21,29 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #edf3ea;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #a7f3d0;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #6ee7b7;
 }
 
 /* Glassmorphic subtle accents */
 .gov-card {
-  @apply bg-white border border-slate-200/80 rounded-xl shadow-sm transition-all duration-200 hover:border-slate-300;
+  @apply bg-white border border-slate-200/90 rounded-xl shadow-sm transition-all duration-200 hover:border-emerald-400 hover:shadow-md;
 }
 
 .gov-header-gradient {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #0a2918 0%, #14532d 50%, #166534 100%);
 }
 
 .gov-subtle-gradient {
-  background: linear-gradient(180deg, rgba(241, 245, 249, 0.6) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(180deg, rgba(247, 248, 244, 0.8) 0%, rgba(255, 255, 255, 1) 100%);
 }
 
 /* Accessibility Font Scaling */

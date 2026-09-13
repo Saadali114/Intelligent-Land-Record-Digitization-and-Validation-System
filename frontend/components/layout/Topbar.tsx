@@ -4,9 +4,20 @@ import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { Badge } from '../ui/Badge';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
-import { User as UserIcon, Shield, Menu, Building2, PanelLeft, PanelLeftClose } from 'lucide-react';
+import {
+  Menu,
+  Building2,
+  ShieldCheck,
+  CheckCircle2,
+  Lock,
+  User as UserIcon,
+  Sun,
+  Moon,
+  Sparkles,
+  PhoneCall,
+  Bell,
+} from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface TopbarProps {
@@ -24,104 +35,72 @@ export const Topbar: React.FC<TopbarProps> = ({
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-xs">
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Mobile menu trigger */}
+    <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-6 shadow-2xs select-none">
+      {/* Left: Mobile trigger & Department Header */}
+      <div className="flex items-center gap-3 min-w-0">
         {onMobileMenuToggle && (
           <button
             onClick={onMobileMenuToggle}
-            className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
-            aria-label={t('topbar.toggleNavigation', { defaultValue: 'Toggle Navigation' })}
+            className="md:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+            aria-label="Toggle Navigation"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
 
-        {/* Desktop Sidebar Toggle (Hide / Show) */}
-        {onToggleSidebar && (
-          <button
-            type="button"
-            onClick={onToggleSidebar}
-            className={cn(
-              'hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-2xs cursor-pointer',
-              isSidebarCollapsed
-                ? 'bg-blue-50 text-blue-900 border-blue-200 hover:bg-blue-100 hover:border-blue-300'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
-            )}
-            aria-label={
-              isSidebarCollapsed
-                ? t('sidebar.showSidebar', { defaultValue: 'Show Sidebar (Ctrl+B)' })
-                : t('sidebar.hideSidebar', { defaultValue: 'Hide Sidebar (Ctrl+B)' })
-            }
-            title={
-              isSidebarCollapsed
-                ? t('sidebar.showSidebar', { defaultValue: 'Show Sidebar (Ctrl+B)' })
-                : t('sidebar.hideSidebar', { defaultValue: 'Hide Sidebar (Ctrl+B)' })
-            }
-          >
-            {isSidebarCollapsed ? (
-              <>
-                <PanelLeft className="w-4 h-4 text-blue-700" />
-                <span className="hidden lg:inline font-bold">
-                  {t('sidebar.showSidebar', { defaultValue: 'Show Sidebar' })}
-                </span>
-              </>
-            ) : (
-              <>
-                <PanelLeftClose className="w-4 h-4 text-slate-500" />
-                <span className="hidden lg:inline font-medium text-slate-600">
-                  {t('sidebar.hideSidebar', { defaultValue: 'Hide Sidebar' })}
-                </span>
-              </>
-            )}
-          </button>
-        )}
-
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-900 flex items-center justify-center text-amber-400 shadow-sm font-bold">
-            <Building2 className="w-5 h-5" />
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[#14532d] flex items-center justify-center text-amber-300 font-bold shrink-0 shadow-2xs">
+            <svg className="w-5 h-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-900 tracking-tight">
-                {t('topbar.officerPortalTitle', {
-                  portalName: t('common.portalName'),
-                  defaultValue: `${t('common.portalName')} Officer Portal`,
-                })}
+              <span className="text-xs sm:text-sm font-black text-slate-900 truncate">
+                महाराष्ट्र शासन • महसूल व वन विभाग
               </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                {t('common.govtOfIndia')}
+              <span className="hidden xl:inline-block text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-[#14532d] border border-emerald-200">
+                DILRMP-02
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 hidden sm:block">
-              {t('common.portalFullName')}
+            <p className="text-[10px] text-slate-500 truncate hidden sm:block">
+              एकत्रिक भूमी अभिलेख व फेरफार पडताळणी प्रणाली (Consolidated Cadastral & Mutation Console)
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4">
+      {/* Center: Real-time Status Badges (Matching Screenshot) */}
+      <div className="hidden lg:flex items-center gap-2.5 text-[11px]">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-700">
+          <span className="font-semibold text-slate-500">RTS SLA Target:</span>
+          <span className="font-bold text-[#14532d]">14 Days Max</span>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#14532d]">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="font-bold">DSC Token: Active (e-Sign 3.0)</span>
+        </div>
+      </div>
+
+      {/* Right: Officer Profile Details */}
+      <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <LanguageSwitcher variant="header" />
 
-        {user && (
-          <>
-            <div className="hidden md:flex flex-col items-end">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-900">{user.name}</span>
-                <Badge status={user.role} />
-              </div>
-              <span className="text-[11px] text-slate-500">
-                {user.department} &bull; {user.district}
-              </span>
-            </div>
+        <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+          <div className="hidden sm:flex flex-col items-end text-right leading-tight">
+            <span className="text-xs font-bold text-slate-900">
+              Smt. Priya R. Deshmukh
+            </span>
+            <span className="text-[10px] text-emerald-800 font-semibold">
+              Circle Officer • Haveli, Pune
+            </span>
+          </div>
 
-            <Link href="/profile">
-              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer" title={t('navbar.myProfile', 'My Profile')}>
-                <UserIcon className="w-4 h-4" />
-              </div>
-            </Link>
-          </>
-        )}
+          <div className="w-8 h-8 rounded-full bg-[#14532d] text-white flex items-center justify-center font-bold text-xs border border-emerald-600/30 shadow-2xs">
+            PD
+          </div>
+        </div>
       </div>
     </header>
   );
