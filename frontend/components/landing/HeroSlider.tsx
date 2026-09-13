@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ApplyDigitalDocumentModal } from '../portal/ApplyDigitalDocumentModal';
 
@@ -17,26 +15,25 @@ export const HeroSlider: React.FC = () => {
     <section
       id="hero"
       data-purpose="hero-banner"
-      className="relative bg-sovereign-800 text-white py-12 md:py-16 px-4 sm:px-8 lg:px-12 border-b border-stone-700/60 overflow-hidden select-none"
+      className="relative bg-sovereign-800 text-white cadastral-grid-pattern py-12 md:py-16 px-4 sm:px-8 lg:px-12 border-b border-stone-700/60 overflow-hidden select-none"
     >
       {/* Ambient Glow Behind Hero */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-40" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
         {/* Left Column: Sovereign Authority & Pitch */}
         <div className="lg:col-span-7 space-y-6">
           {/* Authority Badge */}
-          <div className="inline-flex items-center space-x-2 bg-sovereign-850/90 border border-emerald-500/30 px-3.5 py-1 rounded-full text-xs font-medium text-emerald-300 backdrop-blur-xs shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="inline-flex items-center space-x-2 bg-sovereign-850/90 border border-emerald-500/30 px-3.5 py-1 rounded-full text-xs font-medium text-emerald-300 backdrop-blur-sm shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Secure Land Records Repository</span>
             <span className="text-stone-500">•</span>
             <span className="text-stone-300">100% Authenticated Cadastral Database</span>
           </div>
 
           {/* Hero Heading */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-white leading-tight tracking-tight">
             Your Land Records Are <br className="hidden sm:inline" />
             <span className="text-white">Safe, Verified &amp; </span>
             <span className="text-gold-500 underline decoration-gold-500/50 decoration-2 underline-offset-8">
@@ -52,8 +49,8 @@ export const HeroSlider: React.FC = () => {
           {/* Primary CTA Controls */}
           <div className="flex flex-wrap items-center gap-3.5 pt-2">
             <Link
-              href="/land-records"
-              className="border border-stone-500 hover:border-white bg-sovereign-850/80 hover:bg-sovereign-700 text-stone-200 hover:text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded transition-all flex items-center space-x-2 cursor-pointer shadow-xs"
+              href="#services"
+              className="border border-stone-500 hover:border-white bg-sovereign-850/80 hover:bg-sovereign-700 text-stone-200 hover:text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded transition-all flex items-center space-x-2"
             >
               <span>Explore Land Records</span>
               <span>→</span>
@@ -62,9 +59,8 @@ export const HeroSlider: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsApplyModalOpen(true)}
-              className="border border-stone-500 hover:border-white bg-sovereign-850/80 hover:bg-sovereign-700 text-stone-200 hover:text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded transition-all flex items-center space-x-2 cursor-pointer shadow-xs"
+              className="border border-stone-500 hover:border-white bg-sovereign-850/80 hover:bg-sovereign-700 text-stone-200 hover:text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded transition-all flex items-center space-x-2 cursor-pointer"
             >
-              <FileText className="w-4 h-4 text-gold-400" />
               <span>Apply for Digital Document</span>
             </button>
           </div>
@@ -103,17 +99,14 @@ export const HeroSlider: React.FC = () => {
             </div>
 
             {/* Visual with authentic Stitch asset */}
-            <div className="relative overflow-hidden aspect-4/3">
-              <Image
+            <div className="relative overflow-hidden">
+              <img
                 src="/hero-cadastral-ai.jpg"
                 alt="Digital Land Records Transformation showing historical parchment dissolving into vector cadastral maps"
-                fill
-                sizes="(max-width: 768px) 100vw, 40vw"
-                className="object-cover transform transition-transform duration-700 group-hover:scale-105"
-                priority
+                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-stone-900 via-stone-900/85 to-transparent p-4">
-                <div className="inline-flex items-center space-x-1.5 bg-emerald-950/90 border border-emerald-500/40 px-2.5 py-1 rounded text-[11px] font-mono text-emerald-300 mb-1.5 backdrop-blur-xs">
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-stone-900 via-stone-900/80 to-transparent p-4">
+                <div className="inline-flex items-center space-x-1.5 bg-emerald-950/90 border border-emerald-500/40 px-2.5 py-1 rounded text-[11px] font-mono text-emerald-300 mb-1.5 backdrop-blur-sm">
                   <span className="text-gold-400">⚡</span>
                   <span>Modi &amp; Devanagari Paper Scans ➔ 14-Digit Bhu-Aadhaar Vector</span>
                 </div>
