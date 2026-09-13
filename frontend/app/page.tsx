@@ -34,9 +34,15 @@ export default function HomePage() {
 
         {/* 6. Certified Cadastral Services & Records */}
         <ServicesSection />
+
+        {/* 7. Frequently Asked Questions */}
+        <FaqSection />
+
+        {/* 8. Citizen Helpdesk & Regional Offices */}
+        <ContactSection />
       </main>
 
-      {/* 7. Official Maharashtra Government Footer */}
+      {/* 9. Official Maharashtra Government Footer */}
       <LandingFooter />
     </div>
   );

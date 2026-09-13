@@ -53,13 +53,13 @@ export default function RegisterLandingPage() {
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sticky top-0 z-30 shadow-xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-900 flex items-center justify-center text-amber-400 font-bold shadow-xs border border-blue-800 group-hover:scale-105 transition-transform">
-              <Building2 className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sovereign-800 flex items-center justify-center text-white font-bold shadow-xs border border-emerald-600/40 group-hover:scale-105 transition-transform">
+              <Building2 className="w-6 h-6 text-emerald-300" />
             </div>
             <div>
               <div className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
                 <span>ILRDVS</span>
-                <span className="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                <span className="text-xs font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                   {t('registration.registrationHeader', { defaultValue: 'Registration Portal' })}
                 </span>
               </div>
@@ -73,7 +73,7 @@ export default function RegisterLandingPage() {
             <LanguageSwitcher variant="header" />
             <Link
               href="/login"
-              className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-blue-900 text-blue-950 hover:bg-slate-100 transition-colors"
+              className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-sovereign-800 text-slate-800 hover:bg-slate-100 transition-colors"
             >
               {t('common.alreadyRegistered', { defaultValue: 'Sign in →' })}
             </Link>
@@ -87,16 +87,16 @@ export default function RegisterLandingPage() {
         <div className="space-y-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 hover:text-blue-700 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-sovereign-800 hover:text-emerald-700 hover:underline"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Portal Home</span>
           </Link>
 
           <div className="text-center max-w-3xl mx-auto space-y-2.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/80 border border-blue-200 text-blue-950 text-xs font-bold uppercase tracking-wider shadow-2xs">
-              <Shield className="w-3.5 h-3.5 text-blue-800" />
-              <span>DILRMP 3.0 Citizen & Officer Access Onboarding</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-bold uppercase tracking-wider shadow-2xs">
+              <Shield className="w-3.5 h-3.5 text-emerald-700" />
+              <span>DILRMP 3.0 Citizen &amp; Officer Access Onboarding</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
@@ -112,10 +112,10 @@ export default function RegisterLandingPage() {
         {/* 2 Split Cards: Citizen vs Officer */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto w-full items-stretch">
           {/* Card 1: Citizen Self-Service */}
-          <div className="bg-white border-2 border-slate-200 hover:border-blue-900 rounded-2xl p-5 sm:p-8 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+          <div className="bg-white border-2 border-slate-200 hover:border-sovereign-800 rounded-2xl p-5 sm:p-8 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-center group-hover:bg-blue-900 group-hover:text-amber-400 transition-colors shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-sovereign-800 flex items-center justify-center group-hover:bg-sovereign-800 group-hover:text-amber-400 transition-colors shadow-xs">
                   <UserCheck className="w-6 h-6" />
                 </div>
                 <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
@@ -125,7 +125,7 @@ export default function RegisterLandingPage() {
               </div>
 
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-blue-950 transition-colors">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 group-hover:text-sovereign-950 transition-colors">
                   Citizen Portal Registration
                 </h2>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -144,7 +144,7 @@ export default function RegisterLandingPage() {
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>
-                    <strong>Digitize Scanned Extracts:</strong> Upload archival paper documents for automated AI OCR Devanagari & Modi script transcription.
+                    <strong>Digitize Scanned Extracts:</strong> Upload archival paper documents for automated AI OCR Devanagari &amp; Modi script transcription.
                   </span>
                 </div>
 
@@ -167,7 +167,7 @@ export default function RegisterLandingPage() {
             <div className="pt-6 mt-6 border-t border-slate-100 space-y-2.5">
               <Link
                 href="/register/citizen"
-                className="w-full py-3.5 px-4 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg shadow-blue-900/20 text-center"
+                className="w-full py-3.5 px-4 rounded-xl bg-sovereign-800 hover:bg-sovereign-900 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg shadow-emerald-950/20 text-center"
               >
                 <span>Register as Citizen</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-amber-400" />

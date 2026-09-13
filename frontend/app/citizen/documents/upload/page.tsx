@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Building2,
   FileCheck,
+  Scroll,
 } from 'lucide-react';
 import { documentVerificationService } from '../../../../services/documentVerification.service';
 
@@ -60,7 +61,6 @@ export default function CitizenDocumentUploadPage() {
     setIsProcessing(true);
     setPipelineStage(0);
 
-    // Animate stages for realistic feedback
     const interval = setInterval(() => {
       setPipelineStage((prev) => {
         if (prev < stages.length - 1) return prev + 1;
@@ -93,193 +93,211 @@ export default function CitizenDocumentUploadPage() {
 
   return (
     <PortalLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 select-none">
         {/* Header Breadcrumb */}
         <div className="flex items-center justify-between">
           <Link
-            href="/citizen/verifications"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            href="/portal"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-emerald-800 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to My Applications
+            <ArrowLeft className="w-4 h-4" /> Back to Citizen Hub
           </Link>
-          <span className="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
-            Automated Land Title Ingestion
+          <span className="text-[11px] font-mono uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-emerald-100 text-[#14532d] border border-emerald-300">
+            DILRMP 3.0 Automated Title Ingestion
           </span>
         </div>
 
-        {/* Title */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm">
-          <h1 className="text-2xl font-bold text-white">Upload Land Document for Verification</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Upload your scanned Maharashtra revenue record or select an authoritative evaluation case to run the end-to-end AI cross-check pipeline.
+        {/* Title Card */}
+        <div className="bg-sovereign-800 text-white rounded-2xl p-6 sm:p-7 shadow-md border border-emerald-950 space-y-2">
+          <div className="inline-flex items-center gap-2 text-emerald-300 font-mono text-xs uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-gold-400" />
+            <span>Cadastral Document Digitization Engine</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+            Upload Land Document for Verification
+          </h1>
+          <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed font-normal max-w-2xl">
+            Upload your scanned Maharashtra revenue record or choose an authoritative prototype scenario to trigger the 8-Layer AI cross-verification pipeline.
           </p>
         </div>
 
         {isProcessing ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-6">
-            <div className="inline-block p-4 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30 animate-pulse">
-              <Sparkles className="w-10 h-10 animate-spin" />
+          <div className="bg-white border border-stone-200 rounded-2xl p-8 sm:p-10 text-center space-y-6 shadow-xs">
+            <div className="inline-block p-4 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 animate-pulse">
+              <Sparkles className="w-8 h-8" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">AI Verification Engine Running</h3>
-              <p className="text-sm text-sky-400 font-medium mt-1">
+            <div className="space-y-2">
+              <h3 className="font-serif font-bold text-xl text-stone-900">
+                Processing Document Ingestion
+              </h3>
+              <p className="text-xs text-stone-500 font-mono">
                 {stages[pipelineStage]}
               </p>
             </div>
 
-            <div className="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden max-w-md mx-auto border border-slate-800">
+            {/* Stepper progress */}
+            <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden max-w-md mx-auto">
               <div
-                className="bg-gradient-to-r from-sky-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                className="bg-sovereign-800 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${((pipelineStage + 1) / stages.length) * 100}%` }}
-              ></div>
+              />
             </div>
-
-            <p className="text-xs text-slate-500">
-              Generating cryptographic SHA-256 fingerprint, parsing Devanagari numerals, and querying cadastral registry...
-            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Step 1: Select Document Type */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-                <span className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold">1</span>
-                <h2 className="text-base font-bold text-white">Select Document Classification</h2>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Document Type Selector */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-xs space-y-4">
+              <label className="block font-serif font-bold text-sm text-stone-900">
+                Select Revenue Document Category
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 {[
-                  { id: '7/12 Extract (Satbara)', desc: 'Record of Rights (RoR) & Crops' },
-                  { id: '8A Extract (Khate Pustika)', desc: 'Holding & Tax Assessment' },
-                  { id: 'Ferfar (Mutation Register)', desc: 'Title Transition & Inheritance' },
-                  { id: 'Sale Deed (Kharidi Khat)', desc: 'Sub-Registrar Conveyance' },
-                ].map((item) => (
+                  '7/12 Extract (Satbara)',
+                  'Form 6 Ferfar (Mutation)',
+                  'Archival Deed / Sanad',
+                ].map((type) => (
                   <button
-                    key={item.id}
+                    key={type}
                     type="button"
-                    onClick={() => setDocumentType(item.id)}
-                    className={`p-3.5 rounded-xl border text-left transition-all ${
-                      documentType === item.id
-                        ? 'bg-sky-500/10 border-sky-500 text-white shadow-sm'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                    onClick={() => setDocumentType(type)}
+                    className={`p-3.5 rounded-xl border text-left font-semibold transition-all cursor-pointer ${
+                      documentType === type
+                        ? 'bg-emerald-50 border-[#14532d] text-[#14532d] ring-1 ring-[#14532d]'
+                        : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50'
                     }`}
                   >
-                    <div className="text-xs font-bold text-white">{item.id}</div>
-                    <div className="text-[11px] text-slate-400 mt-1">{item.desc}</div>
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-emerald-800" />
+                      <span>{type}</span>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Step 2: Instant Demo Scenarios (Judge/Evaluator Mode) */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold">2</span>
-                  <h2 className="text-base font-bold text-white">Instant Demo Scenarios (Optional)</h2>
-                </div>
-                <span className="text-xs text-sky-400 font-semibold">Judge / Demonstration Mode</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div
-                  onClick={() => handlePresetSelect('CASE_1_GREEN')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                    selectedPreset === 'CASE_1_GREEN'
-                      ? 'bg-emerald-500/10 border-emerald-500 text-white'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-400">Scenario 1 (Low Risk)</span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">Pass</span>
-                  </div>
-                  <div className="text-sm font-semibold text-white mt-1">Shankar Ganpat Patil</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Survey 145/2A • Haveli, Pune</div>
-                  <p className="text-[11px] text-slate-500 mt-2">Genuine owner matching cadastral registry.</p>
-                </div>
-
-                <div
-                  onClick={() => handlePresetSelect('CASE_2_YELLOW')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                    selectedPreset === 'CASE_2_YELLOW'
-                      ? 'bg-amber-500/10 border-amber-500 text-white'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-400">Scenario 2 (Medium Risk)</span>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">Clarification</span>
-                  </div>
-                  <div className="text-sm font-semibold text-white mt-1">Meena Rajendra Kulkarni</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Survey 88/3 • Dindori, Nashik</div>
-                  <p className="text-[11px] text-slate-500 mt-2">Legal heir relationship requires clarification.</p>
-                </div>
-
-                <div
-                  onClick={() => handlePresetSelect('CASE_3_RED')}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                    selectedPreset === 'CASE_3_RED'
-                      ? 'bg-red-500/10 border-red-500 text-white'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-red-400">Scenario 3 (High Risk)</span>
-                    <span className="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded">Discrepancy</span>
-                  </div>
-                  <div className="text-sm font-semibold text-white mt-1">Rahul Shankar Patil</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Survey 211/4 • Haveli, Pune</div>
-                  <p className="text-[11px] text-slate-500 mt-2">Area inflation & ownership discrepancy detected.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3: Or Upload Custom File */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-                <span className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold">3</span>
-                <h2 className="text-base font-bold text-white">Upload Your File (PDF, PNG, JPG)</h2>
-              </div>
-
-              <div className="border-2 border-dashed border-slate-800 hover:border-sky-500 rounded-xl p-8 text-center transition-colors">
-                <UploadCloud className="w-10 h-10 text-sky-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-white">
-                  {selectedFile ? selectedFile.name : 'Click to browse or drag & drop document file'}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Supported formats: PDF, PNG, JPEG, TIFF (Max file size: 10MB)
-                </p>
+            {/* Upload Area */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+              <label className="block font-serif font-bold text-sm text-stone-900">
+                Upload Scanned File (PDF, TIFF, JPEG)
+              </label>
+              <div className="border-2 border-dashed border-emerald-300 rounded-2xl p-8 text-center bg-stone-50/60 hover:bg-emerald-50/30 transition-colors">
                 <input
                   type="file"
-                  id="doc-upload-input"
+                  id="document-upload"
+                  accept=".pdf,.jpg,.jpeg,.png,.tiff"
                   onChange={handleFileChange}
-                  accept=".pdf,.png,.jpg,.jpeg,.tiff"
                   className="hidden"
                 />
                 <label
-                  htmlFor="doc-upload-input"
-                  className="inline-block mt-4 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 font-semibold text-xs cursor-pointer transition-colors"
+                  htmlFor="document-upload"
+                  className="cursor-pointer flex flex-col items-center gap-3"
                 >
-                  Choose Document File
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-2xs">
+                    <UploadCloud className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm text-stone-900 block">
+                      {selectedFile ? selectedFile.name : 'Click to select document or drag & drop'}
+                    </span>
+                    <span className="text-xs text-stone-500 mt-1 block">
+                      Supports high-resolution scans up to 50MB (Bilingual Marathi / English)
+                    </span>
+                  </div>
                 </label>
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Evaluation Scenarios / Presets */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-xs space-y-4">
+              <div>
+                <h3 className="font-serif font-bold text-sm text-stone-900">
+                  Or Test Authoritative Prototype Scenarios
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Select a pre-configured sample document to test the automatic verification checks
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                {/* Case 1 */}
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('CASE_1_GREEN')}
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer space-y-1.5 ${
+                    selectedPreset === 'CASE_1_GREEN'
+                      ? 'bg-emerald-50 border-[#14532d] ring-1 ring-[#14532d]'
+                      : 'bg-stone-50 border-stone-200 hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-900 text-xs">Case 1: Clear RoR</span>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-[#14532d] text-white">
+                      CLEAN
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 leading-snug">
+                    Clean 7/12 extract matching RoR with zero area discrepancy.
+                  </p>
+                </button>
+
+                {/* Case 2 */}
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('CASE_2_YELLOW')}
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer space-y-1.5 ${
+                    selectedPreset === 'CASE_2_YELLOW'
+                      ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500'
+                      : 'bg-stone-50 border-stone-200 hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-900 text-xs">Case 2: Variance</span>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-stone-950">
+                      WARNING
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 leading-snug">
+                    0.04 Ha boundary variance against SVAMITVA drone ortho-polygon.
+                  </p>
+                </button>
+
+                {/* Case 3 */}
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('CASE_3_RED')}
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer space-y-1.5 ${
+                    selectedPreset === 'CASE_3_RED'
+                      ? 'bg-rose-50 border-rose-500 ring-1 ring-rose-500'
+                      : 'bg-stone-50 border-stone-200 hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-900 text-xs">Case 3: Collision</span>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-600 text-white">
+                      CRITICAL
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 leading-snug">
+                    Double-registration or active court stay injunction collision.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Action */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <Link
-                href="/citizen/verifications"
-                className="px-4 py-2.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold"
+                href="/portal"
+                className="px-5 py-3 rounded-xl border border-stone-300 text-stone-700 font-semibold text-xs hover:bg-stone-50 transition-colors"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-lg shadow-sky-600/20 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sovereign-800 hover:bg-sovereign-700 text-white font-serif font-bold text-xs shadow-md transition-all cursor-pointer border border-emerald-500/30"
               >
-                <Sparkles className="w-4 h-4" />
-                Execute AI Verification Pipeline
+                <FileCheck className="w-4 h-4 text-gold-400" />
+                <span>Run Ingestion Pipeline</span>
               </button>
             </div>
           </form>

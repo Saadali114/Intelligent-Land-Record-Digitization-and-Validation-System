@@ -32,46 +32,51 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   const pathname = usePathname();
   const router = useRouter();
 
-  const citizenNav = [
+  const workspaceNav = [
     {
-      name: 'Dashboard (Overview)',
+      name: 'नागरिक कक्ष (Citizen Hub)',
       href: '/portal',
       exact: true,
       icon: LayoutDashboard,
     },
     {
-      name: 'My Land Parcels & 7/12 (माझी जमीन)',
-      href: '/portal/land-records',
-      icon: FileSpreadsheet,
-    },
-    {
-      name: 'Form 6 Mutation Tracker (फेरफार अर्ज)',
+      name: 'फेरफार नोंद (Mutation Queue)',
       href: '/portal/applications',
+      badge: '28',
       icon: FileText,
     },
     {
-      name: '8-Layer Land Stack (भूमी पासबुक)',
-      href: '/land-records',
+      name: 'भू-नकाशा (GIS Cadastral)',
+      href: '/portal/land-records',
+      tag: 'EPSG:3857',
       icon: Layers,
     },
     {
-      name: 'Upload Document (दस्तऐवज)',
+      name: 'मोडी लिपी (OCR Archival)',
       href: '/portal/upload',
       icon: UploadCloud,
     },
     {
-      name: 'Title Search & Encumbrance (बोजा)',
-      href: '/land-records',
-      icon: Search,
+      name: 'मंजूरी अहवाल (Audit Logs)',
+      href: '/documents',
+      icon: ShieldCheck,
+    },
+  ];
+
+  const registersNav = [
+    {
+      name: '७/१२ व ८-अ (7/12 & 8-A)',
+      href: '/portal/land-records',
+      icon: FileSpreadsheet,
     },
     {
-      name: 'Grievance & RTS (तक्रार निवारण)',
+      name: 'तक्रार नोंदवही (RTS Appeals)',
       href: '/verification',
       icon: Scale,
     },
     {
-      name: 'Citizen Support & FAQs (मदत केंद्र)',
-      href: '/documents',
+      name: 'मदत केंद्र (Help & FAQs)',
+      href: '/#faq',
       icon: HelpCircle,
     },
   ];
@@ -82,27 +87,31 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   };
 
   const content = (
-    <div className="flex flex-col h-full bg-white text-slate-800 w-64 border-r border-slate-200 select-none justify-between">
-      <div>
-        {/* Header Title */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-            नागरिक सेवा पोर्टल / CITIZEN SERVICES
+    <div className="flex flex-col h-full bg-[#132e22] text-white w-72 select-none justify-between border-r border-[#0b1d16] shadow-md">
+      <div className="overflow-y-auto">
+        {/* District Division Header Pill */}
+        <div className="p-3">
+          <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/10 border border-white/15">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="font-mono text-xs text-emerald-100 font-bold tracking-wide">
+                HAVELI DIV #411028
+              </span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-bold">
+              ONLINE
+            </span>
           </div>
-          {onCloseMobile && (
-            <button
-              type="button"
-              onClick={onCloseMobile}
-              className="md:hidden p-1 text-slate-500 hover:text-slate-900"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
         </div>
 
-        {/* Navigation List */}
-        <div className="p-3 space-y-1">
-          {citizenNav.map((item) => {
+        {/* Section 1: Citizen Workspace */}
+        <div className="px-3 pt-2 pb-1">
+          <span className="text-[10px] uppercase tracking-wider text-emerald-300/75 font-bold">
+            Citizen Workspace
+          </span>
+        </div>
+        <nav className="flex flex-col gap-1 px-3">
+          {workspaceNav.map((item) => {
             const active = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
             const Icon = item.icon;
 
@@ -111,37 +120,91 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
                 key={item.name}
                 href={item.href}
                 onClick={onCloseMobile}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all text-xs font-semibold ${
                   active
-                    ? 'bg-[#dcfce7] text-[#14532d] shadow-2xs font-bold border border-emerald-300/80'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-white/20 text-white font-bold shadow-[inset_3px_0_0_0_#85f8c4] border border-emerald-500/30'
+                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-[#14532d]' : 'text-slate-400'}`} />
-                <span className="truncate">{item.name}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-emerald-300' : 'text-emerald-400/80'}`} />
+                  <span className="truncate">{item.name}</span>
+                </div>
+                {item.badge && (
+                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-400 text-slate-950 font-bold">
+                    {item.badge}
+                  </span>
+                )}
+                {item.tag && (
+                  <span className="text-[10px] font-mono text-emerald-300">
+                    {item.tag}
+                  </span>
+                )}
               </Link>
             );
           })}
+        </nav>
+
+        {/* Section 2: Statutory Registers */}
+        <div className="px-3 pt-4 pb-1">
+          <span className="text-[10px] uppercase tracking-wider text-emerald-300/75 font-bold">
+            Statutory Registers
+          </span>
         </div>
+        <nav className="flex flex-col gap-1 px-3">
+          {registersNav.map((item) => {
+            const active = false;
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onCloseMobile}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all text-xs font-semibold ${
+                  active
+                    ? 'bg-white/20 text-white font-bold shadow-[inset_3px_0_0_0_#85f8c4]'
+                    : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon className="w-4 h-4 shrink-0 text-emerald-400/80" />
+                  <span className="truncate">{item.name}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Footer Info & Logout */}
-      <div className="p-4 border-t border-slate-100 space-y-3">
-        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-500 leading-relaxed">
-          <div className="flex items-center gap-1 font-bold text-slate-700 mb-0.5">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            DigiLocker & UIDAI Linked
+      {/* Footer Info: NIC Central Gateway & Sign Out */}
+      <div className="p-3 bg-black/20 border-t border-white/10 space-y-2">
+        <div className="p-2.5 bg-white/10 rounded-lg border border-white/15 flex flex-col gap-1.5 text-[10px]">
+          <div className="flex items-center justify-between">
+            <span className="text-emerald-200/80 font-medium">NIC Central Gateway</span>
+            <span className="text-emerald-300 font-bold font-mono">99.98% Sync</span>
           </div>
-          Biometric & Aadhaar e-KYC Active for Parcel Validation.
+          <div className="w-full h-1.5 rounded-full bg-white/20 overflow-hidden">
+            <div className="h-full bg-emerald-400 rounded-full w-[99.98%]"></div>
+          </div>
+          <div className="flex items-center justify-between pt-0.5 text-emerald-300/70 font-mono">
+            <span>Node: MH-PUN-04</span>
+            <span className="text-emerald-300 font-bold">Encrypted</span>
+          </div>
         </div>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-bold text-rose-700 hover:bg-rose-50 transition-colors"
+          className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-950/40 hover:text-white transition-colors cursor-pointer"
         >
-          <LogOut className="w-4 h-4 text-rose-600" />
-          <span>लॉगआउट (Sign Out)</span>
+          <div className="flex items-center gap-2">
+            <LogOut className="w-4 h-4 text-rose-400" />
+            <span>लॉगआउट (Sign Out)</span>
+          </div>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-900/60 font-bold text-rose-200">
+            EXIT
+          </span>
         </button>
       </div>
     </div>
@@ -150,7 +213,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col shrink-0 h-[calc(100vh-5.5rem)] sticky top-[5.5rem]">
+      <aside className="hidden md:flex flex-col shrink-0 h-[calc(100vh-4rem)] sticky top-16">
         {content}
       </aside>
 
@@ -161,7 +224,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
             className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             onClick={onCloseMobile}
           />
-          <div className="relative flex w-64 max-w-xs flex-1 flex-col bg-white shadow-2xl z-10">
+          <div className="relative flex w-72 max-w-xs flex-1 flex-col bg-[#132e22] shadow-2xl z-10">
             {content}
           </div>
         </div>

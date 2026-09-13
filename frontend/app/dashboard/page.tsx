@@ -141,26 +141,32 @@ export default function DashboardPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
-              <span className="text-[#14532d] font-bold">
+              <span className="text-sovereign-800 font-bold">
                 महसूल व भूमी अभिलेख महासंचालनालय
               </span>
               <span>•</span>
-              <span className="px-2 py-0.5 rounded bg-emerald-50 text-[#14532d] border border-emerald-200 text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded bg-emerald-50 text-sovereign-800 border border-emerald-200 text-[10px] font-bold">
                 DILRMP 3.0 National Code Node
               </span>
               <span>•</span>
               <span className="font-mono text-slate-400">Govt. Code: Pun-22 (MahaGov-NIC)</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-serif font-black text-[#0f2d1e] tracking-tight flex items-baseline gap-2">
-              राज्य भू-अभिलेख नियंत्रण कक्ष{' '}
-              <span className="text-sm font-sans font-medium text-slate-500">
-                (State Administration & Governance Console)
-              </span>
-            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 tracking-tight">
+                Operations &amp; Validation Dashboard
+              </h1>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-emerald-200 shadow-2xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-semibold text-emerald-800 tracking-tight">Live Database Feed</span>
+              </div>
+            </div>
 
             <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-              Centralized governance node for 36 District Revenue Cadastres, high-throughput Modi script OCR verification, SVAMITVA GIS vector syncing, and automated RCCMS stay compliance.
+              Real-time synchronization across 36 district land registries, high-throughput Modi script OCR verification, SVAMITVA GIS vector syncing, and automated RCCMS stay compliance.
             </p>
           </div>
 

@@ -171,15 +171,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    'flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all group',
+                    'relative flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all group overflow-hidden',
                     isActive
-                      ? 'bg-[#14532d] text-white font-bold shadow-xs border border-emerald-500/50'
-                      : 'text-slate-300 hover:bg-[#0f3e28] hover:text-white'
+                      ? 'bg-[#164028] text-white font-bold shadow-xs border border-emerald-700/60'
+                      : 'text-slate-300 hover:bg-[#164028]/60 hover:text-white'
                   )}
                   title={collapsed ? item.label : undefined}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-amber-300' : 'text-slate-400 group-hover:text-emerald-300')} />
+                  {isActive && !collapsed && (
+                    <div className="absolute left-0 top-1 bottom-1 w-1 bg-amber-400 rounded-r"></div>
+                  )}
+                  <div className="flex items-center gap-2.5 min-w-0 pl-0.5">
+                    <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-amber-400' : 'text-slate-400 group-hover:text-emerald-300')} />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                   </div>
 

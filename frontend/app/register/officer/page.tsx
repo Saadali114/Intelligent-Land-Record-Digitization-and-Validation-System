@@ -176,7 +176,7 @@ export default function OfficerRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f8faf9] cadastral-grid flex flex-col justify-between">
       {/* Top Gov Tricolor Ribbon */}
       <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 border-b border-slate-200" />
 
