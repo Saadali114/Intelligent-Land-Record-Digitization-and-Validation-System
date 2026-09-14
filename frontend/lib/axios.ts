@@ -1,9 +1,20 @@
 import axios, { AxiosError } from 'axios';
 
 const getBaseURL = (): string => {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  const trimmed = envUrl.replace(/\/+$/, '');
-  // If the URL already ends with /api, use it as is; otherwise append /api
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl.trim() && !envUrl.includes('localhost')) {
+    const trimmed = envUrl.replace(/\/+$/, '');
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+  }
+  // Browser runtime detection on deployed cloud hosts
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host.includes('onrender.com') || (!host.includes('localhost') && !host.includes('127.0.0.1'))) {
+      return 'https://ilrd-backend.onrender.com/api';
+    }
+  }
+  const fallback = envUrl || 'http://localhost:5000/api';
+  const trimmed = fallback.replace(/\/+$/, '');
   return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
 };
 
@@ -17,10 +28,17 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor (attaches token from localStorage if present as fallback)
+// Request interceptor (attaches token and ensures cloud API endpoint in production browser)
 apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (
+        (host.includes('onrender.com') || (!host.includes('localhost') && !host.includes('127.0.0.1'))) &&
+        (!config.baseURL || config.baseURL.includes('localhost'))
+      ) {
+        config.baseURL = 'https://ilrd-backend.onrender.com/api';
+      }
       const token = localStorage.getItem('token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;

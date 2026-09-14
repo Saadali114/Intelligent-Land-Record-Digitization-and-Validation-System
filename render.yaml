@@ -79,7 +79,7 @@ services:
         value: "max-age=31536000; includeSubDomains; preload"
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        sync: false           # Set to https://your-backend.onrender.com/api after backend deploys
+        value: https://ilrd-backend.onrender.com/api
       - key: NEXT_PUBLIC_EMAILJS_SERVICE_ID
         value: service_u2dyh2v
       - key: NEXT_PUBLIC_EMAILJS_TEMPLATE_ID

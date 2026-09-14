@@ -327,6 +327,76 @@ const DEFAULT_PARCELS: CadastralParcel[] = [
       ['27 Nov 2022', 'Mutation #5890', 'Land use converted to Residential Class 1'],
     ],
   },
+  {
+    id: '42/1B',
+    owner: 'Devendra Bapurao Deshmukh',
+    area: '3.40 Ha (34,000 sq.m)',
+    type: 'agri',
+    crop: 'Cotton & Soybean (Kharif Cash Crops)',
+    village: 'Hingna',
+    taluka: 'Hingna',
+    district: 'Nagpur',
+    ulpin: '81LVQLD9410JH3',
+    khataNumber: 'KT-774',
+    khasraNumber: '42/1B',
+    valuation: '₹ 1.05 Crore',
+    encumbrance: 'Clear Title (Zero Encumbrances)',
+    hasActiveDispute: false,
+    historical2001: {
+      landUse: 'Traditional Vidarbha Black Soil Farmland',
+      crop: 'Cotton & Pulses Canopy',
+      builtUpPercent: '0%',
+      ndvi: '0.65',
+      ownerIn2001: 'Bapurao Deshmukh (Father)',
+      satelliteSensor: 'IRS-1D LISS-III',
+      acquisitionDate: '18-Nov-2001',
+      boundaryIntegrity: 'Pillars certified under DILRMP GIS',
+    },
+    coords: [
+      [18.5207, 73.8555],
+      [18.5207, 73.8567],
+      [18.5201, 73.8567],
+      [18.5201, 73.8555],
+    ],
+    mutations: [
+      ['09 Jan 2024', 'Mutation #3012', 'Succession partitioned and sanctioned by Tehsildar'],
+    ],
+  },
+  {
+    id: '102/5',
+    owner: 'Aniket Manohar Sawant',
+    area: '0.95 Ha (9,500 sq.m)',
+    type: 'resi',
+    crop: 'Commercial Complex & Warehousing Zone',
+    village: 'Karjat',
+    taluka: 'Karjat',
+    district: 'Raigad',
+    ulpin: '81LVQLD9411JH4',
+    khataNumber: 'KT-218',
+    khasraNumber: '102/5',
+    valuation: '₹ 77.90 Lakh',
+    encumbrance: 'Bank of Baroda Commercial Term Lien (₹ 12,00,000)',
+    hasActiveDispute: false,
+    historical2001: {
+      landUse: 'Horticultural Orchard & Open Grassland',
+      crop: 'Cashew & Mango Plantation',
+      builtUpPercent: '0%',
+      ndvi: '0.78',
+      ownerIn2001: 'Manohar Sawant',
+      satelliteSensor: 'Landsat-7 ETM+',
+      acquisitionDate: '10-Oct-2001',
+      boundaryIntegrity: 'Converted to Commercial NA in 2025',
+    },
+    coords: [
+      [18.5207, 73.8567],
+      [18.5207, 73.8579],
+      [18.5201, 73.8579],
+      [18.5201, 73.8567],
+    ],
+    mutations: [
+      ['20 Jan 2025', 'Mutation #1140', 'Commercial Non-Agricultural Order sanctioned by SDO'],
+    ],
+  },
 ];
 
 const TYPE_COLORS = {
@@ -531,6 +601,18 @@ export const CadastralGisViewer: React.FC<CadastralGisViewerProps> = ({
       }, 1800);
     }
   };
+
+  // Synchronize selection when initialSurvey prop changes
+  useEffect(() => {
+    if (!initialSurvey || !layersRef.current?.parcelLayers) return;
+    const clean = initialSurvey.trim().toLowerCase();
+    const match = Object.keys(layersRef.current.parcelLayers).find(
+      (id) => id.toLowerCase() === clean
+    );
+    if (match) {
+      handleSelectParcel(match);
+    }
+  }, [initialSurvey]);
 
   // Switch Base Map
   const handleSetBase = (which: 'street' | 'satellite') => {
