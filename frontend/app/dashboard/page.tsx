@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { useDashboardStatsQuery } from '../../hooks/useDashboard';
@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../..
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { formatDate, formatDateTime } from '../../lib/utils';
-import { formatRole, formatStatus, formatDistrict } from '../../lib/translationHelpers';
+import { formatRole, formatStatus, formatDistrict, normalizeDistrictKey } from '../../lib/translationHelpers';
 import {
   Users,
   Files,
@@ -43,6 +43,47 @@ const CHART_COLORS = ['#1e3a8a', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0
 export default function DashboardPage() {
   const { t } = useTranslation();
   const { data: stats, isLoading, isError, error } = useDashboardStatsQuery();
+
+  // Strictly localized chart datasets to prevent Hindi & English mixing
+  const documentStatusData = useMemo(() => {
+    return (stats?.charts?.documentStatus || []).map((entry) => ({
+      ...entry,
+      displayName: formatStatus(entry.status, t),
+    }));
+  }, [stats?.charts?.documentStatus, t]);
+
+  const verificationStatusData = useMemo(() => {
+    return (stats?.charts?.verificationStatus || []).map((entry) => ({
+      ...entry,
+      displayName: formatStatus(entry.status, t),
+    }));
+  }, [stats?.charts?.verificationStatus, t]);
+
+  const districtWiseData = useMemo(() => {
+    const mergedMap = new Map<string, number>();
+    (stats?.charts?.districtWise || []).forEach((entry) => {
+      const canonicalKey = normalizeDistrictKey(entry.district);
+      if (!canonicalKey) return;
+      const count = typeof entry.count === 'number' ? entry.count : 0;
+      mergedMap.set(canonicalKey, (mergedMap.get(canonicalKey) || 0) + count);
+    });
+
+    return Array.from(mergedMap.entries())
+      .map(([key, count]) => ({
+        key,
+        displayName: formatDistrict(key, t),
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+  }, [stats?.charts?.districtWise, t]);
+
+  const userRolesData = useMemo(() => {
+    return (stats?.charts?.userRoles || []).map((entry) => ({
+      ...entry,
+      displayName: formatRole(entry.role, t),
+    }));
+  }, [stats?.charts?.userRoles, t]);
 
   return (
     <AppLayout>
@@ -230,24 +271,24 @@ export default function DashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={stats.charts.documentStatus}
+                        data={documentStatusData}
                         dataKey="count"
-                        nameKey="status"
+                        nameKey="displayName"
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
                         outerRadius={90}
                         paddingAngle={4}
-                        label={({ name, percent }) => `${formatStatus(String(name), t)} (${(percent * 100).toFixed(0)}%)`}
+                        label={({ displayName, percent }) => `${displayName} (${(percent * 100).toFixed(0)}%)`}
                       >
-                        {stats.charts.documentStatus.map((entry, index) => (
+                        {documentStatusData.map((_, index) => (
                           <Cell
                             key={`doc-status-${index}`}
                             fill={CHART_COLORS[index % CHART_COLORS.length]}
                           />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: any, name: any) => [value, formatStatus(String(name), t)]} />
+                      <Tooltip formatter={(value: any, name: any) => [value, name]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -266,13 +307,13 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.charts.verificationStatus}>
+                    <BarChart data={verificationStatusData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="status" fontSize={11} stroke="#64748b" tickFormatter={(val) => formatStatus(val, t)} />
+                      <XAxis dataKey="displayName" fontSize={11} stroke="#64748b" />
                       <YAxis allowDecimals={false} fontSize={11} stroke="#64748b" />
                       <Tooltip
                         formatter={(value: any) => [value, t('dashboard.recordsLabel', { defaultValue: 'Records' })]}
-                        labelFormatter={(label: any) => formatStatus(label, t)}
+                        labelFormatter={(label: any) => String(label)}
                       />
                       <Bar
                         dataKey="count"
@@ -299,23 +340,22 @@ export default function DashboardPage() {
                 <CardContent className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={stats.charts.districtWise}
+                      data={districtWiseData}
                       layout="vertical"
                       margin={{ left: 20 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                       <XAxis type="number" allowDecimals={false} fontSize={11} stroke="#64748b" />
                       <YAxis
-                        dataKey="district"
+                        dataKey="displayName"
                         type="category"
                         fontSize={11}
                         stroke="#64748b"
-                        width={80}
-                        tickFormatter={(val) => formatDistrict(val, t)}
+                        width={90}
                       />
                       <Tooltip
                         formatter={(value: any) => [value, t('dashboard.recordsLabel', { defaultValue: 'Records' })]}
-                        labelFormatter={(label: any) => formatDistrict(label, t)}
+                        labelFormatter={(label: any) => String(label)}
                       />
                       <Bar
                         dataKey="count"
@@ -341,13 +381,13 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.charts.userRoles}>
+                    <BarChart data={userRolesData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="role" fontSize={11} stroke="#64748b" tickFormatter={(val) => formatRole(val, t)} />
+                      <XAxis dataKey="displayName" fontSize={11} stroke="#64748b" />
                       <YAxis allowDecimals={false} fontSize={11} stroke="#64748b" />
                       <Tooltip
                         formatter={(value: any) => [value, t('dashboard.usersLabel', { defaultValue: 'Users' })]}
-                        labelFormatter={(label: any) => formatRole(label, t)}
+                        labelFormatter={(label: any) => String(label)}
                       />
                       <Bar
                         dataKey="count"

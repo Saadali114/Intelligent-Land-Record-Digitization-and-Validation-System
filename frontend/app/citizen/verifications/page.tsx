@@ -72,7 +72,7 @@ export default function CitizenVerificationsListPage() {
             </p>
           </div>
           <Link
-            href="/citizen/documents/upload"
+            href="/portal/upload"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-sky-600/20 whitespace-nowrap"
           >
             <UploadCloud className="w-4 h-4" />
@@ -132,7 +132,7 @@ export default function CitizenVerificationsListPage() {
               <p className="text-sm font-medium text-slate-300">{t('citizenVerifications.noApplicationsFound')}</p>
               <p className="text-xs text-slate-500 mt-1">{t('citizenVerifications.noApplicationsDesc')}</p>
               <Link
-                href="/citizen/documents/upload"
+                href="/portal/upload"
                 className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold"
               >
                 {t('citizenVerifications.uploadNow')}

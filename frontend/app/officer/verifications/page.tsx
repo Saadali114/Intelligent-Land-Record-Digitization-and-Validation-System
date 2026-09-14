@@ -317,7 +317,7 @@ export default function OfficerVerificationQueuePage() {
 
                         <td className="px-5 py-4 text-right">
                           <Link
-                            href={`/officer/verification/${appId}`}
+                            href={`/officer/verifications/${appId}`}
                             className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors"
                           >
                             Review Workspace
