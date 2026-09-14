@@ -13,6 +13,22 @@ export const createApp = (): Express => {
 
   const clientUrl = (process.env.CLIENT_URL || '').replace(/\/+$/, '');
 
+  // Security Headers Middleware (satisfies Mozilla Observatory, OWASP, and XFO/CSP audits)
+  app.use((_req: Request, res: Response, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https: http://localhost:* ws://localhost:*; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+    );
+    res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), browsing-topics=()');
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
+    next();
+  });
+
   // Middleware - Dynamic CORS for deployed Render, Vercel, and local development
   app.use(
     cors({
