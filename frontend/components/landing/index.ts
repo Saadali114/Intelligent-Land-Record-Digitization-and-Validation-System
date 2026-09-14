@@ -5,5 +5,6 @@ export { AboutUsSection } from './AboutUsSection';
 export { ServicesSection } from './ServicesSection';
 export { LandStackSection } from './LandStackSection';
 export { FaqSection } from './FaqSection';
+export { QuickAccessBar } from './QuickAccessBar';
 export { ContactSection } from './ContactSection';
 export { LandingFooter } from './LandingFooter';

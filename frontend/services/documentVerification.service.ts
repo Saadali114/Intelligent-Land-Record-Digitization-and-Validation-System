@@ -267,55 +267,10 @@ export const documentVerificationService = {
       const response = await apiClient.get<{ success: boolean; data: DemoCadastralRecord[] }>(
         '/verifications/demo-records/list'
       );
-      return response.data.data;
+      return response.data.data || [];
     } catch (err) {
-      return [
-        {
-          recordId: 'LR-001',
-          ownerName: 'Shankar Ganpat Patil',
-          surveyNumber: '145/2A',
-          gatNumber: '145/2A',
-          khasraNumber: 'KH-1452',
-          khataNumber: 'KT-304',
-          plotArea: '1.25 Hectares',
-          village: 'Khadakwasla',
-          tehsil: 'Haveli',
-          district: 'Pune',
-          landClassification: 'Agricultural (Jirayat)',
-          mutationNumber: 'MUT-2024-8812',
-          sourceType: 'DEMO_REFERENCE_RECORD',
-        },
-        {
-          recordId: 'LR-002',
-          ownerName: 'Meena Rajendra Kulkarni',
-          surveyNumber: '88/3',
-          gatNumber: '88/3',
-          khasraNumber: 'KH-0883',
-          khataNumber: 'KT-112',
-          plotArea: '0.85 Hectares',
-          village: 'Vani',
-          tehsil: 'Dindori',
-          district: 'Nashik',
-          landClassification: 'Agricultural (Bagayat)',
-          mutationNumber: 'MUT-2023-4109',
-          sourceType: 'DEMO_REFERENCE_RECORD',
-        },
-        {
-          recordId: 'LR-003',
-          ownerName: 'Rahul Shankar Patil',
-          surveyNumber: '211/4',
-          gatNumber: '211/4',
-          khasraNumber: 'KH-2114',
-          khataNumber: 'KT-589',
-          plotArea: '2.10 Hectares',
-          village: 'Wagholi',
-          tehsil: 'Haveli',
-          district: 'Pune',
-          landClassification: 'Agricultural (Jirayat)',
-          mutationNumber: 'MUT-2025-9921',
-          sourceType: 'DEMO_REFERENCE_RECORD',
-        },
-      ];
+      console.warn('Failed to load demo records from API:', err);
+      return [];
     }
   },
 

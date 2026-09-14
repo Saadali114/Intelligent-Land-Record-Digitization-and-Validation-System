@@ -9,6 +9,7 @@ import {
   LandStackSection,
   ServicesSection,
   FaqSection,
+  QuickAccessBar,
   ContactSection,
   LandingFooter,
 } from '../components/landing';
@@ -25,6 +26,9 @@ export default function HomePage() {
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* 3. Hero Section (Attractive slider: "Your land records are safe here", Land info slides, DILRMP 3.0 highlights) */}
         <HeroSlider />
+
+        {/* 3.1 Quick Access & Direct Inspection Bar (Survey Number, Mutation History, GIS Cadastral Map) */}
+        <QuickAccessBar />
 
         {/* 4. About Us Section (Cadastral Heritage, Modernization mission, 4 AI Pillars) */}
         <AboutUsSection />

@@ -70,10 +70,17 @@ export const LandRecordFilterBar: React.FC<LandRecordFilterBarProps> = ({
           ))}
         </select>
 
-        <div className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-emerald-200 bg-emerald-50/80 text-emerald-800">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-          <span>{t('landRecords.verifiedOnly', { defaultValue: 'Status: Verified Documents' })}</span>
-        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => onStatusFilterChange(e.target.value)}
+          className="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-900"
+        >
+          <option value="">{t('landRecords.allStatuses', { defaultValue: 'All Statuses' })}</option>
+          <option value="VERIFIED">Verified</option>
+          <option value="PENDING">Pending Review</option>
+          <option value="DISPUTED">Disputed</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
       </div>
     </div>
   );

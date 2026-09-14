@@ -4,6 +4,8 @@ import {
   CitizenNotification,
   CitizenProfile,
 } from '../types/citizen';
+import { LandRecord } from '../types';
+import { landRecordsService } from './land-records.service';
 import {
   getStoredApplications,
   saveStoredApplications,
@@ -14,6 +16,56 @@ import {
   saveStoredProfile,
   INITIAL_CITIZEN_PROFILE,
 } from '../lib/citizenMockData';
+
+export function mapApiLandRecordToCitizen(r: LandRecord): CitizenLandRecord {
+  const isVerified = r.verificationStatus === 'VERIFIED';
+  const officerName = typeof r.verifiedBy === 'object' && r.verifiedBy !== null ? r.verifiedBy.name : (isVerified ? 'Revenue Officer' : undefined);
+  const officerDesignation = typeof r.verifiedBy === 'object' && r.verifiedBy !== null ? r.verifiedBy.role : (isVerified ? 'Circle Revenue Officer' : undefined);
+
+  return {
+    id: r._id || r.recordId || `REC-${r.surveyNumber}`,
+    owner: r.ownerName,
+    owners: [r.ownerName],
+    surveyNumber: r.surveyNumber || r.gatNumber || '',
+    khataNumber: r.khataNumber || '—',
+    khasraNumber: r.khasraNumber || '—',
+    village: r.village || '',
+    taluka: r.tehsil || '',
+    district: r.district || '',
+    area: r.plotArea || '—',
+    landType: r.landClassification || 'Agricultural',
+    tenureStatus: r.ownershipType || 'Occupant Class 1',
+    mutationNumber: r.mutationNumber || '—',
+    recordStatus: isVerified ? 'VERIFIED' : r.hasActiveDispute ? 'FLAGGED' : 'UNDER_REVIEW',
+    status: r.verificationStatus || (isVerified ? 'VERIFIED' : 'UNDER_REVIEW'),
+    verifiedDate: r.updatedAt
+      ? new Date(r.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : isVerified
+      ? 'Verified'
+      : 'Pending Verification',
+    verifiedByOfficer: isVerified,
+    officerName,
+    officerDesignation,
+    digitalSignatureId: isVerified ? `DSC-MAHA-REV-${(r._id || r.recordId || '2026').slice(-6).toUpperCase()}` : undefined,
+    ulpin: r.ulpin || undefined,
+    assessment: '₹ 3.50 / year',
+    encumbrance: r.hasBankCharge
+      ? 'Bank Lien / Encumbered'
+      : r.hasActiveDispute
+      ? 'Disputed Title (RCCMS)'
+      : 'No Dues / Clear Title',
+    mutationHistory: r.mutationNumber
+      ? [
+          {
+            mutationNo: r.mutationNumber,
+            date: r.updatedAt ? new Date(r.updatedAt).toLocaleDateString('en-GB') : 'Recent',
+            nature: r.ownershipType || 'Cadastral Title Deed',
+            sanctionedBy: officerName || 'Circle Officer',
+          },
+        ]
+      : [],
+  };
+}
 
 export const citizenService = {
   // Auth state
@@ -429,9 +481,18 @@ export const citizenService = {
     return true;
   },
 
-  // Land records
-  getLandRecords(): CitizenLandRecord[] {
-    return getStoredLandRecords();
+  // Land records (live backend API)
+  async getLandRecords(): Promise<CitizenLandRecord[]> {
+    try {
+      const res = await landRecordsService.getLandRecords({ limit: 100 });
+      if (res?.records && res.records.length > 0) {
+        return res.records.map(mapApiLandRecordToCitizen);
+      }
+      return [];
+    } catch (error) {
+      console.warn('Failed to fetch land records from API, falling back to local stored records:', error);
+      return getStoredLandRecords();
+    }
   },
 
   // Notifications

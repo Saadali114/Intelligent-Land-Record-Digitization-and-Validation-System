@@ -86,10 +86,10 @@ export default function OfficerVerificationQueuePage() {
             </div>
           </div>
           <Link
-            href="/admin/land-records"
+            href="/land-records"
             className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 whitespace-nowrap"
           >
-            Manage Demo Cadastral Data →
+            Manage Cadastral Records →
           </Link>
         </div>
 

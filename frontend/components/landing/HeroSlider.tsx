@@ -65,9 +65,9 @@ export const HeroSlider: React.FC = () => {
       highlight: t('home.slider.slide1Highlight'),
       description: t('home.slider.slide1Desc'),
       primaryBtnText: t('home.slider.slide1PrimaryBtn'),
-      primaryBtnLink: '#services',
+      primaryBtnLink: '/check-ownership',
       secondaryBtnText: t('home.slider.slide1SecondaryBtn'),
-      secondaryBtnLink: '/verification',
+      secondaryBtnLink: '/check-ownership?tab=gis',
       badge: t('home.slider.slide1Badge'),
       theme: 'from-slate-950 via-blue-950 to-slate-900',
     },
@@ -239,7 +239,7 @@ export const HeroSlider: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-2.5 text-xs">
                   <Link
-                    href="/land-records"
+                    href="/check-ownership"
                     className="p-3 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 transition-all text-left group"
                   >
                     <div className="w-7 h-7 rounded-lg bg-blue-900/60 text-blue-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
@@ -278,7 +278,7 @@ export const HeroSlider: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="#services"
+                    href="/check-ownership?tab=mutation"
                     className="p-3 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 transition-all text-left group"
                   >
                     <div className="w-7 h-7 rounded-lg bg-amber-900/60 text-amber-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">

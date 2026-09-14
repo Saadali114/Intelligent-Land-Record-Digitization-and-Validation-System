@@ -375,79 +375,7 @@ export const INITIAL_APPLICATIONS: CitizenApplication[] = [
   },
 ];
 
-export const INITIAL_LAND_RECORDS: CitizenLandRecord[] = [
-  {
-    id: 'REC-PUN-001',
-    owner: 'Rahul Patil',
-    owners: ['Rahul Patil'],
-    ulpin: '27-25-045-00087-003',
-    surveyNumber: '87/3',
-    khataNumber: '210',
-    khasraNumber: 'KH-87',
-    village: 'Wadgaon Budruk',
-    taluka: 'Haveli',
-    district: 'Pune',
-    area: '1.10 Hectare',
-    landType: 'Agricultural (Bagayat)',
-    tenureStatus: 'Occupant Class 1 (Bhogwatadar Class 1)',
-    assessment: '₹ 3.50 / year',
-    encumbrance: 'No Dues / Clear Title',
-    mutationNumber: 'MTR-2025-88',
-    recordStatus: 'VERIFIED',
-    status: 'VERIFIED',
-    verifiedDate: '02 Sep 2026',
-    verifiedByOfficer: true,
-    officerName: 'Smt. Anjali Patil',
-    officerDesignation: 'Taluka Executive Magistrate & Tehsildar',
-    digitalSignatureId: 'DSC-MAHA-REV-2026-98124',
-    mutationHistory: [
-      {
-        mutationNo: 'MTR-2025-88',
-        date: '15 Aug 2026',
-        nature: 'Inheritance Succession (वारस नोंद)',
-        sanctionedBy: 'Circle Officer, Haveli',
-      },
-      {
-        mutationNo: 'MTR-2018-42',
-        date: '10 Mar 2018',
-        nature: 'Partition Deed (वापस वाटप)',
-        sanctionedBy: 'Talathi, Wadgaon',
-      },
-    ],
-  },
-  {
-    id: 'REC-PUN-002',
-    owner: 'Rahul Patil',
-    owners: ['Rahul Patil'],
-    ulpin: '27-25-045-00124-002',
-    surveyNumber: '124/2',
-    khataNumber: '450',
-    khasraNumber: 'KH-124',
-    village: 'Khadakwasla',
-    taluka: 'Haveli',
-    district: 'Pune',
-    area: '2.35 Hectare',
-    landType: 'Agricultural (Jirayat)',
-    tenureStatus: 'Occupant Class 1',
-    assessment: '₹ 4.25 / year',
-    encumbrance: 'Under Mutation Notice',
-    mutationNumber: 'MTR-2026-012',
-    recordStatus: 'UNDER_REVIEW',
-    status: 'UNDER_REVIEW',
-    verifiedDate: 'Pending Verification',
-    verifiedByOfficer: false,
-    officerName: 'Shri Suresh Deshmukh',
-    officerDesignation: 'Circle Revenue Officer (Mandal Adhikari)',
-    mutationHistory: [
-      {
-        mutationNo: 'MTR-2026-012',
-        date: '12 Jan 2026',
-        nature: 'Purchase Conveyance (खरेदी नोंद)',
-        sanctionedBy: 'Awaiting Officer Sanction',
-      },
-    ],
-  },
-];
+export const INITIAL_LAND_RECORDS: CitizenLandRecord[] = [];
 
 export const INITIAL_NOTIFICATIONS: CitizenNotification[] = [
   {
@@ -547,15 +475,14 @@ export const saveStoredProfile = (profile: CitizenProfile): void => {
 };
 
 export const getStoredLandRecords = (): CitizenLandRecord[] => {
-  if (typeof window === 'undefined') return INITIAL_LAND_RECORDS;
+  if (typeof window === 'undefined') return [];
   const stored = localStorage.getItem('ilrdvs_citizen_land_records');
   if (!stored) {
-    localStorage.setItem('ilrdvs_citizen_land_records', JSON.stringify(INITIAL_LAND_RECORDS));
-    return INITIAL_LAND_RECORDS;
+    return [];
   }
   try {
     return JSON.parse(stored);
   } catch {
-    return INITIAL_LAND_RECORDS;
+    return [];
   }
 };

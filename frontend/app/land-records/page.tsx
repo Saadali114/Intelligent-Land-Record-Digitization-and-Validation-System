@@ -48,7 +48,7 @@ export default function LandRecordsPage() {
     limit: 10,
     search: search || undefined,
     district: districtFilter || undefined,
-    status: 'VERIFIED',
+    status: statusFilter || undefined,
     landClassification: classificationFilter || undefined,
   });
 

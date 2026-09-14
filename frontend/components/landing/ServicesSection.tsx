@@ -28,7 +28,7 @@ export const ServicesSection: React.FC = () => {
       key: 'satbara',
       icon: <FileText className="w-6 h-6 text-blue-700" />,
       badgeColor: 'bg-blue-100 text-blue-900 border-blue-200',
-      link: '/land-records',
+      link: '/check-ownership',
     },
     {
       key: 'propertyCard',
@@ -40,7 +40,7 @@ export const ServicesSection: React.FC = () => {
       key: 'mutation',
       icon: <Sparkles className="w-6 h-6 text-amber-600" />,
       badgeColor: 'bg-amber-100 text-amber-900 border-amber-200',
-      link: '/verification',
+      link: '/check-ownership?tab=mutation',
     },
     {
       key: 'verification',
@@ -52,7 +52,7 @@ export const ServicesSection: React.FC = () => {
       key: 'gisMaps',
       icon: <Compass className="w-6 h-6 text-cyan-700" />,
       badgeColor: 'bg-cyan-100 text-cyan-900 border-cyan-200',
-      link: '#land-stack',
+      link: '/gis-map',
     },
     {
       key: 'titleSearch',

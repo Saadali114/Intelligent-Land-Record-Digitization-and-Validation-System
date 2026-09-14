@@ -35,61 +35,7 @@ export interface ILandRecordProvider {
 
 export class DemoLandRecordProvider implements ILandRecordProvider {
   /**
-   * Static fallback records in case MongoDB is temporarily seeding or unreachable
-   */
-  private static FALLBACK_RECORDS: CadastralRecordResult[] = [
-    {
-      recordId: 'LR-001',
-      ownerName: 'Shankar Ganpat Patil',
-      surveyNumber: '145/2A',
-      gatNumber: '145/2A',
-      khasraNumber: 'KH-1452',
-      khataNumber: 'KT-304',
-      plotArea: '1.25 Hectares',
-      village: 'Khadakwasla',
-      tehsil: 'Haveli',
-      district: 'Pune',
-      landClassification: 'Agricultural (Jirayat)',
-      mutationNumber: 'MUT-2024-8812',
-      sourceType: 'DEMO_REFERENCE_RECORD',
-      isOfficialRecord: true,
-    },
-    {
-      recordId: 'LR-002',
-      ownerName: 'Meena Rajendra Kulkarni',
-      surveyNumber: '88/3',
-      gatNumber: '88/3',
-      khasraNumber: 'KH-0883',
-      khataNumber: 'KT-112',
-      plotArea: '0.85 Hectares',
-      village: 'Vani',
-      tehsil: 'Dindori',
-      district: 'Nashik',
-      landClassification: 'Agricultural (Bagayat)',
-      mutationNumber: 'MUT-2023-4109',
-      sourceType: 'DEMO_REFERENCE_RECORD',
-      isOfficialRecord: true,
-    },
-    {
-      recordId: 'LR-003',
-      ownerName: 'Rahul Shankar Patil',
-      surveyNumber: '211/4',
-      gatNumber: '211/4',
-      khasraNumber: 'KH-2114',
-      khataNumber: 'KT-589',
-      plotArea: '2.10 Hectares',
-      village: 'Wagholi',
-      tehsil: 'Haveli',
-      district: 'Pune',
-      landClassification: 'Agricultural (Jirayat)',
-      mutationNumber: 'MUT-2025-9921',
-      sourceType: 'DEMO_REFERENCE_RECORD',
-      isOfficialRecord: true,
-    },
-  ];
-
-  /**
-   * Search for official/demo reference record matching extracted fields
+   * Search for official land record matching extracted fields from database
    */
   public async findMatchingRecord(query: LandRecordQuery): Promise<CadastralRecordResult | null> {
     try {
@@ -127,47 +73,36 @@ export class DemoLandRecordProvider implements ILandRecordProvider {
         }
       }
 
-      // 3. Check static fallbacks
-      for (const fb of DemoLandRecordProvider.FALLBACK_RECORDS) {
-        if (
-          normalizedSurvey &&
-          NormalizationService.normalizeSurveyNumber(fb.surveyNumber) === normalizedSurvey
-        ) {
-          return fb;
-        }
-        if (
-          normalizedName &&
-          NormalizationService.normalizeName(fb.ownerName).includes(normalizedName.split(' ')[0])
-        ) {
-          return fb;
-        }
-      }
-
-      // If neither matched exactly, return default canonical record for demonstration
-      return DemoLandRecordProvider.FALLBACK_RECORDS[0];
+      return null;
     } catch (err) {
-      console.warn('DemoLandRecordProvider fallback triggered:', err);
-      return DemoLandRecordProvider.FALLBACK_RECORDS[0];
+      console.warn('Error querying LandRecord from database:', err);
+      return null;
     }
   }
 
   public async getRecordById(recordId: string): Promise<CadastralRecordResult | null> {
-    const doc = await LandRecord.findOne({ recordId });
-    if (doc) return this.mapMongoDocToCadastral(doc);
-
-    return DemoLandRecordProvider.FALLBACK_RECORDS.find((r) => r.recordId === recordId) || null;
+    try {
+      const doc = await LandRecord.findOne({
+        $or: [{ recordId }, { _id: recordId.match(/^[0-9a-fA-F]{24}$/) ? recordId : undefined }],
+      });
+      if (doc) return this.mapMongoDocToCadastral(doc);
+      return null;
+    } catch (err) {
+      console.warn('Error fetching LandRecord by ID:', err);
+      return null;
+    }
   }
 
-  public async listDemoRecords(limit = 20): Promise<CadastralRecordResult[]> {
+  public async listDemoRecords(limit = 50): Promise<CadastralRecordResult[]> {
     try {
-      const records = await LandRecord.find({ sourceType: 'DEMO_REFERENCE_RECORD' }).limit(limit);
+      const records = await LandRecord.find().limit(limit);
       if (records.length > 0) {
         return records.map((r) => this.mapMongoDocToCadastral(r));
       }
     } catch (err) {
-      console.warn('Error fetching demo records from DB:', err);
+      console.warn('Error fetching land records from DB:', err);
     }
-    return DemoLandRecordProvider.FALLBACK_RECORDS;
+    return [];
   }
 
   private mapMongoDocToCadastral(doc: ILandRecord): CadastralRecordResult {

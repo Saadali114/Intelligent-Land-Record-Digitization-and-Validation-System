@@ -44,8 +44,15 @@ export default function CitizenDashboardPage() {
     setProfile(prof);
     const apps = citizenService.getApplications();
     setApplications(apps);
-    const records = citizenService.getLandRecords();
-    setLandRecords(records);
+    citizenService
+      .getLandRecords()
+      .then((records) => {
+        setLandRecords(records);
+      })
+      .catch((err) => {
+        console.warn('Failed to load portal land records:', err);
+        setLandRecords([]);
+      });
   }, []);
 
   const totalCount = applications.length;
