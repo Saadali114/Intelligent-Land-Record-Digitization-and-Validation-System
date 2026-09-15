@@ -95,6 +95,66 @@ export const getDashboardStatsService = async () => {
     ]),
   ]);
 
+  // Normalize district names across Devanagari & English so duplicates are merged
+  const DEVANAGARI_TO_ENGLISH_DISTRICTS: Record<string, string> = {
+    'पुणे': 'Pune',
+    'ठाणे': 'Thane',
+    'नाशिक': 'Nashik',
+    'नासिक': 'Nashik',
+    'रायगड': 'Raigad',
+    'नागपूर': 'Nagpur',
+    'नागपुर': 'Nagpur',
+    'छत्रपती संभाजीनगर': 'Chhatrapati Sambhajinagar',
+    'छत्रपति संभाजीनगर': 'Chhatrapati Sambhajinagar',
+    'औरंगाबाद': 'Chhatrapati Sambhajinagar',
+    'सातारा': 'Satara',
+    'कोल्हापूर': 'Kolhapur',
+    'कोल्हापुर': 'Kolhapur',
+    'सोलापूर': 'Solapur',
+    'सोलापुर': 'Solapur',
+    'अमरावती': 'Amravati',
+    'नांदेड': 'Nanded',
+    'नांदेड़': 'Nanded',
+    'मुंबई शहर': 'Mumbai City',
+    'मुंबई उपनगर': 'Mumbai Suburban',
+    'पालघर': 'Palghar',
+    'अहमदनगर': 'Ahmednagar',
+    'जळगाव': 'Jalgaon',
+    'धुळे': 'Dhule',
+    'नंदुरबार': 'Nandurbar',
+    'जालना': 'Jalna',
+    'परभणी': 'Parbhani',
+    'हिंगोली': 'Hingoli',
+    'बीड': 'Beed',
+    'लातूर': 'Latur',
+    'धाराशिव': 'Dharashiv',
+    'उस्मानाबाद': 'Dharashiv',
+    'अकोला': 'Akola',
+    'बुलढाणा': 'Buldhana',
+    'वाशिम': 'Washim',
+    'यवतमाळ': 'Yavatmal',
+    'वर्धा': 'Wardha',
+    'भंडारा': 'Bhandara',
+    'गोंदिया': 'Gondia',
+    'चंद्रपूर': 'Chandrapur',
+    'गडचिरोली': 'Gadchiroli',
+    'सांगली': 'Sangli',
+    'रत्नागिरी': 'Ratnagiri',
+    'सिंधुदुर्ग': 'Sindhudurg',
+  };
+
+  const districtMap = new Map<string, number>();
+  for (const item of (districtWiseRecords || [])) {
+    const raw = (item.district || '').trim();
+    if (!raw) continue;
+    const canonical = DEVANAGARI_TO_ENGLISH_DISTRICTS[raw] || raw;
+    districtMap.set(canonical, (districtMap.get(canonical) || 0) + (item.count || 0));
+  }
+  const normalizedDistrictWise = Array.from(districtMap.entries())
+    .map(([district, count]) => ({ district, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
   return {
     overview: {
       totalUsers,
@@ -112,7 +172,7 @@ export const getDashboardStatsService = async () => {
       verificationStatus: verificationStatusCounts,
       documentStatus: documentStatusCounts,
       userRoles: userRoleCounts,
-      districtWise: districtWiseRecords,
+      districtWise: normalizedDistrictWise,
       monthlyTrends: monthlyProcessing,
     },
     recentActivity: recentAuditLogs,
