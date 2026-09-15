@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Building,
   LogOut,
+  AlertCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { citizenService } from '../../services/citizen.service';
@@ -56,6 +57,11 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       name: t('applications.title'),
       href: '/portal/applications',
       icon: FileText,
+    },
+    {
+      name: t('complaints.sidebarTitle', { defaultValue: 'Grievance Redressal' }),
+      href: '/portal/complaints',
+      icon: AlertCircle,
     },
     {
       name: t('notifications.title'),

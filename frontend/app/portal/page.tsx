@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Layers,
   Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import { PortalLayout } from '../../components/portal/PortalLayout';
 import { Badge } from '../../components/ui/Badge';
@@ -25,6 +26,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { ApplyDigitalDocumentModal } from '../../components/portal/ApplyDigitalDocumentModal';
 import { formatDocType, formatStatus } from '../../lib/translationHelpers';
 import { citizenService } from '../../services/citizen.service';
+import { complaintsService } from '../../services/complaints.service';
 import {
   CitizenApplication,
   CitizenLandRecord,
@@ -37,6 +39,7 @@ export default function CitizenDashboardPage() {
   const [profile, setProfile] = useState<CitizenProfile | null>(null);
   const [applications, setApplications] = useState<CitizenApplication[]>([]);
   const [landRecords, setLandRecords] = useState<CitizenLandRecord[]>([]);
+  const [complaintsCount, setComplaintsCount] = useState<number>(0);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   useEffect(() => {
@@ -71,6 +74,13 @@ export default function CitizenDashboardPage() {
         console.warn('Failed to load portal land records:', err);
         setLandRecords([]);
       });
+
+    complaintsService
+      .getComplaints()
+      .then((list) => {
+        setComplaintsCount(list.length);
+      })
+      .catch(() => {});
   }, []);
 
   const totalCount = applications.length;
@@ -416,6 +426,40 @@ export default function CitizenDashboardPage() {
               >
                 + Apply Document
               </button>
+            </div>
+          </div>
+
+          {/* Grievance & RTSA Quick Access Card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-amber-300 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-amber-100 text-amber-800">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  {t('complaints.sidebarTitle', { defaultValue: 'Grievance Redressal' })}
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                RTSA 2015
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              {t('complaints.subtitle', { defaultValue: 'Lodge and track cadastral disputes, mutation delays, boundary conflicts, and clerical corrections.' })}
+            </p>
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <Link
+                href="/portal/complaints"
+                className="text-xs font-bold text-blue-900 hover:text-blue-700 flex items-center gap-1"
+              >
+                {t('common.viewAll', { defaultValue: 'View All' })} ({complaintsCount}) <ArrowRight className="w-3 h-3" />
+              </Link>
+              <Link
+                href="/portal/complaints"
+                className="text-xs font-bold text-amber-700 hover:text-amber-800"
+              >
+                + {t('complaints.lodgeNew', { defaultValue: 'Lodge Grievance' })}
+              </Link>
             </div>
           </div>
         </div>
