@@ -100,7 +100,7 @@ export const ServicesSection: React.FC = () => {
                   <h3 className="font-bold text-slate-900 text-base group-hover:text-blue-950 transition-colors">
                     {t(`services.items.${s.key}.title`)}
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium">
+                  <p className="text-xs text-slate-500 font-medium" lang="mr">
                     {t(`services.items.${s.key}.titleAlt`)}
                   </p>
                 </div>
@@ -113,10 +113,10 @@ export const ServicesSection: React.FC = () => {
               <div className="pt-4 border-t border-slate-100">
                 <Link
                   href={s.link}
-                  className="w-full inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-blue-900 text-slate-800 hover:text-white font-bold text-xs border border-slate-200 hover:border-blue-900 transition-all group-hover:shadow-xs"
+                  className="w-full inline-flex items-center justify-between px-4 py-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-xs hover:shadow-md cursor-pointer"
                 >
                   <span>{t(`services.items.${s.key}.actionText`)}</span>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { citizenService } from '../../services/citizen.service';
+import { useAuth } from '../../context/AuthContext';
 import {
   Building2,
   ChevronDown,
   LogIn,
+  LogOut,
   Menu,
   X,
   FileText,
@@ -52,10 +54,22 @@ const DISTRICTS_LIST = [
 export const SubNavbar: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { user, isAuthenticated, logout: authLogout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDistrictOpen, setMobileDistrictOpen] = useState(false);
   const [selectedDistrictKey, setSelectedDistrictKey] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [citizenAuth, setCitizenAuth] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    setCitizenAuth(citizenService.isAuthenticated());
+  }, [user, isAuthenticated]);
+
+  const isLoggedIn = isMounted && (isAuthenticated || citizenAuth);
+  const isOfficerOrAdmin = isMounted && isAuthenticated && user && user.role !== 'CITIZEN';
+  const isCitizen = isMounted && (citizenAuth || (isAuthenticated && user?.role === 'CITIZEN'));
 
   const toggleDropdown = (name: string) => {
     setOpenDropdown(openDropdown === name ? null : name);
@@ -65,6 +79,21 @@ export const SubNavbar: React.FC = () => {
     if (!citizenService.isAuthenticated()) {
       e.preventDefault();
       router.push('/portal/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      citizenService.logout();
+      if (isAuthenticated) {
+        await authLogout();
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setCitizenAuth(false);
+      router.push('/');
+      router.refresh();
     }
   };
 
@@ -89,10 +118,10 @@ export const SubNavbar: React.FC = () => {
                   Maharashtra Portal
                 </span>
               </div>
-              <h1 className="text-[11px] sm:text-sm font-bold text-slate-800 tracking-tight leading-tight truncate sm:whitespace-normal">
+              <p className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight leading-tight truncate sm:whitespace-normal">
                 {t('common.portalFullName', 'Intelligent Land Record Digitization & Validation System')}
-              </h1>
-              <p className="text-[10px] text-slate-500 font-medium hidden md:block">
+              </p>
+              <p className="text-xs text-slate-500 font-medium hidden md:block">
                 {t('home.bannerBadge', 'National Land Records Modernization Programme (NLRMP)')} &bull; Digital India Land Records
               </p>
             </div>
@@ -100,44 +129,104 @@ export const SubNavbar: React.FC = () => {
 
           {/* Right: Quick Action CTAs (Desktop) */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
-            {/* Register Account */}
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
-            >
-              <UserPlus className="w-4 h-4 text-blue-900" />
-              <span>{t('navbar.register', 'Register')}</span>
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                {/* Register Account */}
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 hover:border-blue-900 text-slate-800 hover:text-blue-950 font-bold text-xs bg-slate-50 hover:bg-white transition-all shadow-2xs"
+                >
+                  <UserPlus className="w-4 h-4 text-blue-900" />
+                  <span>{t('navbar.register', 'Register')}</span>
+                </Link>
 
-            {/* Citizen Portal Access */}
-            <Link
-              href="/portal"
-              onClick={handleCitizenPortalClick}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
-            >
-              <ShieldCheck className="w-4 h-4 text-slate-950" />
-              <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
-            </Link>
+                {/* Citizen Portal Access */}
+                <Link
+                  href="/portal"
+                  onClick={handleCitizenPortalClick}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+                >
+                  <ShieldCheck className="w-4 h-4 text-slate-950" />
+                  <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
+                </Link>
 
-            {/* Officer / Employee Login */}
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
-            >
-              <LogIn className="w-4 h-4 text-amber-400" />
-              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
-            </Link>
+                {/* Officer / Employee Login */}
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
+                >
+                  <LogIn className="w-4 h-4 text-amber-400" />
+                  <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* When logged in: Hide Register, Citizen Portal, and Officer Login */}
+                {isOfficerOrAdmin ? (
+                  <Link
+                    href={user?.role === 'ADMIN' ? '/dashboard' : '/officer/verifications'}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all border border-blue-700"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-amber-400" />
+                    <span>
+                      {user?.role === 'ADMIN'
+                        ? t('navbar.adminDashboard', 'Admin Dashboard')
+                        : t('navbar.officerWorkspace', 'Officer Workspace')}
+                    </span>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/portal"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:shadow-md transition-all border border-amber-300"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-slate-950" />
+                    <span>{t('navbar.myPortal', 'My Portal & Records')}</span>
+                  </Link>
+                )}
+
+                {/* Logged in User Badge */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="max-w-[120px] truncate">
+                    {user?.name || (isCitizen ? t('navbar.citizen', 'Citizen') : t('navbar.officer', 'Officer'))}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 font-semibold uppercase">
+                    {user?.role || (isCitizen ? 'Citizen' : 'User')}
+                  </span>
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 font-bold text-xs transition-colors cursor-pointer"
+                  title="Sign out"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                  <span>{t('common.logout', 'Logout')}</span>
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Right Controls: Mini CTAs & Hamburger Toggle */}
           <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
-            <Link
-              href="/portal"
-              onClick={handleCitizenPortalClick}
-              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-xs"
-            >
-              {t('navbar.citizenPortal', 'Portal')}
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href={isOfficerOrAdmin ? (user?.role === 'ADMIN' ? '/dashboard' : '/officer/verifications') : '/portal'}
+                className="px-2.5 py-1.5 rounded-lg bg-blue-900 text-white font-bold text-xs shadow-xs"
+              >
+                {isOfficerOrAdmin ? 'Workspace' : 'Portal'}
+              </Link>
+            ) : (
+              <Link
+                href="/portal"
+                onClick={handleCitizenPortalClick}
+                className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-xs"
+              >
+                {t('navbar.citizenPortal', 'Portal')}
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -417,34 +506,69 @@ export const SubNavbar: React.FC = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3 text-xs font-semibold text-slate-700 shadow-xl max-h-[80vh] overflow-y-auto">
           {/* Action CTAs Strip */}
-          <Link
-            href="/register"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold border border-blue-200 text-center transition-colors"
-          >
-            + {t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}
-          </Link>
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href="/portal"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                handleCitizenPortalClick(e);
-              }}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shadow-xs transition-colors"
-            >
-              <ShieldCheck className="w-4 h-4 text-slate-950" />
-              <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
-            </Link>
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold transition-colors"
-            >
-              <LogIn className="w-4 h-4 text-amber-400" />
-              <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
-            </Link>
-          </div>
+          {!isLoggedIn ? (
+            <>
+              <Link
+                href="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold border border-blue-200 text-center transition-colors"
+              >
+                + {t('registration.registerNow', { defaultValue: 'Register / Apply for Access' })}
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/portal"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    handleCitizenPortalClick(e);
+                  }}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shadow-xs transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4 text-slate-950" />
+                  <span>{t('navbar.citizenPortal', 'Citizen Portal')}</span>
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold transition-colors"
+                >
+                  <LogIn className="w-4 h-4 text-amber-400" />
+                  <span>{t('navbar.employeeLogin', 'Officer Login')}</span>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-slate-900 text-xs">
+                    {user?.name || (isCitizen ? 'Citizen User' : 'Officer User')}
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-semibold uppercase">
+                    {user?.role || (isCitizen ? 'CITIZEN' : 'OFFICER')}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-rose-200 bg-white text-rose-700 text-xs font-bold cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                  <span>{t('common.logout', 'Logout')}</span>
+                </button>
+              </div>
+              <Link
+                href={isOfficerOrAdmin ? (user?.role === 'ADMIN' ? '/dashboard' : '/officer/verifications') : '/portal'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full py-2 px-3 rounded-xl bg-blue-900 text-white font-bold text-center text-xs shadow-xs"
+              >
+                {isOfficerOrAdmin ? 'Go to Officer Workspace' : 'Go to My Portal & Records'}
+              </Link>
+            </div>
+          )}
 
           {/* Governance Tools & Direct Portals in Mobile Burger */}
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">

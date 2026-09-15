@@ -92,7 +92,7 @@ export const ContactSection: React.FC = () => {
                   <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <div>
                     <strong>{t('contact.headOfficeLabel')}</strong>
-                    <p className="text-slate-400 text-[11px] mt-0.5">
+                    <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
                       {t('contact.headOfficeValue')}
                     </p>
                   </div>
@@ -181,9 +181,7 @@ export const ContactSection: React.FC = () => {
                       className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-900 focus:outline-none"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
                       {t('contact.formPhone')}
@@ -214,7 +212,7 @@ export const ContactSection: React.FC = () => {
                     </select>
                   </div>
 
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block font-semibold text-slate-700 mb-1">
                       {t('contact.formSubject')}
                     </label>

@@ -333,7 +333,7 @@ export const FaqSection: React.FC = () => {
         {/* Still have questions? Helpdesk Banner */}
         <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-50 via-slate-50 to-indigo-50 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="space-y-0.5">
-            <h4 className="font-bold text-slate-900 text-sm">Still have questions regarding your land parcel?</h4>
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base">Still have questions regarding your land parcel?</h3>
             <p className="text-xs text-slate-600">
               Our 24x7 citizen helpdesk and regional taluka revenue inspectors are available to assist.
             </p>

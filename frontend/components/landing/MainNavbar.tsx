@@ -120,7 +120,7 @@ export const MainNavbar: React.FC = () => {
           </div>
 
           {/* Accessibility & Utility Tools */}
-          <div className="flex items-center gap-3 text-[10px] text-slate-300">
+          <div className="flex items-center gap-3 text-xs text-slate-300">
             <div className="hidden lg:flex items-center gap-1.5 text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/50">
               <PhoneCall className="w-2.5 h-2.5" />
               <span>{t('common.tollFree')}</span>
