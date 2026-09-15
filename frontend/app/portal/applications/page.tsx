@@ -39,6 +39,20 @@ export default function CitizenApplicationsPage() {
       search: searchQuery,
     });
     setApplications(list);
+
+    citizenService
+      .fetchApplications({
+        status: selectedStatus,
+        search: searchQuery,
+      })
+      .then((liveList) => {
+        if (liveList && liveList.length > 0) {
+          setApplications(liveList);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch live applications:', err);
+      });
   };
 
   const statusFilters = [

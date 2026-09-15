@@ -43,21 +43,35 @@ export default function ApplicationDetailClient() {
 
   useEffect(() => {
     if (id) {
-      const app = citizenService.getApplicationById(id);
-      if (app) {
-        setApplication(app);
+      const cachedApp = citizenService.getApplicationById(id);
+      if (cachedApp) {
+        setApplication(cachedApp);
+        setLoading(false);
       }
-      setLoading(false);
+      // Query backend for live status
+      citizenService
+        .fetchApplicationById(id)
+        .then((liveApp) => {
+          if (liveApp) {
+            setApplication(liveApp);
+          }
+        })
+        .catch((err) => {
+          console.warn('Live application detail fetch failed:', err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [id]);
 
-  const handleClarificationSubmit = (e: React.FormEvent) => {
+  const handleClarificationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clarificationText.trim() || !application) return;
 
     setIsSubmittingResponse(true);
-    setTimeout(() => {
-      citizenService.respondToDiscrepancy(
+    try {
+      await citizenService.respondToDiscrepancy(
         application.id,
         clarificationText,
         supportingFile || 'tax_receipt_2025_26.pdf'
@@ -69,7 +83,10 @@ export default function ApplicationDetailClient() {
       }
       setIsSubmittingResponse(false);
       setResponseSuccess(true);
-    }, 700);
+    } catch (err) {
+      console.error('Clarification submit error:', err);
+      setIsSubmittingResponse(false);
+    }
   };
 
   if (loading) {

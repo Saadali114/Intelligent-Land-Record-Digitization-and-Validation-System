@@ -42,8 +42,26 @@ export default function CitizenDashboardPage() {
   useEffect(() => {
     const prof = citizenService.getProfile();
     setProfile(prof);
+    citizenService
+      .fetchProfile()
+      .then((liveProf) => {
+        if (liveProf) setProfile(liveProf);
+      })
+      .catch(() => {});
+
     const apps = citizenService.getApplications();
     setApplications(apps);
+    citizenService
+      .fetchApplications()
+      .then((liveApps) => {
+        if (liveApps && liveApps.length > 0) {
+          setApplications(liveApps);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load live applications:', err);
+      });
+
     citizenService
       .getLandRecords()
       .then((records) => {

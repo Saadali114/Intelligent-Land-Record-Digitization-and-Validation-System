@@ -1,10 +1,14 @@
+import apiClient from '../lib/axios';
 import {
   CitizenApplication,
+  CitizenApplicationStatus,
+  CitizenDocumentType,
   CitizenLandRecord,
   CitizenNotification,
   CitizenProfile,
+  DiscrepancyItem,
 } from '../types/citizen';
-import { LandRecord } from '../types';
+import { LandRecord, ApiResponse } from '../types';
 import { landRecordsService } from './land-records.service';
 import {
   getStoredApplications,
@@ -16,6 +20,116 @@ import {
   saveStoredProfile,
   INITIAL_CITIZEN_PROFILE,
 } from '../lib/citizenMockData';
+
+export function mapWorkflowToCitizenApplication(w: any): CitizenApplication {
+  const isApproved = w.officerDecision?.status === 'APPROVED';
+  const isRejected = w.officerDecision?.status === 'REJECTED';
+  const isClarification = w.officerDecision?.status === 'CLARIFICATION_REQUESTED';
+  const isUnderReview = w.status === 'NEEDS_REVIEW' || w.status === 'PENDING_OFFICER_REVIEW';
+
+  let status: CitizenApplicationStatus = 'PROCESSING';
+  if (isApproved) status = 'VERIFIED';
+  else if (isRejected) status = 'REJECTED';
+  else if (isClarification) status = 'ACTION_REQUIRED';
+  else if (isUnderReview) status = 'UNDER_REVIEW';
+
+  const doc = w.document || {};
+  const extracted = doc.extractedFields || {};
+  const match = w.officialRecordMatch || {};
+  const officer = w.officerDecision || {};
+  const applicant = w.applicant || {};
+
+  const survey = extracted.surveyNumber?.value || extracted.gatNumber?.value || match.matchedSurveyNumber || '—';
+  const village = extracted.village?.value || match.matchedVillage || '—';
+  const taluka = extracted.taluka?.value || match.matchedTaluka || '—';
+  const district = extracted.district?.value || match.matchedDistrict || '—';
+  const owner = extracted.ownerName?.value || applicant.name || '—';
+  const area = extracted.landArea?.value || '—';
+  const landType = extracted.landClassification?.value || 'Agricultural';
+
+  const submittedDate = w.createdAt
+    ? new Date(w.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : 'Recent';
+
+  // Discrepancy checks from field comparisons
+  const discrepancies: DiscrepancyItem[] = (match.fieldComparisons || []).map((f: any) => ({
+    field: f.fieldName,
+    expected: f.officialValue,
+    found: f.uploadedValue,
+    status: f.isMatch ? 'MATCH' : 'MISMATCH',
+    note: f.notes,
+  }));
+
+  const timeline = (w.auditTimeline && w.auditTimeline.length > 0)
+    ? w.auditTimeline.map((t: any, index: number) => ({
+        step: index + 1,
+        title: t.action || 'Workflow Event',
+        date: t.timestamp ? new Date(t.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : submittedDate,
+        status: index === 0 ? ('COMPLETED' as const) : isApproved ? ('COMPLETED' as const) : ('CURRENT' as const),
+        description: t.description || '',
+      }))
+    : [
+        {
+          step: 1,
+          title: 'Document Ingestion',
+          date: submittedDate,
+          status: 'COMPLETED' as const,
+          description: 'Document uploaded and identity checked.',
+        },
+        {
+          step: 2,
+          title: 'AI OCR & Cadastral Entity Extraction',
+          date: submittedDate,
+          status: 'COMPLETED' as const,
+          description: 'Devanagari OCR and legal boundaries parsed.',
+        },
+        {
+          step: 3,
+          title: 'Official Cadastral Cross-Check',
+          date: submittedDate,
+          status: (isUnderReview || isApproved) ? ('COMPLETED' as const) : ('CURRENT' as const),
+          description: match.summary || 'Validation against official revenue records.',
+        },
+        {
+          step: 4,
+          title: 'Officer Review & Sanction',
+          date: officer.decidedAt ? new Date(officer.decidedAt).toLocaleDateString('en-GB') : 'Pending',
+          status: isApproved ? ('COMPLETED' as const) : ('CURRENT' as const),
+          description: officer.remarks || 'Competent revenue officer statutory review.',
+        },
+      ];
+
+  return {
+    id: w.applicationId || w.id || w._id,
+    documentType: (doc.documentType as CitizenDocumentType) || '7/12 Extract',
+    fileName: doc.fileName || 'uploaded_document.pdf',
+    fileSize: typeof doc.fileSize === 'number' ? doc.fileSize : 1850000,
+    submittedDate,
+    status,
+    surveyNumber: survey,
+    khasraNumber: extracted.khasraNumber?.value,
+    khataNumber: extracted.khataNumber?.value,
+    village,
+    taluka,
+    district,
+    landArea: area,
+    landType,
+    ownerName: owner,
+    ocrConfidence: doc.avgConfidence || 0.95,
+    extractedFields: extracted,
+    identityVerified: applicant.identityStatus === 'VERIFIED',
+    mobileNumber: applicant.mobile || '',
+    officerName: officer.officerName || (isApproved ? 'Circle Revenue Officer' : undefined),
+    officerRemarks: officer.remarks,
+    verifiedByOfficer: isApproved,
+    officerActionDate: officer.decidedAt
+      ? new Date(officer.decidedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : undefined,
+    digitalSignatureId: isApproved ? `DSC-MAHA-REV-${(w.applicationId || '2026').slice(-6).toUpperCase()}` : undefined,
+    discrepancies: discrepancies.length > 0 ? discrepancies : undefined,
+    timeline,
+  };
+}
 
 export function mapApiLandRecordToCitizen(r: LandRecord): CitizenLandRecord {
   const isVerified = r.verificationStatus === 'VERIFIED';
@@ -164,9 +278,52 @@ export const citizenService = {
     return list;
   },
 
+  async fetchApplications(filter?: { status?: string; search?: string }): Promise<CitizenApplication[]> {
+    try {
+      const response = await apiClient.get<ApiResponse<any[]>>('/verifications/citizen/applications', {
+        params: { limit: 50 },
+      });
+      const workflows = response.data?.data;
+      if (Array.isArray(workflows) && workflows.length > 0) {
+        const liveApps = workflows.map(mapWorkflowToCitizenApplication);
+        const stored = getStoredApplications();
+        
+        // Merge live applications with locally stored ones (avoid duplicates by ID)
+        const liveIds = new Set(liveApps.map((a) => a.id.toLowerCase()));
+        const merged = [...liveApps, ...stored.filter((s) => !liveIds.has(s.id.toLowerCase()))];
+        saveStoredApplications(merged);
+      }
+    } catch (error) {
+      // If unauthenticated or offline, seamlessly fall back to local stored cache
+      console.warn('Could not fetch live verification applications, using local cache:', error);
+    }
+    return this.getApplications(filter);
+  },
+
   getApplicationById(id: string): CitizenApplication | undefined {
     const list = getStoredApplications();
     return list.find((a) => a.id.toLowerCase() === id.toLowerCase());
+  },
+
+  async fetchApplicationById(id: string): Promise<CitizenApplication | undefined> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(`/verifications/${id}`);
+      if (response.data?.success && response.data?.data) {
+        const liveApp = mapWorkflowToCitizenApplication(response.data.data);
+        const list = getStoredApplications();
+        const index = list.findIndex((a) => a.id.toLowerCase() === id.toLowerCase());
+        if (index >= 0) {
+          list[index] = liveApp;
+        } else {
+          list.unshift(liveApp);
+        }
+        saveStoredApplications(list);
+        return liveApp;
+      }
+    } catch (error) {
+      console.warn(`Could not fetch live application ${id}, using local cache:`, error);
+    }
+    return this.getApplicationById(id);
   },
 
   submitApplication(newAppData: Partial<CitizenApplication>): CitizenApplication {
@@ -375,7 +532,15 @@ export const citizenService = {
     return newApp;
   },
 
-  respondToDiscrepancy(id: string, explanation: string, docName?: string): boolean {
+  async respondToDiscrepancy(id: string, explanation: string, docName?: string): Promise<boolean> {
+    try {
+      await apiClient.post(`/verifications/${id}/clarification`, {
+        responseText: explanation,
+      });
+    } catch (error) {
+      console.warn(`Could not push clarification to backend for ${id}:`, error);
+    }
+
     const list = getStoredApplications();
     const index = list.findIndex((a) => a.id.toLowerCase() === id.toLowerCase());
     if (index === -1) return false;
@@ -552,6 +717,32 @@ export const citizenService = {
       }
     }
     return stored;
+  },
+
+  async fetchProfile(): Promise<CitizenProfile> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>('/auth/me');
+      if (response.data?.success && response.data?.data) {
+        const u = response.data.data;
+        const stored = getStoredProfile();
+        const updated: CitizenProfile = {
+          ...stored,
+          name: u.name || stored.name,
+          email: u.email || stored.email,
+          mobile: u.mobileNumber || stored.mobile,
+          district: u.district || stored.district,
+          taluka: u.taluka || stored.taluka,
+          village: u.village || stored.village,
+          preferredLanguage: u.preferredLanguage || stored.preferredLanguage,
+          isIdentityVerified: u.emailVerified ?? stored.isIdentityVerified,
+        };
+        saveStoredProfile(updated);
+        return updated;
+      }
+    } catch (error) {
+      console.warn('Could not fetch live user profile, using local cache:', error);
+    }
+    return this.getProfile();
   },
 
   updateProfile(updates: Partial<CitizenProfile>): CitizenProfile {
